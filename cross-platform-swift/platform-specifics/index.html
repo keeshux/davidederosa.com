@@ -1,0 +1,550 @@
+
+
+
+<!DOCTYPE html>
+<html lang="en" itemscope itemtype="http://schema.org/Blog">
+    <head>
+        
+
+
+
+
+
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+<title>Cross-platform Swift: Platform specifics</title>
+
+<meta name="author" content="Davide De Rosa" />
+<meta name="description" content="I make software. I look around me.">
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="apple-mobile-web-app-title" content="keeshux">
+
+<!-- OpenGraph -->
+
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="Cross-platform Swift: Platform specifics" />
+<meta property="og:title" content="Cross-platform Swift: Platform specifics" />
+<meta property="og:description" content="I make software. I look around me." />
+<meta property="og:image" content="https://davidederosa.com/s/f/swift/swift.png?1751298661" />
+<meta property="og:url" content="https://davidederosa.com/cross-platform-swift/platform-specifics/" />
+
+<!-- Twitter -->
+
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:site" content="@keeshux" />
+<meta name="twitter:title" content="Cross-platform Swift: Platform specifics" />
+<meta name="twitter:description" content="I make software. I look around me." />
+<meta name="twitter:image" content="https://davidederosa.com/s/f/swift/swift.png?1751298661" />
+<meta name="twitter:url" content="https://davidederosa.com/cross-platform-swift/platform-specifics/" />
+
+<link rel="canonical" href="https://davidederosa.com/cross-platform-swift/platform-specifics/" />
+
+
+<link rel="next" href="/2025/05/a-true-case-for-dependency-injection/" title="A true case for Dependency Injection" />
+
+
+<link rel="stylesheet" href="/s/main.css?1751298661" />
+<link rel="stylesheet" href="/s/main-mobile.css?1751298661" media="only screen and (max-width: 600px)" />
+<link rel="stylesheet" href="/s/syntax.css?1751298661" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway:600,400" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha384-t1nt8BQoYMLFN5p42tRAtuAAFQaCQODekUVeKKZrEnEyp4H2R0RHFz0KWpmj7i8g" crossorigin="anonymous">
+
+<link rel="shortcut icon" href="/s/favicon.ico?1751298661" />
+<link rel="apple-touch-icon" href="/s/iphone-icon-precomposed.png?1751298661" />
+
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-DWPG2HZ9FS"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag() {
+    dataLayer.push(arguments);
+}
+gtag('js', new Date());
+gtag('config', 'G-DWPG2HZ9FS');
+</script>
+
+
+
+    </head>
+    <body>
+        <div id="container">
+            <header>
+                <nav id="menu">
+    <ul>
+        
+    </ul>
+</nav>
+
+            </header>
+            <div>
+                <header>
+                    <h1><a href="/">Davide De Rosa</a></h1>
+                </header>
+                <main>
+                    <article class="post post-full" itemscope itemtype="https://schema.org/Article">
+    <header>
+        
+<div class="post-icon">
+    <a href="/cross-platform-swift/platform-specifics/">
+        
+        <img src="/s/f/swift/swift-150.png" alt="Cross-platform Swift: Platform specifics" />
+        
+    </a>
+</div>
+
+
+        <div>
+            <span class="post-date" itemprop="datepublished">Jun 30, 2025</span>
+            <h2 itemprop="name">
+                
+                Cross-platform Swift: Platform specifics
+                
+            </h2>
+            
+
+
+
+
+
+
+<div class="post-list post-series-links">
+    part of a <a href="/cross-platform-swift/" title="Cross-platform Swift: Introduction">series</a>:
+    
+    <a href="/cross-platform-swift/core-libraries/" title="Cross-platform Swift: Core libraries">&lt; prev</a>
+    
+    |
+    
+    next &gt;
+    
+</div>
+
+
+
+        </div>
+    </header>
+    <div class="post-body">
+        
+
+        
+<header class="post-series-toc">
+    
+    <h3>Table of contents (ongoing)</h3>
+    
+    <ol>
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        <li>
+            
+            <a href="/cross-platform-swift/" title="Introduction">
+                
+                Introduction
+                
+            </a>
+        </li>
+        
+        
+        
+        <li>
+            
+            <a href="/cross-platform-swift/combine/" title="Combine">
+                
+                Combine
+                
+            </a>
+        </li>
+        
+        
+        
+        
+        
+        <li>
+            
+            <a href="/cross-platform-swift/core-libraries/" title="Core libraries">
+                
+                Core libraries
+                
+            </a>
+        </li>
+        
+        
+        
+        
+        
+        <li>
+            
+            <a href="/cross-platform-swift/platform-specifics/" title="Platform specifics">
+                
+                <strong>Platform specifics</strong>
+                
+            </a>
+        </li>
+        
+        
+    </ol>
+</header>
+
+
+        <p>Very few developers treat the SwiftPM manifest, i.e. the <code class="language-plaintext highlighter-rouge">Package.swift</code> file, as what its extension suggests. If you are used to enumerate static products and targets, remember that the SwiftPM manifest is a fully legit Swift program, and as such it allows for plenty of control.</p>
+
+<h2 id="conditionals-in-packageswift">Conditionals in Package.swift</h2>
+
+<p>In a library whose aim is to target multiple platforms, and try different paths along the way, a flexible manifest is of great help. Partout uses generic Swift routines overall, but in some areas it needs to differentiate how things are done based on the platform it’s running on.</p>
+
+<p>Think of:</p>
+
+<ul>
+  <li>DNS resolution (CFHost vs POSIX)</li>
+  <li>Pseudo-random number generation (SecRandom vs getrandom)</li>
+  <li>Access to the filesystem (FileManager vs FILE *)</li>
+</ul>
+
+<p>In some cases, even provide additional behavior that is not available on other platforms. If you started our Swift library on Apple platforms, like it’s often the case, you may have used plenty of frameworks that are tighly bound to Apple. Examples:</p>
+
+<ul>
+  <li>UserDefaults</li>
+  <li>The keychain</li>
+  <li>iCloud</li>
+  <li>Camera</li>
+  <li>…</li>
+</ul>
+
+<h2 id="building-on-non-apple">Building on non-Apple</h2>
+
+<p>While it’s true that the <code class="language-plaintext highlighter-rouge">Foundation</code> framework may provide some platform-agnostic API (e.g. <code class="language-plaintext highlighter-rouge">UserDefaults</code>), it’s better to take full control of what’s being distributed based on our choices. If you care to split platform-specific code into separate targets, you can leverage the <code class="language-plaintext highlighter-rouge">condition</code> parameter of a dependency to fine-tune per-platform dependencies:</p>
+
+<div class="language-swift highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">.</span><span class="nf">target</span><span class="p">(</span>
+    <span class="nv">name</span><span class="p">:</span> <span class="s">"SomeMultiCode"</span><span class="p">,</span>
+    <span class="nv">dependencies</span><span class="p">:</span> <span class="p">[</span>
+        <span class="o">.</span><span class="nf">target</span><span class="p">(</span><span class="nv">name</span><span class="p">:</span> <span class="s">"SomeiOSDep"</span><span class="p">,</span> <span class="nv">condition</span><span class="p">:</span> <span class="o">.</span><span class="nf">when</span><span class="p">(</span><span class="nv">platforms</span><span class="p">:</span> <span class="p">[</span><span class="o">.</span><span class="n">iOS</span><span class="p">])),</span>
+        <span class="o">.</span><span class="nf">target</span><span class="p">(</span><span class="nv">name</span><span class="p">:</span> <span class="s">"SomeWindowsDep"</span><span class="p">,</span> <span class="nv">condition</span><span class="p">:</span> <span class="o">.</span><span class="nf">when</span><span class="p">(</span><span class="nv">platforms</span><span class="p">:</span> <span class="p">[</span><span class="o">.</span><span class="n">windows</span><span class="p">])),</span>
+        <span class="c1">// ...</span>
+        <span class="c1">// same with .product</span>
+    <span class="p">]</span>
+<span class="p">)</span>
+</code></pre></div></div>
+
+<p>Invoking <code class="language-plaintext highlighter-rouge">swift build --target &lt;some&gt;</code> will comply with the platform conditionals, whereas this (still) seems to be a problem for tests. That’s because SwiftPM attempts to build all targets regardless of the conditionals, then compose the filtered targets to assemble the final products, whereas it shouldn’t build some targets in the first place.</p>
+
+<p>A mitigation for this problem is to wrap conditional code in a <code class="language-plaintext highlighter-rouge">canImport</code> condition:</p>
+
+<div class="language-swift highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// make sure that the import is available</span>
+<span class="cp">#if canImport(Security)</span>
+<span class="kd">import</span> <span class="kt">Security</span>
+
+<span class="c1">// do stuff with the Apple Security framework</span>
+<span class="cp">#endif</span>
+</code></pre></div></div>
+
+<p>This is acceptable inside the library, but how should consumers deal with all these inconvenient differences?</p>
+
+<h2 id="dependency-factory">Dependency factory</h2>
+
+<p>A simple solution to avoid conditionals in consumer apps is the use of a <em>factory</em> to instantiate the right dependencies for our environment. The factory would internally pick the suitable implementation for the current platform, lifting the burden of the choice from the user of the library.</p>
+
+<p>Imagine that we want to provide a common interface for the persistent storage of the library. A natural choice on Apple would be Core Data, and maybe Realm or plain SQLite on Windows and Linux. Furthermore, we may want to support CloudKit synchronization on Apple devices, and omit that feature elsewhere.</p>
+
+<p>In Package.swift:</p>
+
+<div class="language-swift highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">.</span><span class="nf">target</span><span class="p">(</span>
+    <span class="nv">name</span><span class="p">:</span> <span class="s">"MyPersistence"</span>
+<span class="p">),</span>
+<span class="o">.</span><span class="nf">target</span><span class="p">(</span>
+    <span class="nv">name</span><span class="p">:</span> <span class="s">"MyApplePersistence"</span><span class="p">,</span>
+    <span class="nv">dependencies</span><span class="p">:</span> <span class="p">[</span><span class="s">"MyPersistence"</span><span class="p">]</span>
+<span class="p">),</span>
+<span class="o">.</span><span class="nf">target</span><span class="p">(</span>
+    <span class="nv">name</span><span class="p">:</span> <span class="s">"MyOtherPersistence"</span><span class="p">,</span>
+    <span class="nv">dependencies</span><span class="p">:</span> <span class="p">[</span><span class="s">"MyPersistence"</span><span class="p">]</span>
+<span class="p">),</span>
+<span class="o">.</span><span class="nf">target</span><span class="p">(</span>
+    <span class="nv">name</span><span class="p">:</span> <span class="s">"MyLibrary"</span><span class="p">,</span>
+    <span class="nv">dependencies</span><span class="p">:</span> <span class="p">[</span>
+        <span class="o">.</span><span class="nf">target</span><span class="p">(</span><span class="nv">name</span><span class="p">:</span> <span class="s">"MyApplePersistence"</span><span class="p">,</span> <span class="nv">condition</span><span class="p">:</span> <span class="o">.</span><span class="nf">when</span><span class="p">(</span><span class="nv">platforms</span><span class="p">:</span> <span class="p">[</span><span class="o">.</span><span class="n">iOS</span><span class="p">,</span> <span class="o">.</span><span class="n">macOS</span><span class="p">,</span> <span class="o">.</span><span class="n">tvOS</span><span class="p">,</span> <span class="o">.</span><span class="n">watchOS</span><span class="p">])),</span>
+        <span class="o">.</span><span class="nf">target</span><span class="p">(</span><span class="nv">name</span><span class="p">:</span> <span class="s">"MyOtherPersistence"</span><span class="p">,</span> <span class="nv">condition</span><span class="p">:</span> <span class="o">.</span><span class="nf">when</span><span class="p">(</span><span class="nv">platforms</span><span class="p">:</span> <span class="p">[</span><span class="o">.</span><span class="n">windows</span><span class="p">,</span> <span class="o">.</span><span class="n">linux</span><span class="p">,</span> <span class="o">.</span><span class="n">android</span><span class="p">])),</span>
+    <span class="p">]</span>
+<span class="p">)</span>
+</code></pre></div></div>
+
+<p>In <code class="language-plaintext highlighter-rouge">MyPersistence</code> we declare the generic persistence API:</p>
+
+<div class="language-swift highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">protocol</span> <span class="kt">Persistence</span> <span class="p">{</span>
+    <span class="k">var</span> <span class="nv">supportsSynchronization</span><span class="p">:</span> <span class="kt">Bool</span> <span class="p">{</span> <span class="k">get</span> <span class="p">}</span>
+
+    <span class="kd">func</span> <span class="n">save</span><span class="o">&lt;</span><span class="kt">T</span><span class="o">&gt;</span><span class="p">(</span><span class="n">_</span> <span class="nv">object</span><span class="p">:</span> <span class="kt">T</span><span class="p">)</span> <span class="k">throws</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>that we then implement in <code class="language-plaintext highlighter-rouge">MyApplePersistence</code> with Core Data:</p>
+
+<div class="language-swift highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">import</span> <span class="kt">CoreData</span>
+
+<span class="kd">public</span> <span class="kd">final</span> <span class="kd">class</span> <span class="kt">MyApplePersistence</span><span class="p">:</span> <span class="kt">Persistence</span> <span class="p">{</span>
+    <span class="nf">init</span><span class="p">(</span><span class="nv">path</span><span class="p">:</span> <span class="kt">String</span><span class="p">)</span> <span class="p">{</span>
+        <span class="c1">// ...</span>
+    <span class="p">}</span>
+
+    <span class="k">var</span> <span class="nv">supportsSynchronization</span><span class="p">:</span> <span class="kt">Bool</span> <span class="p">{</span>
+        <span class="kc">true</span>
+    <span class="p">}</span>
+
+    <span class="kd">func</span> <span class="n">save</span><span class="o">&lt;</span><span class="kt">T</span><span class="o">&gt;</span><span class="p">(</span><span class="n">_</span> <span class="nv">object</span><span class="p">:</span> <span class="kt">T</span><span class="p">)</span> <span class="k">throws</span> <span class="p">{</span>
+        <span class="c1">// ...</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>and <code class="language-plaintext highlighter-rouge">MyOtherPersistence</code> with Realm:</p>
+
+<div class="language-swift highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">import</span> <span class="kt">Realm</span>
+
+<span class="kd">public</span> <span class="kd">final</span> <span class="kd">class</span> <span class="kt">MyApplePersistence</span><span class="p">:</span> <span class="kt">Persistence</span> <span class="p">{</span>
+    <span class="nf">init</span><span class="p">(</span><span class="nv">path</span><span class="p">:</span> <span class="kt">String</span><span class="p">)</span> <span class="p">{</span>
+        <span class="c1">// ...</span>
+    <span class="p">}</span>
+
+    <span class="k">var</span> <span class="nv">supportsSynchronization</span><span class="p">:</span> <span class="kt">Bool</span> <span class="p">{</span>
+        <span class="kc">false</span>
+    <span class="p">}</span>
+
+    <span class="kd">func</span> <span class="n">save</span><span class="o">&lt;</span><span class="kt">T</span><span class="o">&gt;</span><span class="p">(</span><span class="n">_</span> <span class="nv">object</span><span class="p">:</span> <span class="kt">T</span><span class="p">)</span> <span class="k">throws</span> <span class="p">{</span>
+        <span class="c1">// ...</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>In the <code class="language-plaintext highlighter-rouge">MyLibrary</code> umbrella target:</p>
+
+<div class="language-swift highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">enum</span> <span class="kt">Factories</span> <span class="p">{</span>
+<span class="p">}</span>
+
+<span class="kd">public</span> <span class="kd">protocol</span> <span class="kt">PersistenceFactory</span> <span class="p">{</span>
+    <span class="kd">func</span> <span class="nf">newPersistence</span><span class="p">(</span><span class="n">at</span> <span class="nv">path</span><span class="p">:</span> <span class="kt">String</span><span class="p">)</span> <span class="k">throws</span> <span class="o">-&gt;</span> <span class="kt">Persistence</span>
+<span class="p">}</span>
+
+<span class="kd">extension</span> <span class="kt">Factories</span> <span class="p">{</span>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="k">let</span> <span class="nv">persistence</span> <span class="o">=</span> <span class="kt">PersistenceFactoryImpl</span><span class="p">()</span>
+<span class="p">}</span>
+
+<span class="cp">#if canImport(MyApplePersistence)</span>
+
+<span class="c1">// uses Core Data</span>
+<span class="kd">private</span> <span class="kd">final</span> <span class="kd">class</span> <span class="kt">PersistenceFactoryImpl</span><span class="p">:</span> <span class="kt">PersistenceFactory</span> <span class="p">{</span>
+    <span class="kd">func</span> <span class="nf">newPersistence</span><span class="p">(</span><span class="n">at</span> <span class="nv">path</span><span class="p">:</span> <span class="kt">String</span><span class="p">)</span> <span class="k">throws</span> <span class="o">-&gt;</span> <span class="kt">Persistence</span> <span class="p">{</span>
+        <span class="k">try</span> <span class="kt">MyApplePersistence</span><span class="p">(</span><span class="nv">path</span><span class="p">:</span> <span class="n">path</span><span class="p">)</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="cp">#elseif canImport(MyOtherPersistence)</span>
+
+<span class="c1">// uses Realm</span>
+<span class="kd">private</span> <span class="kd">final</span> <span class="kd">class</span> <span class="kt">PersistenceFactoryImpl</span><span class="p">:</span> <span class="kt">PersistenceFactory</span> <span class="p">{</span>
+    <span class="kd">func</span> <span class="nf">newPersistence</span><span class="p">(</span><span class="n">at</span> <span class="nv">path</span><span class="p">:</span> <span class="kt">String</span><span class="p">)</span> <span class="k">throws</span> <span class="o">-&gt;</span> <span class="kt">Persistence</span> <span class="p">{</span>
+        <span class="k">try</span> <span class="kt">MyOtherPersistence</span><span class="p">(</span><span class="nv">path</span><span class="p">:</span> <span class="n">path</span><span class="p">)</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="cp">#else</span>
+
+<span class="c1">// unsupported platform</span>
+
+<span class="cp">#endif</span>
+</code></pre></div></div>
+
+<p>Finally, in the consumer app we would do this regardless of the operating system:</p>
+
+<div class="language-swift highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">func</span> <span class="nf">someFunction</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">let</span> <span class="nv">path</span> <span class="o">=</span> <span class="s">"SomeFile.db"</span>
+    <span class="k">let</span> <span class="nv">persistence</span> <span class="o">=</span> <span class="kt">Factories</span><span class="o">.</span><span class="n">persistence</span><span class="o">.</span><span class="nf">newPersistence</span><span class="p">(</span><span class="nv">at</span><span class="p">:</span> <span class="n">path</span><span class="p">)</span>
+    <span class="c1">// ...</span>
+    <span class="k">do</span> <span class="p">{</span>
+        <span class="nf">print</span><span class="p">(</span><span class="s">"Supports synchronization: </span><span class="se">\(</span><span class="n">persistence</span><span class="o">.</span><span class="n">supportsSynchronization</span><span class="se">)</span><span class="s">"</span><span class="p">)</span>
+        <span class="k">try</span> <span class="n">persistence</span><span class="o">.</span><span class="nf">save</span><span class="p">(</span><span class="s">"SomeString"</span><span class="p">)</span>
+    <span class="p">}</span> <span class="k">catch</span> <span class="p">{</span>
+        <span class="c1">// ...</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>The library would just take care of the different implementations.</p>
+
+<h2 id="bottom-line">Bottom line</h2>
+
+<p>It’s easy to overcome the platform differences with SwiftPM conditionals and simple design patterns. If you need even more customizations, don’t be afraid to tweak the manifest further because it’s good old Swift, not static YAML. Even just an <code class="language-plaintext highlighter-rouge">if</code> may do wonders and resolve convoluted package layouts.</p>
+
+<p>In the next article, we’ll start the long but inevitable journey of Swift interoperability with C and other languages.</p>
+
+        
+    </div>
+    
+    
+        
+            
+        
+    
+        
+    
+        
+            
+        
+    
+        
+    
+        
+            
+        
+    
+        
+            
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+    
+
+
+
+
+
+
+
+<aside class="sharing" id="sharing-me">
+    <ul>
+        <li><a href="/feed.xml" title="Follow the blog" target="_blank"><i class="fa-solid fa-rss"></i>Subscribe</a></li>
+        <li><a href="https://linkedin.com/in/davidederosa" title="Follow me on LinkedIn" target="_blank"><i class="fab fa-linkedin"></i>LinkedIn</a></li>
+    </ul>
+</aside>
+
+    <aside class="post-related">
+        <p>See also:</p>
+        <ul>
+            
+            <li><a href="/cross-platform-swift/core-libraries/">Cross-platform Swift: Core libraries</a></li>
+            
+            <li><a href="/2025/04/scripting-and-open-source-adoption/">Scripting and open-source adoption</a></li>
+            
+            <li><a href="/cross-platform-swift/combine/">Cross-platform Swift: Combine</a></li>
+            
+        </ul>
+    </aside>
+    <div id="disqus_thread"></div>
+    <nav class="paginator">
+    <ul>
+        <li class="paginator-browser older">
+            
+            <a href="/2025/05/a-true-case-for-dependency-injection/" title="A true case for Dependency Injection"><i class="fa fa-chevron-left"></i> Older</a>
+            
+        </li><li class="paginator-browser home">
+            <a href="/" class="fa fa-home"></a>
+        </li><li class="paginator-browser newer">
+            
+        </li>
+    </ul>
+</nav>
+
+</article>
+<script src="//keeshux.disqus.com/embed.js" async="async"></script>
+
+                </main>
+                <footer id="page-footer">
+                    <p id="social">
+    &copy; 2025 Davide De Rosa
+    <a href="https://github.com/keeshux" title="Browse my GitHub repository" class="fab fa-github"></a>
+    <a href="https://linkedin.com/in/davidederosa" title="Connect on LinkedIn" class="fab fa-linkedin"></a>
+    <a href="https://x.com/keeshux" title="Follow me on X" class="fab fa-x-twitter"></a>
+    <a href="/s/keeshux-gpg.txt" title="My GnuPG public key" class="fa fa-lock"></a>
+    <a href="/feed.xml" title="Follow the blog" class="fa-solid fa-rss"></a>
+</ul>
+
+                </footer>
+            </div>
+        </div>
+        <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    </body>
+</html>
