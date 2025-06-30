@@ -26,7 +26,7 @@
 <meta property="og:site_name" content="Cross-platform Swift: Platform specifics" />
 <meta property="og:title" content="Cross-platform Swift: Platform specifics" />
 <meta property="og:description" content="I make software. I look around me." />
-<meta property="og:image" content="https://davidederosa.com/s/f/swift/swift.png?1751298661" />
+<meta property="og:image" content="https://davidederosa.com/s/f/swift/swift.png?1751305585" />
 <meta property="og:url" content="https://davidederosa.com/cross-platform-swift/platform-specifics/" />
 
 <!-- Twitter -->
@@ -35,7 +35,7 @@
 <meta name="twitter:site" content="@keeshux" />
 <meta name="twitter:title" content="Cross-platform Swift: Platform specifics" />
 <meta name="twitter:description" content="I make software. I look around me." />
-<meta name="twitter:image" content="https://davidederosa.com/s/f/swift/swift.png?1751298661" />
+<meta name="twitter:image" content="https://davidederosa.com/s/f/swift/swift.png?1751305585" />
 <meta name="twitter:url" content="https://davidederosa.com/cross-platform-swift/platform-specifics/" />
 
 <link rel="canonical" href="https://davidederosa.com/cross-platform-swift/platform-specifics/" />
@@ -44,14 +44,14 @@
 <link rel="next" href="/2025/05/a-true-case-for-dependency-injection/" title="A true case for Dependency Injection" />
 
 
-<link rel="stylesheet" href="/s/main.css?1751298661" />
-<link rel="stylesheet" href="/s/main-mobile.css?1751298661" media="only screen and (max-width: 600px)" />
-<link rel="stylesheet" href="/s/syntax.css?1751298661" />
+<link rel="stylesheet" href="/s/main.css?1751305585" />
+<link rel="stylesheet" href="/s/main-mobile.css?1751305585" media="only screen and (max-width: 600px)" />
+<link rel="stylesheet" href="/s/syntax.css?1751305585" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway:600,400" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha384-t1nt8BQoYMLFN5p42tRAtuAAFQaCQODekUVeKKZrEnEyp4H2R0RHFz0KWpmj7i8g" crossorigin="anonymous">
 
-<link rel="shortcut icon" href="/s/favicon.ico?1751298661" />
-<link rel="apple-touch-icon" href="/s/iphone-icon-precomposed.png?1751298661" />
+<link rel="shortcut icon" href="/s/favicon.ico?1751305585" />
+<link rel="apple-touch-icon" href="/s/iphone-icon-precomposed.png?1751305585" />
 
 
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-DWPG2HZ9FS"></script>
@@ -319,11 +319,11 @@ gtag('config', 'G-DWPG2HZ9FS');
 <span class="p">}</span>
 </code></pre></div></div>
 
-<p>that we then implement in <code class="language-plaintext highlighter-rouge">MyApplePersistence</code> with Core Data:</p>
+<p>that we then implement in <code class="language-plaintext highlighter-rouge">CoreDataPersistence</code> with Core Data, in the <code class="language-plaintext highlighter-rouge">MyApplePersistence</code> target:</p>
 
 <div class="language-swift highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">import</span> <span class="kt">CoreData</span>
 
-<span class="kd">public</span> <span class="kd">final</span> <span class="kd">class</span> <span class="kt">MyApplePersistence</span><span class="p">:</span> <span class="kt">Persistence</span> <span class="p">{</span>
+<span class="kd">public</span> <span class="kd">final</span> <span class="kd">class</span> <span class="kt">CoreDataPersistence</span><span class="p">:</span> <span class="kt">Persistence</span> <span class="p">{</span>
     <span class="nf">init</span><span class="p">(</span><span class="nv">path</span><span class="p">:</span> <span class="kt">String</span><span class="p">)</span> <span class="p">{</span>
         <span class="c1">// ...</span>
     <span class="p">}</span>
@@ -338,11 +338,11 @@ gtag('config', 'G-DWPG2HZ9FS');
 <span class="p">}</span>
 </code></pre></div></div>
 
-<p>and <code class="language-plaintext highlighter-rouge">MyOtherPersistence</code> with Realm:</p>
+<p>and <code class="language-plaintext highlighter-rouge">RealmPersistence</code> with Realm, in the <code class="language-plaintext highlighter-rouge">MyOtherPersistence</code> target:</p>
 
 <div class="language-swift highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">import</span> <span class="kt">Realm</span>
 
-<span class="kd">public</span> <span class="kd">final</span> <span class="kd">class</span> <span class="kt">MyApplePersistence</span><span class="p">:</span> <span class="kt">Persistence</span> <span class="p">{</span>
+<span class="kd">public</span> <span class="kd">final</span> <span class="kd">class</span> <span class="kt">RealmPersistence</span><span class="p">:</span> <span class="kt">Persistence</span> <span class="p">{</span>
     <span class="nf">init</span><span class="p">(</span><span class="nv">path</span><span class="p">:</span> <span class="kt">String</span><span class="p">)</span> <span class="p">{</span>
         <span class="c1">// ...</span>
     <span class="p">}</span>
@@ -375,7 +375,7 @@ gtag('config', 'G-DWPG2HZ9FS');
 <span class="c1">// uses Core Data</span>
 <span class="kd">private</span> <span class="kd">final</span> <span class="kd">class</span> <span class="kt">PersistenceFactoryImpl</span><span class="p">:</span> <span class="kt">PersistenceFactory</span> <span class="p">{</span>
     <span class="kd">func</span> <span class="nf">newPersistence</span><span class="p">(</span><span class="n">at</span> <span class="nv">path</span><span class="p">:</span> <span class="kt">String</span><span class="p">)</span> <span class="k">throws</span> <span class="o">-&gt;</span> <span class="kt">Persistence</span> <span class="p">{</span>
-        <span class="k">try</span> <span class="kt">MyApplePersistence</span><span class="p">(</span><span class="nv">path</span><span class="p">:</span> <span class="n">path</span><span class="p">)</span>
+        <span class="k">try</span> <span class="kt">CoreDataPersistence</span><span class="p">(</span><span class="nv">path</span><span class="p">:</span> <span class="n">path</span><span class="p">)</span>
     <span class="p">}</span>
 <span class="p">}</span>
 
@@ -384,7 +384,7 @@ gtag('config', 'G-DWPG2HZ9FS');
 <span class="c1">// uses Realm</span>
 <span class="kd">private</span> <span class="kd">final</span> <span class="kd">class</span> <span class="kt">PersistenceFactoryImpl</span><span class="p">:</span> <span class="kt">PersistenceFactory</span> <span class="p">{</span>
     <span class="kd">func</span> <span class="nf">newPersistence</span><span class="p">(</span><span class="n">at</span> <span class="nv">path</span><span class="p">:</span> <span class="kt">String</span><span class="p">)</span> <span class="k">throws</span> <span class="o">-&gt;</span> <span class="kt">Persistence</span> <span class="p">{</span>
-        <span class="k">try</span> <span class="kt">MyOtherPersistence</span><span class="p">(</span><span class="nv">path</span><span class="p">:</span> <span class="n">path</span><span class="p">)</span>
+        <span class="k">try</span> <span class="kt">RealmPersistence</span><span class="p">(</span><span class="nv">path</span><span class="p">:</span> <span class="n">path</span><span class="p">)</span>
     <span class="p">}</span>
 <span class="p">}</span>
 
