@@ -1,0 +1,446 @@
+
+
+
+<!DOCTYPE html>
+<html lang="en" itemscope itemtype="http://schema.org/Blog">
+    <head>
+        
+
+
+
+
+
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+<title>Cross-platform Swift: C interop (pt. 1)</title>
+
+<meta name="author" content="Davide De Rosa" />
+<meta name="description" content="I make software. I look around me.">
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="apple-mobile-web-app-title" content="keeshux">
+
+<!-- OpenGraph -->
+
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="Cross-platform Swift: C interop (pt. 1)" />
+<meta property="og:title" content="Cross-platform Swift: C interop (pt. 1)" />
+<meta property="og:description" content="I make software. I look around me." />
+<meta property="og:image" content="https://davidederosa.com/s/f/swift/swift.png?1752142215" />
+<meta property="og:url" content="https://davidederosa.com/cross-platform-swift/c-interop-part-one/" />
+
+<!-- Twitter -->
+
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:site" content="@keeshux" />
+<meta name="twitter:title" content="Cross-platform Swift: C interop (pt. 1)" />
+<meta name="twitter:description" content="I make software. I look around me." />
+<meta name="twitter:image" content="https://davidederosa.com/s/f/swift/swift.png?1752142215" />
+<meta name="twitter:url" content="https://davidederosa.com/cross-platform-swift/c-interop-part-one/" />
+
+<link rel="canonical" href="https://davidederosa.com/cross-platform-swift/c-interop-part-one/" />
+
+<link rel="prev" href="/cross-platform-swift/c-interop-part-two/" title="Cross-platform Swift: C interop (pt. 2)" />
+
+
+<link rel="next" href="/cross-platform-swift/platform-specifics/" title="Cross-platform Swift: Platform specifics" />
+
+
+<link rel="stylesheet" href="/s/main.css?1752142215" />
+<link rel="stylesheet" href="/s/main-mobile.css?1752142215" media="only screen and (max-width: 600px)" />
+<link rel="stylesheet" href="/s/syntax.css?1752142215" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway:600,400" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha384-t1nt8BQoYMLFN5p42tRAtuAAFQaCQODekUVeKKZrEnEyp4H2R0RHFz0KWpmj7i8g" crossorigin="anonymous">
+
+<link rel="shortcut icon" href="/s/favicon.ico?1752142215" />
+<link rel="apple-touch-icon" href="/s/iphone-icon-precomposed.png?1752142215" />
+
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-DWPG2HZ9FS"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag() {
+    dataLayer.push(arguments);
+}
+gtag('js', new Date());
+gtag('config', 'G-DWPG2HZ9FS');
+</script>
+
+
+
+    </head>
+    <body>
+        <div id="container">
+            <header>
+                <nav id="menu">
+    <ul>
+        
+    </ul>
+</nav>
+
+            </header>
+            <div>
+                <header>
+                    <h1><a href="/">Davide De Rosa</a></h1>
+                </header>
+                <main>
+                    <article class="post post-full" itemscope itemtype="https://schema.org/Article">
+    <header>
+        
+<div class="post-icon">
+    <a href="/cross-platform-swift/c-interop-part-one/">
+        
+        <img src="/s/f/swift/swift-150.png" alt="Cross-platform Swift: C interop (pt. 1)" />
+        
+    </a>
+</div>
+
+
+        <div>
+            <span class="post-date" itemprop="datepublished">Jul 9, 2025</span>
+            <h2 itemprop="name">
+                
+                Cross-platform Swift: C interop (pt. 1)
+                
+            </h2>
+            
+
+
+
+
+
+
+<div class="post-list post-series-links">
+    part of a <a href="/cross-platform-swift/" title="Cross-platform Swift: Introduction">series</a>:
+    
+    <a href="/cross-platform-swift/platform-specifics/" title="Cross-platform Swift: Platform specifics">&lt; prev</a>
+    
+    |
+    
+    <a href="/cross-platform-swift/c-interop-part-two/" title="Cross-platform Swift: C interop (pt. 2)">next &gt;</a>
+    
+</div>
+
+
+
+        </div>
+    </header>
+    <div class="post-body">
+        
+
+        
+<header class="post-series-toc">
+    
+    <h3>Table of contents (ongoing)</h3>
+    
+    <ol>
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        <li>
+            
+            <a href="/cross-platform-swift/" title="Introduction">
+                
+                Introduction
+                
+            </a>
+        </li>
+        
+        
+        
+        <li>
+            
+            <a href="/cross-platform-swift/combine/" title="Combine">
+                
+                Combine
+                
+            </a>
+        </li>
+        
+        
+        
+        
+        
+        <li>
+            
+            <a href="/cross-platform-swift/core-libraries/" title="Core libraries">
+                
+                Core libraries
+                
+            </a>
+        </li>
+        
+        
+        
+        
+        
+        <li>
+            
+            <a href="/cross-platform-swift/platform-specifics/" title="Platform specifics">
+                
+                Platform specifics
+                
+            </a>
+        </li>
+        
+        
+        
+        <li>
+            
+            <a href="/cross-platform-swift/c-interop-part-one/" title="C interop (pt. 1)">
+                
+                <strong>C interop (pt. 1)</strong>
+                
+            </a>
+        </li>
+        
+        
+        
+        <li>
+            
+            <a href="/cross-platform-swift/c-interop-part-two/" title="C interop (pt. 2)">
+                
+                C interop (pt. 2)
+                
+            </a>
+        </li>
+        
+        
+    </ol>
+</header>
+
+
+        <p>This is where the fun begins. <a href="https://github.com/passepartoutvpn/partout">Partout</a>, the library I talk about in this series, is a networking library. As such, there are places where code control and performance are paramount. The integration of Swift with the C language for low-level routines is neat, and SwiftPM makes it very easy to mix Swift and C code as if they were the same thing.</p>
+
+<h2 id="the-dangers-of-apple-mix-and-match">The dangers of Apple “Mix and Match”</h2>
+
+<p><img src="/s/f/cross-platform-swift/c-interop-objc-tinky-winky.jpg" alt="ObjC is the Tinky Winky hand" /></p>
+
+<p>I said “mix Swift and C code”, but I should have said “Swift, C, and Objective-C code”. Given that Swift was born off the ribs of Objective-C and the everlasting NeXSTEP library –I know you love that ubiquitous <code class="language-plaintext highlighter-rouge">NS</code> prefix–, it still owes a big legacy to that system. Since the beginning, Apple offered great tools to make <a href="https://developer.apple.com/documentation/swift/importing-objective-c-into-swift">the migration from ObjC to Swift</a> as seamless as possible. In fact, the process has been so smooth that you may have a hard time spotting the Objective-C entities of a Swift codebase.</p>
+
+<p>While this is amazing for Apple-oriented software with plenty of legacy, this is no less than a disgrace when you port Swift elsewhere, because <a href="/cross-platform-swift/#2-objc-no-thanks">Objective-C is not available to Swift</a> out of the Apple ecosystem. At least, not easily <em>at all</em>.</p>
+
+<h2 id="embrace-the-power-of-c">Embrace the power of C</h2>
+
+<p>The mix-and-match transition to Swift may lead your codebase to a place where it’s very difficult to gauge the extent of the Objective-C legacy. Why is this important? Because if your intent is going cross-platform, you’d better port all your Objective-C code to good old C. The alternative is manually linking against <a href="https://www.gnustep.org/">GNUstep</a>, but it’s niche GPL software, and adds unnecessary complexity to keep around a language that is already obsolete.</p>
+
+<p>In my case, the low-level part of my OpenVPN implementation in Partout was written in Objective-C plus OpenSSL, so I decided it was time to <a href="https://github.com/passepartoutvpn/partout/milestone/4?closed=1">patiently write a new C version</a>.</p>
+
+<p>You have no idea how thrilled I am that <strong>this new Swift/C implementation now works on Apple, Windows, Linux, and Android</strong>!</p>
+
+<p>It took me a couple of weeks to have a successful connection over the new code, and not only was it more <em>pleasant</em> (Objective-C is not praised for its beauty), it was also significantly <em>faster</em>. The image below shows a speed test comparing the performance of my C (1) and ObjC (2) implementations of the OpenVPN protocol over the same 5G connection.</p>
+
+<p>Can I finally mention the joy of using C again after years of high-level programming?</p>
+
+<script src="https://emgithub.com/embed-v2.js?target=https%3A%2F%2Fgithub.com%2Fpassepartoutvpn%2Fpartout%2Fblob%2F66f3ed5c01c8d357a7b625a1067f19f368698124%2FSources%2FCrypto%2FOpenSSL_ObjC%2FCryptoAEAD.m%23L37-L58&amp;style=default&amp;type=code&amp;showBorder=on&amp;showLineNumbers=on&amp;showFileMeta=on&amp;showFullPath=on&amp;showCopy=on"></script>
+
+<script src="https://emgithub.com/embed-v2.js?target=https%3A%2F%2Fgithub.com%2Fpassepartoutvpn%2Fpartout%2Fblob%2F66f3ed5c01c8d357a7b625a1067f19f368698124%2FSources%2FCrypto%2FOpenSSL_C%2Fcrypto_aead.c%23L26-L42&amp;style=default&amp;type=code&amp;showBorder=on&amp;showLineNumbers=on&amp;showFileMeta=on&amp;showFullPath=on&amp;showCopy=on"></script>
+
+<p><img src="/s/f/cross-platform-swift/c-interop-speed-test.png" alt="OpenVPN over C versus ObjC" /></p>
+
+<h2 id="let-countless-options-unfold">Let countless options unfold</h2>
+
+<p>As you dig into C interop, you realize how many things you can do with Swift in both an abstract and performant fashion. WWDC 2024 even introduced the <a href="https://www.swift.org/get-started/embedded/">Embedded Swift</a> mode to <em>really</em> go thin and low-level, and C is the natural choice when it comes to communicating with an operating system API, or non-Swift libraries.</p>
+
+<p>At a later stage, we’ll have to face the complications of distributing the Swift runtime, but having C at disposal may dramatically reduce the impact of third-party dependencies, including those Swift itself relies on. Let me anticipate a few examples:</p>
+
+<ul>
+  <li>The burden of Foundation, or even Concurrency, may be avoided with a tailored C API for our specific domain.</li>
+  <li>The WireGuard backend, that Partout currently integrates via <a href="https://github.com/WireGuard/wireguard-go">wireguard-go</a>, can communicate with the Linux/Windows kernel module instead.</li>
+  <li>If the footprint is important, the OpenSSL dependency may be replaced with OS APIs, or used in SwiftPM as a shared library. This is common on Linux.</li>
+</ul>
+
+<script src="https://emgithub.com/embed-v2.js?target=https%3A%2F%2Fgithub.com%2Fpassepartoutvpn%2Fpartout%2Fblob%2F66f3ed5c01c8d357a7b625a1067f19f368698124%2FPackage.swift%23L334-L346&amp;style=default&amp;type=code&amp;showBorder=on&amp;showLineNumbers=on&amp;showFileMeta=on&amp;showFullPath=on&amp;showCopy=on"></script>
+
+<h2 id="bottom-line">Bottom line</h2>
+
+<p>C is a first-class citizen in the Swift ecosystem, and it’s the door to literally everything about a device. Keep enjoying the convenience of the modern Swift abstractions, but don’t fear the power of C when necessary, because C code compiles everywhere with little to no modifications. Some stuff is incredibly easier in C than Swift.</p>
+
+<p>In the next article, I’ll show you how to survive the deceptive complexity of Swift/C bridging.</p>
+
+
+        
+    </div>
+    
+    
+        
+            
+            Keep reading: <a href="/cross-platform-swift/c-interop-part-two/">Cross-platform Swift: C interop (pt. 2)</a>
+            
+        
+    
+        
+            
+        
+    
+        
+            
+        
+    
+        
+    
+        
+            
+        
+    
+        
+    
+        
+            
+        
+    
+        
+            
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+    
+
+
+
+
+
+
+
+<aside class="sharing" id="sharing-me">
+    <ul>
+        <li><a href="/feed.xml" title="Follow the blog" target="_blank"><i class="fa-solid fa-rss"></i>Subscribe</a></li>
+        <li><a href="https://linkedin.com/in/davidederosa" title="Follow me on LinkedIn" target="_blank"><i class="fab fa-linkedin"></i>LinkedIn</a></li>
+    </ul>
+</aside>
+
+    <aside class="post-related">
+        <p>See also:</p>
+        <ul>
+            
+            <li><a href="/cross-platform-swift/platform-specifics/">Cross-platform Swift: Platform specifics</a></li>
+            
+            <li><a href="/2025/05/a-true-case-for-dependency-injection/">A true case for Dependency Injection</a></li>
+            
+            <li><a href="/cross-platform-swift/core-libraries/">Cross-platform Swift: Core libraries</a></li>
+            
+        </ul>
+    </aside>
+    <div id="disqus_thread"></div>
+    <nav class="paginator">
+    <ul>
+        <li class="paginator-browser older">
+            
+            <a href="/cross-platform-swift/platform-specifics/" title="Cross-platform Swift: Platform specifics"><i class="fa fa-chevron-left"></i> Older</a>
+            
+        </li><li class="paginator-browser home">
+            <a href="/" class="fa fa-home"></a>
+        </li><li class="paginator-browser newer">
+            
+            <a href="/cross-platform-swift/c-interop-part-two/" title="Cross-platform Swift: C interop (pt. 2)">Newer <i class="fa fa-chevron-right"></i></a>
+            
+        </li>
+    </ul>
+</nav>
+
+</article>
+<script src="//keeshux.disqus.com/embed.js" async="async"></script>
+
+                </main>
+                <footer id="page-footer">
+                    <p id="social">
+    &copy; 2025 Davide De Rosa
+    <a href="https://github.com/keeshux" title="Browse my GitHub repository" class="fab fa-github"></a>
+    <a href="https://linkedin.com/in/davidederosa" title="Connect on LinkedIn" class="fab fa-linkedin"></a>
+    <a href="https://x.com/keeshux" title="Follow me on X" class="fab fa-x-twitter"></a>
+    <a href="/s/keeshux-gpg.txt" title="My GnuPG public key" class="fa fa-lock"></a>
+    <a href="/feed.xml" title="Follow the blog" class="fa-solid fa-rss"></a>
+</ul>
+
+                </footer>
+            </div>
+        </div>
+        <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    </body>
+</html>

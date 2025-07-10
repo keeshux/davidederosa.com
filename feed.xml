@@ -1,4 +1,218 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://davidederosa.com/feed.xml" rel="self" type="application/atom+xml" /><link href="https://davidederosa.com/" rel="alternate" type="text/html" /><updated>2025-07-02T16:42:02+02:00</updated><id>https://davidederosa.com/feed.xml</id><title type="html">Davide De Rosa</title><subtitle>I make software. I look around me.</subtitle><author><name>Davide De Rosa</name></author><entry><title type="html">Cross-platform Swift: Platform specifics</title><link href="https://davidederosa.com/cross-platform-swift/platform-specifics/" rel="alternate" type="text/html" title="Cross-platform Swift: Platform specifics" /><published>2025-06-30T00:00:00+02:00</published><updated>2025-06-30T00:00:00+02:00</updated><id>https://davidederosa.com/cross-platform-swift/cross-platform-swift-platform-specifics</id><content type="html" xml:base="https://davidederosa.com/cross-platform-swift/platform-specifics/"><![CDATA[<p>Very few developers treat the SwiftPM manifest, i.e. the <code class="language-plaintext highlighter-rouge">Package.swift</code> file, as what its extension suggests. If you are used to enumerate static products and targets, remember that the SwiftPM manifest is a fully legit Swift program, and as such it allows for plenty of control.</p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://davidederosa.com/feed.xml" rel="self" type="application/atom+xml" /><link href="https://davidederosa.com/" rel="alternate" type="text/html" /><updated>2025-07-10T12:10:15+02:00</updated><id>https://davidederosa.com/feed.xml</id><title type="html">Davide De Rosa</title><subtitle>I make software. I look around me.</subtitle><author><name>Davide De Rosa</name></author><entry><title type="html">Cross-platform Swift: C interop (pt. 2)</title><link href="https://davidederosa.com/cross-platform-swift/c-interop-part-two/" rel="alternate" type="text/html" title="Cross-platform Swift: C interop (pt. 2)" /><published>2025-07-10T00:00:00+02:00</published><updated>2025-07-10T00:00:00+02:00</updated><id>https://davidederosa.com/cross-platform-swift/cross-platform-swift-c-interop-part-two</id><content type="html" xml:base="https://davidederosa.com/cross-platform-swift/c-interop-part-two/"><![CDATA[<p>While writing C in a Swift context makes no difference at all, it takes a few tricks to reduce the friction in Swift code that embeds C routines. Let’s go through them together.</p>
+
+<h2 id="the-mystique-of-swift-pointers">The mystique of Swift pointers</h2>
+
+<p>Swift has often changed the way it interacts with C entities, especially around version 3 and 4, IIRC. It has changed so much that upgrading Xcode to a new minor version would likely break some code with obscure error messages. To this day, the ambiguity around Swift pointer types still beats me.</p>
+
+<p>Have you ever noticed how many variants exist?</p>
+
+<ul>
+  <li><a href="https://developer.apple.com/documentation/swift/unsafepointer">UnsafePointer</a></li>
+  <li><a href="https://developer.apple.com/documentation/swift/unsafebufferpointer">UnsafeBufferPointer</a></li>
+  <li><a href="https://developer.apple.com/documentation/swift/unsaferawpointer">UnsafeRawPointer</a></li>
+  <li><a href="https://developer.apple.com/documentation/swift/unsaferawbufferpointer">UnsafeRawBufferPointer</a></li>
+</ul>
+
+<p>Each of them with its mutable counterpart, totalling EIGHT pointer types. Don’t be offended, Swift, but this is ridiculously complex, and I hope that someday that part of the language will be properly simplified. It’s the single thing, hands down, that makes Swift/C interop unappealing.</p>
+
+<p>Personally, I have a hard time getting them right, and find myself bruteforcing the Swift code until I get it to compile. Don’t even get me started on the <code class="language-plaintext highlighter-rouge">withUnsafeBytes()</code> variants and the horrendously deceptive compiler/LSP errors that they trigger. They are very similar to the ones you stumble upon in complex SwiftUI closures with generics, to get the idea.</p>
+
+<p>Let me show you some lovely examples:</p>
+
+<p><img src="/s/f/cross-platform-swift/c-interop-compile-01.png" alt="" /></p>
+
+<p><img src="/s/f/cross-platform-swift/c-interop-compile-02.png" alt="" /></p>
+
+<p><img src="/s/f/cross-platform-swift/c-interop-compile-03.png" alt="" /></p>
+
+<p><img src="/s/f/cross-platform-swift/c-interop-compile-04.png" alt="" /></p>
+
+<h2 id="unsafe-with-closures">Unsafe <code class="language-plaintext highlighter-rouge">with</code> closures</h2>
+
+<p>When using <code class="language-plaintext highlighter-rouge">withUnsafeBytes()</code>, <code class="language-plaintext highlighter-rouge">withCString()</code>, and other similar closures, make sure to follow these ultimate 3 rules:</p>
+
+<ul>
+  <li><strong>Never ever let the closure arguments outlive the closure</strong>.</li>
+  <li><strong>Never</strong>.</li>
+  <li><strong>Ever</strong>.</li>
+</ul>
+
+<p>Thank me later. You’re welcome.</p>
+
+<p>This is another clunky syntax of Swift. Especially if your C function requires multiple variables to be mapped to their “unsafe representation”, you may quickly end up with this beautiful accordion:</p>
+
+<div class="language-swift highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">var</span> <span class="nv">a</span> <span class="o">=</span> <span class="o">...</span>
+<span class="k">var</span> <span class="nv">b</span> <span class="o">=</span> <span class="o">...</span>
+<span class="k">var</span> <span class="nv">c</span> <span class="o">=</span> <span class="o">...</span>
+<span class="n">a</span><span class="o">.</span><span class="n">withUnsafeBytes</span> <span class="p">{</span> <span class="n">pa</span> <span class="k">in</span>
+    <span class="n">b</span><span class="o">.</span><span class="n">withUnsafeBytes</span> <span class="p">{</span> <span class="n">pb</span> <span class="k">in</span>
+        <span class="n">c</span><span class="o">.</span><span class="n">withUnsafeBytes</span> <span class="p">{</span> <span class="n">pc</span> <span class="k">in</span>
+            <span class="nf">my_demanding_c_function</span><span class="p">(</span><span class="n">pa</span><span class="p">,</span> <span class="n">pb</span><span class="p">,</span> <span class="n">pc</span><span class="p">)</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Then, disgusted by the indentation overflow, you might look for ways to make the code more linear, and naturally think of returning the pointers that the closures provide:</p>
+
+<div class="language-swift highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">let</span> <span class="nv">pa</span> <span class="o">=</span> <span class="n">a</span><span class="o">.</span><span class="n">withUnsafeBytes</span> <span class="p">{</span> <span class="nv">$0</span> <span class="p">}</span>
+<span class="k">let</span> <span class="nv">pb</span> <span class="o">=</span> <span class="n">b</span><span class="o">.</span><span class="n">withUnsafeBytes</span> <span class="p">{</span> <span class="nv">$0</span> <span class="p">}</span>
+<span class="k">let</span> <span class="nv">pc</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">withUnsafeBytes</span> <span class="p">{</span> <span class="nv">$0</span> <span class="p">}</span>
+<span class="nf">my_demanding_c_function</span><span class="p">(</span><span class="n">pa</span><span class="p">,</span> <span class="n">pb</span><span class="p">,</span> <span class="n">pc</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>Much, much cleaner, only to find out that this code will crash, sooner or later, at some point of your life. They call it <em>unpredictable behavior</em>, and I guess it’s for the same reasons why you shouldn’t return a reference to a local variable. So, remember <em>the</em> rule, and kindly accept the nested closures. Or, keep reading.</p>
+
+<h2 id="bridging-to-swift">Bridging to Swift</h2>
+
+<p>Ironically, the above constructs are enough to minimize or even discourage the use of C in Swift. The time I wasted on Swift pointers made me constantly reconsider the balance between Swift and C code %, in that exposing C pointers to Swift was so frustrating that I’d rather write the whole logic in C, and let Swift be a thin wrapper. After all, it’s the best approach because going back and forth from and to Swift/C types is very inconvenient. Why would you ever use a bare <code class="language-plaintext highlighter-rouge">memcpy()</code> or <code class="language-plaintext highlighter-rouge">strlen()</code> in Swift? There are better, native alternatives.</p>
+
+<p>The point of C interop is to perform the low-level logic in C files, and only expose in/out types that are easier to funnel to Swift for use at higher levels of abstraction, especially if you make good use of the <code class="language-plaintext highlighter-rouge">_Nullable</code> and <code class="language-plaintext highlighter-rouge">_Nonnull</code> clang qualifiers.</p>
+
+<p>All in all, Swift bridges C <code class="language-plaintext highlighter-rouge">struct</code> as if it were a Swift value type, and pointers to <code class="language-plaintext highlighter-rouge">struct</code> are naturally mapped to <code class="language-plaintext highlighter-rouge">UnsafePointer&lt;T&gt;</code> or <code class="language-plaintext highlighter-rouge">UnsafeMutablePointer&lt;T&gt;</code> according to their <code class="language-plaintext highlighter-rouge">const</code> modifier. <code class="language-plaintext highlighter-rouge">enum</code> and <code class="language-plaintext highlighter-rouge">union</code> also behave pretty much the same way.</p>
+
+<p>So, what’s the matter? Why would one need more than this? Well, because everything is cool until you hit pointers, strings, and memory management.</p>
+
+<h2 id="opaquepointer">OpaquePointer</h2>
+
+<p>Sure, a C <code class="language-plaintext highlighter-rouge">struct</code> is nicely bridged to Swift, until it has less linear (yet super common) fields like:</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
+    <span class="kt">char</span> <span class="n">str</span><span class="p">[</span><span class="mi">32</span><span class="p">];</span>
+    <span class="kt">uint16_t</span> <span class="o">*</span><span class="n">buf</span><span class="p">;</span>
+    <span class="k">const</span> <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="p">)(</span><span class="kt">char</span> <span class="o">**</span><span class="n">ptr</span><span class="p">);</span>
+    <span class="kt">int</span> <span class="o">**</span><span class="n">matrix</span><span class="p">;</span>
+<span class="p">}</span> <span class="n">my_cool_struct</span><span class="p">;</span>
+</code></pre></div></div>
+
+<p>Good luck with the bridged Swift version of this structure, and good luck to manage its memory layout properly.</p>
+
+<p>But this is when I casually discovered the magic wand, the ultimate structure for C objects in Swift: <a href="https://developer.apple.com/documentation/swift/opaquepointer">OpaquePointer</a>.</p>
+
+<p><img src="/s/f/cross-platform-swift/c-interop-opaque-pointers.jpg" alt="Courtesy of Reddit" /></p>
+
+<p>Opaque pointers are a popular way to attain OOP-like encapsulation in C. You write a <em>forward declaration</em> in a .h header, then the full definition in a .c file. By doing so, the type internals are only exposed to the .c file that needs them to implement its logic. Externally, the pointers are treated as generic I/O handles, and Swift can’t see through them because it can only bridge what it sees in the C headers, i.e. a shallow type name. For the record, Objective-C can do this with <code class="language-plaintext highlighter-rouge">@class MyType</code>.</p>
+
+<h3 id="the-benefits-of-opaquepointer">The benefits of OpaquePointer</h3>
+
+<p>For example, if we have this structure in a C header:</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// .h</span>
+<span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
+    <span class="k">const</span> <span class="n">tls_channel_options</span> <span class="o">*</span><span class="n">_Nonnull</span> <span class="n">opt</span><span class="p">;</span>
+    <span class="n">SSL_CTX</span> <span class="o">*</span><span class="n">_Nonnull</span> <span class="n">ssl_ctx</span><span class="p">;</span>
+    <span class="kt">size_t</span> <span class="n">buf_len</span><span class="p">;</span>
+    <span class="kt">uint8_t</span> <span class="o">*</span><span class="n">_Nonnull</span> <span class="n">buf_cipher</span><span class="p">;</span>
+    <span class="kt">uint8_t</span> <span class="o">*</span><span class="n">_Nonnull</span> <span class="n">buf_plain</span><span class="p">;</span>
+
+    <span class="n">SSL</span> <span class="o">*</span><span class="n">_Nonnull</span> <span class="n">ssl</span><span class="p">;</span>
+    <span class="n">BIO</span> <span class="o">*</span><span class="n">_Nonnull</span> <span class="n">bio_plain</span><span class="p">;</span>
+    <span class="n">BIO</span> <span class="o">*</span><span class="n">_Nonnull</span> <span class="n">bio_cipher_in</span><span class="p">;</span>
+    <span class="n">BIO</span> <span class="o">*</span><span class="n">_Nonnull</span> <span class="n">bio_cipher_out</span><span class="p">;</span>
+    <span class="n">bool</span> <span class="n">is_connected</span><span class="p">;</span>
+<span class="p">}</span> <span class="n">tls_channel</span><span class="p">;</span>
+</code></pre></div></div>
+
+<p>and return e.g. <code class="language-plaintext highlighter-rouge">tls_channel *</code> from a function, its type will map to <code class="language-plaintext highlighter-rouge">UnsafeMutablePointer&lt;tls_channel&gt;</code> in Swift, and we’ll be able to access its fields with <code class="language-plaintext highlighter-rouge">.pointee</code>. We don’t need or want that level of detail, those are C concerns.</p>
+
+<p>Therefore, we split the definitions across two files. The header with a forward pointer declaration:</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// .h</span>
+<span class="k">typedef</span> <span class="k">struct</span> <span class="n">tls_channel</span> <span class="o">*</span><span class="n">tls_channel_ctx</span><span class="p">;</span>
+</code></pre></div></div>
+
+<p>and the .c file, with the full definition, mind the lack of <code class="language-plaintext highlighter-rouge">typedef</code> here:</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// .c</span>
+<span class="k">struct</span> <span class="n">tls_channel</span> <span class="p">{</span>
+    <span class="k">const</span> <span class="n">tls_channel_options</span> <span class="o">*</span><span class="n">_Nonnull</span> <span class="n">opt</span><span class="p">;</span>
+    <span class="n">SSL_CTX</span> <span class="o">*</span><span class="n">_Nonnull</span> <span class="n">ssl_ctx</span><span class="p">;</span>
+    <span class="c1">// ...</span>
+<span class="p">};</span>
+</code></pre></div></div>
+
+<p>At this point, we replace <code class="language-plaintext highlighter-rouge">tls_channel *</code> with the <code class="language-plaintext highlighter-rouge">tls_channel_ctx</code> alias:</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// before</span>
+<span class="n">tls_channel</span> <span class="o">*</span><span class="nf">tls_create_func</span><span class="p">();</span>
+
+<span class="c1">// after</span>
+<span class="n">tls_channel_ctx</span> <span class="nf">tls_create_func</span><span class="p">();</span>
+</code></pre></div></div>
+
+<p>and Swift will consider the returned object to be of <code class="language-plaintext highlighter-rouge">OpaquePointer</code> type.</p>
+
+<p>Benefits:</p>
+
+<ul>
+  <li>No unsafe Swift pointers involved ever again</li>
+  <li>No unsafe <code class="language-plaintext highlighter-rouge">with</code> closures, you pass the object as is to C functions from Swift</li>
+  <li>The C layer is the only responsible of the object, and Swift cannot mess with it</li>
+</ul>
+
+<p>Granted, it’s not a one-size-fits-it-all, but for complex C objects that need to cross the Swift boundary often, opaque pointers may be a good bet.</p>
+
+<p><img src="/s/f/cross-platform-swift/c-interop-opaque-pointers-example.png" alt="Example in Swift" /></p>
+
+<h2 id="debugging">Debugging</h2>
+
+<p>Talking about the Xcode debugger, it is generally able to debug C code called from Swift without issues. Not that I pushed this to the limit, but so far I’ve only noticed two places where the debugger is unhelpful.</p>
+
+<p>For example, due to their very nature, you don’t get to see what opaque pointers point to in Swift code. However, opaque pointers encapsulate private data, so a logical deduction would be that you’d rather put your breakpoint in C files, and let Swift treat them as a black box.</p>
+
+<p>The other situation is <code class="language-plaintext highlighter-rouge">inline</code> functions, where the Xcode debugger clearly struggles to step in (with reason?).</p>
+
+<h2 id="bottom-line">Bottom line</h2>
+
+<p>Interacting with Swift pointers is painful, but we can make our lives easier with some workarounds. The friction is directly proportional to the surface we expose to Swift, so we need to hide the C internals as much as possible, and minimize the roundtrips across languages. Use opaque pointers when types become complex.</p>
+
+<p>Now that we learned a few tricks about C interop, we can go back to the SwiftPM manifest to manage multiple, alternative implementations. See you in the next article.</p>]]></content><author><name>Davide De Rosa</name></author><category term="development" /><category term="swift" /><category term="c" /><summary type="html"><![CDATA[While writing C in a Swift context makes no difference at all, it takes a few tricks to reduce the friction in Swift code that embeds C routines. Let’s go through them together. The mystique of Swift pointers Swift has often changed the way it interacts with C entities, especially around version 3 and 4, IIRC. It has changed so much that upgrading Xcode to a new minor version would likely break some code with obscure error messages. To this day, the ambiguity around Swift pointer types still beats me. Have you ever noticed how many variants exist? UnsafePointer UnsafeBufferPointer UnsafeRawPointer UnsafeRawBufferPointer Each of them with its mutable counterpart, totalling EIGHT pointer types. Don’t be offended, Swift, but this is ridiculously complex, and I hope that someday that part of the language will be properly simplified. It’s the single thing, hands down, that makes Swift/C interop unappealing. Personally, I have a hard time getting them right, and find myself bruteforcing the Swift code until I get it to compile. Don’t even get me started on the withUnsafeBytes() variants and the horrendously deceptive compiler/LSP errors that they trigger. They are very similar to the ones you stumble upon in complex SwiftUI closures with generics, to get the idea. Let me show you some lovely examples: Unsafe with closures When using withUnsafeBytes(), withCString(), and other similar closures, make sure to follow these ultimate 3 rules: Never ever let the closure arguments outlive the closure. Never. Ever. Thank me later. You’re welcome. This is another clunky syntax of Swift. Especially if your C function requires multiple variables to be mapped to their “unsafe representation”, you may quickly end up with this beautiful accordion: var a = ... var b = ... var c = ... a.withUnsafeBytes { pa in b.withUnsafeBytes { pb in c.withUnsafeBytes { pc in my_demanding_c_function(pa, pb, pc) } } } Then, disgusted by the indentation overflow, you might look for ways to make the code more linear, and naturally think of returning the pointers that the closures provide: let pa = a.withUnsafeBytes { $0 } let pb = b.withUnsafeBytes { $0 } let pc = c.withUnsafeBytes { $0 } my_demanding_c_function(pa, pb, pc) Much, much cleaner, only to find out that this code will crash, sooner or later, at some point of your life. They call it unpredictable behavior, and I guess it’s for the same reasons why you shouldn’t return a reference to a local variable. So, remember the rule, and kindly accept the nested closures. Or, keep reading. Bridging to Swift Ironically, the above constructs are enough to minimize or even discourage the use of C in Swift. The time I wasted on Swift pointers made me constantly reconsider the balance between Swift and C code %, in that exposing C pointers to Swift was so frustrating that I’d rather write the whole logic in C, and let Swift be a thin wrapper. After all, it’s the best approach because going back and forth from and to Swift/C types is very inconvenient. Why would you ever use a bare memcpy() or strlen() in Swift? There are better, native alternatives. The point of C interop is to perform the low-level logic in C files, and only expose in/out types that are easier to funnel to Swift for use at higher levels of abstraction, especially if you make good use of the _Nullable and _Nonnull clang qualifiers. All in all, Swift bridges C struct as if it were a Swift value type, and pointers to struct are naturally mapped to UnsafePointer&lt;T&gt; or UnsafeMutablePointer&lt;T&gt; according to their const modifier. enum and union also behave pretty much the same way. So, what’s the matter? Why would one need more than this? Well, because everything is cool until you hit pointers, strings, and memory management. OpaquePointer Sure, a C struct is nicely bridged to Swift, until it has less linear (yet super common) fields like: typedef struct { char str[32]; uint16_t *buf; const void (*)(char **ptr); int **matrix; } my_cool_struct; Good luck with the bridged Swift version of this structure, and good luck to manage its memory layout properly. But this is when I casually discovered the magic wand, the ultimate structure for C objects in Swift: OpaquePointer. Opaque pointers are a popular way to attain OOP-like encapsulation in C. You write a forward declaration in a .h header, then the full definition in a .c file. By doing so, the type internals are only exposed to the .c file that needs them to implement its logic. Externally, the pointers are treated as generic I/O handles, and Swift can’t see through them because it can only bridge what it sees in the C headers, i.e. a shallow type name. For the record, Objective-C can do this with @class MyType. The benefits of OpaquePointer For example, if we have this structure in a C header: // .h typedef struct { const tls_channel_options *_Nonnull opt; SSL_CTX *_Nonnull ssl_ctx; size_t buf_len; uint8_t *_Nonnull buf_cipher; uint8_t *_Nonnull buf_plain; SSL *_Nonnull ssl; BIO *_Nonnull bio_plain; BIO *_Nonnull bio_cipher_in; BIO *_Nonnull bio_cipher_out; bool is_connected; } tls_channel; and return e.g. tls_channel * from a function, its type will map to UnsafeMutablePointer&lt;tls_channel&gt; in Swift, and we’ll be able to access its fields with .pointee. We don’t need or want that level of detail, those are C concerns. Therefore, we split the definitions across two files. The header with a forward pointer declaration: // .h typedef struct tls_channel *tls_channel_ctx; and the .c file, with the full definition, mind the lack of typedef here: // .c struct tls_channel { const tls_channel_options *_Nonnull opt; SSL_CTX *_Nonnull ssl_ctx; // ... }; At this point, we replace tls_channel * with the tls_channel_ctx alias: // before tls_channel *tls_create_func(); // after tls_channel_ctx tls_create_func(); and Swift will consider the returned object to be of OpaquePointer type. Benefits: No unsafe Swift pointers involved ever again No unsafe with closures, you pass the object as is to C functions from Swift The C layer is the only responsible of the object, and Swift cannot mess with it Granted, it’s not a one-size-fits-it-all, but for complex C objects that need to cross the Swift boundary often, opaque pointers may be a good bet. Debugging Talking about the Xcode debugger, it is generally able to debug C code called from Swift without issues. Not that I pushed this to the limit, but so far I’ve only noticed two places where the debugger is unhelpful. For example, due to their very nature, you don’t get to see what opaque pointers point to in Swift code. However, opaque pointers encapsulate private data, so a logical deduction would be that you’d rather put your breakpoint in C files, and let Swift treat them as a black box. The other situation is inline functions, where the Xcode debugger clearly struggles to step in (with reason?). Bottom line Interacting with Swift pointers is painful, but we can make our lives easier with some workarounds. The friction is directly proportional to the surface we expose to Swift, so we need to hide the C internals as much as possible, and minimize the roundtrips across languages. Use opaque pointers when types become complex. Now that we learned a few tricks about C interop, we can go back to the SwiftPM manifest to manage multiple, alternative implementations. See you in the next article.]]></summary></entry><entry><title type="html">Cross-platform Swift: C interop (pt. 1)</title><link href="https://davidederosa.com/cross-platform-swift/c-interop-part-one/" rel="alternate" type="text/html" title="Cross-platform Swift: C interop (pt. 1)" /><published>2025-07-09T00:00:00+02:00</published><updated>2025-07-09T00:00:00+02:00</updated><id>https://davidederosa.com/cross-platform-swift/cross-platform-swift-c-interop-part-one</id><content type="html" xml:base="https://davidederosa.com/cross-platform-swift/c-interop-part-one/"><![CDATA[<p>This is where the fun begins. <a href="https://github.com/passepartoutvpn/partout">Partout</a>, the library I talk about in this series, is a networking library. As such, there are places where code control and performance are paramount. The integration of Swift with the C language for low-level routines is neat, and SwiftPM makes it very easy to mix Swift and C code as if they were the same thing.</p>
+
+<h2 id="the-dangers-of-apple-mix-and-match">The dangers of Apple “Mix and Match”</h2>
+
+<p><img src="/s/f/cross-platform-swift/c-interop-objc-tinky-winky.jpg" alt="ObjC is the Tinky Winky hand" /></p>
+
+<p>I said “mix Swift and C code”, but I should have said “Swift, C, and Objective-C code”. Given that Swift was born off the ribs of Objective-C and the everlasting NeXSTEP library –I know you love that ubiquitous <code class="language-plaintext highlighter-rouge">NS</code> prefix–, it still owes a big legacy to that system. Since the beginning, Apple offered great tools to make <a href="https://developer.apple.com/documentation/swift/importing-objective-c-into-swift">the migration from ObjC to Swift</a> as seamless as possible. In fact, the process has been so smooth that you may have a hard time spotting the Objective-C entities of a Swift codebase.</p>
+
+<p>While this is amazing for Apple-oriented software with plenty of legacy, this is no less than a disgrace when you port Swift elsewhere, because <a href="/cross-platform-swift/#2-objc-no-thanks">Objective-C is not available to Swift</a> out of the Apple ecosystem. At least, not easily <em>at all</em>.</p>
+
+<h2 id="embrace-the-power-of-c">Embrace the power of C</h2>
+
+<p>The mix-and-match transition to Swift may lead your codebase to a place where it’s very difficult to gauge the extent of the Objective-C legacy. Why is this important? Because if your intent is going cross-platform, you’d better port all your Objective-C code to good old C. The alternative is manually linking against <a href="https://www.gnustep.org/">GNUstep</a>, but it’s niche GPL software, and adds unnecessary complexity to keep around a language that is already obsolete.</p>
+
+<p>In my case, the low-level part of my OpenVPN implementation in Partout was written in Objective-C plus OpenSSL, so I decided it was time to <a href="https://github.com/passepartoutvpn/partout/milestone/4?closed=1">patiently write a new C version</a>.</p>
+
+<p>You have no idea how thrilled I am that <strong>this new Swift/C implementation now works on Apple, Windows, Linux, and Android</strong>!</p>
+
+<p>It took me a couple of weeks to have a successful connection over the new code, and not only was it more <em>pleasant</em> (Objective-C is not praised for its beauty), it was also significantly <em>faster</em>. The image below shows a speed test comparing the performance of my C (1) and ObjC (2) implementations of the OpenVPN protocol over the same 5G connection.</p>
+
+<p>Can I finally mention the joy of using C again after years of high-level programming?</p>
+
+<script src="https://emgithub.com/embed-v2.js?target=https%3A%2F%2Fgithub.com%2Fpassepartoutvpn%2Fpartout%2Fblob%2F66f3ed5c01c8d357a7b625a1067f19f368698124%2FSources%2FCrypto%2FOpenSSL_ObjC%2FCryptoAEAD.m%23L37-L58&amp;style=default&amp;type=code&amp;showBorder=on&amp;showLineNumbers=on&amp;showFileMeta=on&amp;showFullPath=on&amp;showCopy=on"></script>
+
+<script src="https://emgithub.com/embed-v2.js?target=https%3A%2F%2Fgithub.com%2Fpassepartoutvpn%2Fpartout%2Fblob%2F66f3ed5c01c8d357a7b625a1067f19f368698124%2FSources%2FCrypto%2FOpenSSL_C%2Fcrypto_aead.c%23L26-L42&amp;style=default&amp;type=code&amp;showBorder=on&amp;showLineNumbers=on&amp;showFileMeta=on&amp;showFullPath=on&amp;showCopy=on"></script>
+
+<p><img src="/s/f/cross-platform-swift/c-interop-speed-test.png" alt="OpenVPN over C versus ObjC" /></p>
+
+<h2 id="let-countless-options-unfold">Let countless options unfold</h2>
+
+<p>As you dig into C interop, you realize how many things you can do with Swift in both an abstract and performant fashion. WWDC 2024 even introduced the <a href="https://www.swift.org/get-started/embedded/">Embedded Swift</a> mode to <em>really</em> go thin and low-level, and C is the natural choice when it comes to communicating with an operating system API, or non-Swift libraries.</p>
+
+<p>At a later stage, we’ll have to face the complications of distributing the Swift runtime, but having C at disposal may dramatically reduce the impact of third-party dependencies, including those Swift itself relies on. Let me anticipate a few examples:</p>
+
+<ul>
+  <li>The burden of Foundation, or even Concurrency, may be avoided with a tailored C API for our specific domain.</li>
+  <li>The WireGuard backend, that Partout currently integrates via <a href="https://github.com/WireGuard/wireguard-go">wireguard-go</a>, can communicate with the Linux/Windows kernel module instead.</li>
+  <li>If the footprint is important, the OpenSSL dependency may be replaced with OS APIs, or used in SwiftPM as a shared library. This is common on Linux.</li>
+</ul>
+
+<script src="https://emgithub.com/embed-v2.js?target=https%3A%2F%2Fgithub.com%2Fpassepartoutvpn%2Fpartout%2Fblob%2F66f3ed5c01c8d357a7b625a1067f19f368698124%2FPackage.swift%23L334-L346&amp;style=default&amp;type=code&amp;showBorder=on&amp;showLineNumbers=on&amp;showFileMeta=on&amp;showFullPath=on&amp;showCopy=on"></script>
+
+<h2 id="bottom-line">Bottom line</h2>
+
+<p>C is a first-class citizen in the Swift ecosystem, and it’s the door to literally everything about a device. Keep enjoying the convenience of the modern Swift abstractions, but don’t fear the power of C when necessary, because C code compiles everywhere with little to no modifications. Some stuff is incredibly easier in C than Swift.</p>
+
+<p>In the next article, I’ll show you how to survive the deceptive complexity of Swift/C bridging.</p>]]></content><author><name>Davide De Rosa</name></author><category term="development" /><category term="swift" /><category term="c" /><summary type="html"><![CDATA[This is where the fun begins. Partout, the library I talk about in this series, is a networking library. As such, there are places where code control and performance are paramount. The integration of Swift with the C language for low-level routines is neat, and SwiftPM makes it very easy to mix Swift and C code as if they were the same thing. The dangers of Apple “Mix and Match” I said “mix Swift and C code”, but I should have said “Swift, C, and Objective-C code”. Given that Swift was born off the ribs of Objective-C and the everlasting NeXSTEP library –I know you love that ubiquitous NS prefix–, it still owes a big legacy to that system. Since the beginning, Apple offered great tools to make the migration from ObjC to Swift as seamless as possible. In fact, the process has been so smooth that you may have a hard time spotting the Objective-C entities of a Swift codebase. While this is amazing for Apple-oriented software with plenty of legacy, this is no less than a disgrace when you port Swift elsewhere, because Objective-C is not available to Swift out of the Apple ecosystem. At least, not easily at all. Embrace the power of C The mix-and-match transition to Swift may lead your codebase to a place where it’s very difficult to gauge the extent of the Objective-C legacy. Why is this important? Because if your intent is going cross-platform, you’d better port all your Objective-C code to good old C. The alternative is manually linking against GNUstep, but it’s niche GPL software, and adds unnecessary complexity to keep around a language that is already obsolete. In my case, the low-level part of my OpenVPN implementation in Partout was written in Objective-C plus OpenSSL, so I decided it was time to patiently write a new C version. You have no idea how thrilled I am that this new Swift/C implementation now works on Apple, Windows, Linux, and Android! It took me a couple of weeks to have a successful connection over the new code, and not only was it more pleasant (Objective-C is not praised for its beauty), it was also significantly faster. The image below shows a speed test comparing the performance of my C (1) and ObjC (2) implementations of the OpenVPN protocol over the same 5G connection. Can I finally mention the joy of using C again after years of high-level programming? Let countless options unfold As you dig into C interop, you realize how many things you can do with Swift in both an abstract and performant fashion. WWDC 2024 even introduced the Embedded Swift mode to really go thin and low-level, and C is the natural choice when it comes to communicating with an operating system API, or non-Swift libraries. At a later stage, we’ll have to face the complications of distributing the Swift runtime, but having C at disposal may dramatically reduce the impact of third-party dependencies, including those Swift itself relies on. Let me anticipate a few examples: The burden of Foundation, or even Concurrency, may be avoided with a tailored C API for our specific domain. The WireGuard backend, that Partout currently integrates via wireguard-go, can communicate with the Linux/Windows kernel module instead. If the footprint is important, the OpenSSL dependency may be replaced with OS APIs, or used in SwiftPM as a shared library. This is common on Linux. Bottom line C is a first-class citizen in the Swift ecosystem, and it’s the door to literally everything about a device. Keep enjoying the convenience of the modern Swift abstractions, but don’t fear the power of C when necessary, because C code compiles everywhere with little to no modifications. Some stuff is incredibly easier in C than Swift. In the next article, I’ll show you how to survive the deceptive complexity of Swift/C bridging.]]></summary></entry><entry><title type="html">Cross-platform Swift: Platform specifics</title><link href="https://davidederosa.com/cross-platform-swift/platform-specifics/" rel="alternate" type="text/html" title="Cross-platform Swift: Platform specifics" /><published>2025-06-30T00:00:00+02:00</published><updated>2025-06-30T00:00:00+02:00</updated><id>https://davidederosa.com/cross-platform-swift/cross-platform-swift-platform-specifics</id><content type="html" xml:base="https://davidederosa.com/cross-platform-swift/platform-specifics/"><![CDATA[<p>Very few developers treat the SwiftPM manifest, i.e. the <code class="language-plaintext highlighter-rouge">Package.swift</code> file, as what its extension suggests. If you are used to enumerate static products and targets, remember that the SwiftPM manifest is a fully legit Swift program, and as such it allows for plenty of control.</p>
 
 <h2 id="conditionals-in-packageswift">Conditionals in Package.swift</h2>
 
@@ -741,114 +955,4 @@ it takes a few minutes to create a meaningful UI. The instant gratification that
 
 <h3 id="in-conclusion">In conclusion</h3>
 
-<p>Frontend is the face of our product, but UI is only a small part of it. Over the years, the overuse of client-side JavaScript frameworks has made frontend software less of an example of good software design. At the end of the day, though, all design principles still apply, and frontend development deserves the same care and rigor as any other layer of software development.</p>]]></content><author><name>Davide De Rosa</name></author><category term="development" /><summary type="html"><![CDATA[If you are a developer, you have heard this statement at least once. While I believe that any comparison is pointless because everything is about programming, I’d like to add some complexities often neglected in frontend development, within the context of client/server software. Take it seriously Frontend is not a toy. What I find frequent in frontend developers is the recklessness of their choices. Backend developers tend to be more conservative because they are the ones receiving that phone call at night when a service is down, but this doesn’t mean that a frontend bug couldn’t have terrible consequences. Some people claim that backend is harder than frontend because of the “more serious” problems it has to solve: Performance Scalability Robustness Concurrency For some reason, those qualities are considered less of a priority for a well-written client, but they are equally important and sometimes more important. Users may spot slow, sluggish, power-hungry, buggy apps from a distance. It’s also true that if you skip native backend software like web servers or databases, which are a big deal, most developers out there are doing simple web services. Let’s be honest: nowadays, most of the above difficulties are not dealt with at the programming level, they are delegated to long-established SaaS platforms. This is great, but only because backend developers are –in my experience– generally more aware of how things happen under the hood. Sadly, frontend frameworks lead developers in the opposite direction: they make you forget the consequences of bad programming practices. They deviate from the importance of appropriate data structures and algorithms. They convince you that modern machines can endure any load. They overcomplicate code with tons of boilerplate. They waste your time moving your focus on things that nobody cares about e.g. “is that a view or a view model?”. They make you lose the foundations of programming. The result is a far west full of cowboys writing inefficient, dangerous code, but this is not a problem of the frontend itself. Never rely on a backend Not all apps are web-oriented, and Passepartout is an example of frontend development without a backend. Or, better said, frontend development with an uncontrolled backend. What does this imply? You take direct responsibility for your software. In a world where most apps interact with external APIs, it’s appalling how often frontend developers operate in the best-case scenario where everything works as expected. I wonder how many write code that, to name a few: Expects malformed responses Expects no responses Handles timeouts Works fully offline Works headless (without views) Migrates persistent data without data loss This is your responsibility, not the external backend’s, and you do that by giving your frontend a local backend with business logic to rely on. At that point, the presence of an external backend will be of marginal importance. Domain before UI Business logic is another concept that, historically, the backend is more used to than the frontend. I believe that backend developers don’t see the immediate effect of their work until late, whereas it takes a few minutes to create a meaningful UI. The instant gratification that comes from “it works!” may indefinitely delay the key decisions to take early in software development. Presentation is the highest layer in software design, yet in frontend development, the importance of UI is constantly glorified. No surprise, non-tech people and the industry in general judge software from the UI, but frontend developers should prioritize the domain like any other non-UI developer does. Any software should make sense regardless of having a UI, or a remote API, and frontend makes no exception: UI is no more than the visual representation of a domain. I believe that this simple rule also dignifies frontend apps for making them way more meaningful than “a couple of screens”. Troubleshooting How much time do you waste interpreting users’ feedback for the lack of better options? What if you are in a real hurry to solve a frontend problem in production? Clients live in the most unpredictable environments, yet the troubleshooting of their errors is often deferred to backend monitoring. Logging, proper error handling, profiling, and tracking tools are a superpower, but as long as the backend takes care of that, the frontend couldn’t care less. Drop the backend, and troubleshooting becomes a nightmare. Along the lines of “never rely on a backend”, do your homework and invest decent time in logging at least. Make it a requirement, even more than tests. It’s tedious, it’s time-consuming, but it truly pays off when SHTF. Logging is a fundamental trait of software robustness, and it takes a lot of practice to describe what code does through human-readable text in a way that will help your future self later. No software is exempt from the need for logging. In conclusion Frontend is the face of our product, but UI is only a small part of it. Over the years, the overuse of client-side JavaScript frameworks has made frontend software less of an example of good software design. At the end of the day, though, all design principles still apply, and frontend development deserves the same care and rigor as any other layer of software development.]]></summary></entry><entry><title type="html">Rewriting Passepartout for v3</title><link href="https://davidederosa.com/2025/03/rewriting-passepartout-for-v3/" rel="alternate" type="text/html" title="Rewriting Passepartout for v3" /><published>2025-03-11T00:00:00+01:00</published><updated>2025-03-11T00:00:00+01:00</updated><id>https://davidederosa.com/2025/03/rewriting-passepartout-for-v3</id><content type="html" xml:base="https://davidederosa.com/2025/03/rewriting-passepartout-for-v3/"><![CDATA[<p>For software to live a long life, it must grow together with our experience. If our skills improve at a faster pace than we maintain our software, its design will start to drift away from our standards and expectations. If we let the gap increase for too long, it will eventually be impossible to catch up, and we’ll end up hating our creations.</p>
-
-<h3 id="version-2-was-a-mess">Version 2 was a mess</h3>
-
-<p><a href="https://passepartoutvpn.app">Passepartout</a> used to be two separate iOS and macOS apps, with all the complications that this implies. In 2022, I used Passepartout to learn <a href="https://developer.apple.com/xcode/swiftui/">SwiftUI</a> –I considered Flutter initially– and make v2 a partially multiplatform app. Partially because the macOS app was a hybrid <a href="https://developer.apple.com/mac-catalyst/">Catalyst/iPad</a> app, a terrible choice if I think of it today. I don’t even know why I did it, but whatever.</p>
-
-<p>The conclusions I drew after v2:</p>
-
-<ul>
-  <li>SwiftUI is very hard to get right. I had to rewrite my views multiple times due to my wrong understanding of the framework.</li>
-  <li>Catalyst made the macOS app an ugly and unstable iPadOS app, let alone a complete nightmare to develop.</li>
-  <li>The time I spent on the Mac system menu, in particular, was beyond ridiculous. Maybe I’ll dedicate a post to this clunky Catalyst/AppKit interaction.</li>
-  <li>The app core was overengineered, untested, untestable, and confusing.</li>
-  <li><a href="https://github.com/passepartoutvpn/tunnelkit">TunnelKit</a> was already unmanageable and inextensible. Touching the wrong line could break connectivity for thousands of users.</li>
-</ul>
-
-<p>I’m aware that we, developers, occasionally suffer an innate tendency to be unsatisfied with our choices, whatever they are. Redoing the same things over and over is detrimental to making progress, though. Therefore, rewriting software should <em>never</em> be your first choice. That’s why I ruminated around the idea for months, but the rewrite was inevitable 7 years after the first release.</p>
-
-<p>Users don’t and can’t realize the amount of bugs that Passepartout v2 and TunnelKit had. The codebase, <em>my codebase</em>, was such a high barrier that it took me a year (2022 to 2023) to resolve some legitimate concerns with iCloud. Requests/bugs were sadly flowing at 30x the speed I was able to address them. The app was half abandoned.</p>
-
-<p>It’s, however, very risky to rewrite an app that was stable, making decent money, and required very little support despite a user base in the hundreds of thousands. To end up, one year later, with the same app with more or less the same features.</p>
-
-<p>Rewriting must be <em>really</em> worth it.</p>
-
-<h3 id="the-costbenefit-of-rewriting-software">The cost/benefit of rewriting software</h3>
-
-<p>Version 3 is the last time I <em>intend</em> to attack the foundations of Passepartout.</p>
-
-<p>So many times I rewrote code in my life with the sole intent of working in a “beautiful” codebase, not realizing how quickly the enthusiasm wanes when the development routine is back to normal. Give it a few months and, no matter what, your codebase will look “ugly” again. It never ends.</p>
-
-<p>I learned not to rely on “beauty” to bring me back to the joy of programming. After all, when I wrote those nasty lines 10 years ago, I probably thought it was the state of the art. Right?</p>
-
-<p>Today, I try to refactor software as a regular exercise, but at a smaller scale, and with a different purpose:</p>
-
-<p><strong>Make my changes last as long as possible.</strong></p>
-
-<p>Below is what I did in 2024 –part-time until August– for this major update:</p>
-
-<ul>
-  <li><a href="https://github.com/orgs/passepartoutvpn/projects/1/views/4?filterQuery=">The GitHub Project for v3</a></li>
-  <li><a href="https://github.com/orgs/passepartoutvpn/projects/1/views/8?filterQuery=">The tasks split by goal</a></li>
-</ul>
-
-<p>The project encompassed ~1000 items, of which ~350 are invisible for being in private repositories. An insane amount of work, in hindsight.</p>
-
-<p>Today, I can confirm that it was by no means a waste of time. After one year of development, the success of this reengineering is summarized in a sentence:</p>
-
-<p><strong>Most areas of Passepartout won’t need to be modified for years to come.</strong></p>
-
-<p>This is the single measure you want to focus on when considering a big architectural redesign: the time you save in the long run must dramatically compensate for the effort of rewriting. With this mantra, good design will be the natural consequence. Because good design, ultimately, is meant to save development time.</p>
-
-<p>The best code of your software is the one you forget about, the one you don’t need to touch ever again.</p>]]></content><author><name>Davide De Rosa</name></author><category term="development" /><category term="refactoring" /><category term="planning" /><summary type="html"><![CDATA[For software to live a long life, it must grow together with our experience. If our skills improve at a faster pace than we maintain our software, its design will start to drift away from our standards and expectations. If we let the gap increase for too long, it will eventually be impossible to catch up, and we’ll end up hating our creations. Version 2 was a mess Passepartout used to be two separate iOS and macOS apps, with all the complications that this implies. In 2022, I used Passepartout to learn SwiftUI –I considered Flutter initially– and make v2 a partially multiplatform app. Partially because the macOS app was a hybrid Catalyst/iPad app, a terrible choice if I think of it today. I don’t even know why I did it, but whatever. The conclusions I drew after v2: SwiftUI is very hard to get right. I had to rewrite my views multiple times due to my wrong understanding of the framework. Catalyst made the macOS app an ugly and unstable iPadOS app, let alone a complete nightmare to develop. The time I spent on the Mac system menu, in particular, was beyond ridiculous. Maybe I’ll dedicate a post to this clunky Catalyst/AppKit interaction. The app core was overengineered, untested, untestable, and confusing. TunnelKit was already unmanageable and inextensible. Touching the wrong line could break connectivity for thousands of users. I’m aware that we, developers, occasionally suffer an innate tendency to be unsatisfied with our choices, whatever they are. Redoing the same things over and over is detrimental to making progress, though. Therefore, rewriting software should never be your first choice. That’s why I ruminated around the idea for months, but the rewrite was inevitable 7 years after the first release. Users don’t and can’t realize the amount of bugs that Passepartout v2 and TunnelKit had. The codebase, my codebase, was such a high barrier that it took me a year (2022 to 2023) to resolve some legitimate concerns with iCloud. Requests/bugs were sadly flowing at 30x the speed I was able to address them. The app was half abandoned. It’s, however, very risky to rewrite an app that was stable, making decent money, and required very little support despite a user base in the hundreds of thousands. To end up, one year later, with the same app with more or less the same features. Rewriting must be really worth it. The cost/benefit of rewriting software Version 3 is the last time I intend to attack the foundations of Passepartout. So many times I rewrote code in my life with the sole intent of working in a “beautiful” codebase, not realizing how quickly the enthusiasm wanes when the development routine is back to normal. Give it a few months and, no matter what, your codebase will look “ugly” again. It never ends. I learned not to rely on “beauty” to bring me back to the joy of programming. After all, when I wrote those nasty lines 10 years ago, I probably thought it was the state of the art. Right? Today, I try to refactor software as a regular exercise, but at a smaller scale, and with a different purpose: Make my changes last as long as possible. Below is what I did in 2024 –part-time until August– for this major update: The GitHub Project for v3 The tasks split by goal The project encompassed ~1000 items, of which ~350 are invisible for being in private repositories. An insane amount of work, in hindsight. Today, I can confirm that it was by no means a waste of time. After one year of development, the success of this reengineering is summarized in a sentence: Most areas of Passepartout won’t need to be modified for years to come. This is the single measure you want to focus on when considering a big architectural redesign: the time you save in the long run must dramatically compensate for the effort of rewriting. With this mantra, good design will be the natural consequence. Because good design, ultimately, is meant to save development time. The best code of your software is the one you forget about, the one you don’t need to touch ever again.]]></summary></entry><entry><title type="html">Deploying to the App Store: The cost you didn’t expect</title><link href="https://davidederosa.com/2025/03/deploying-to-the-app-store-the-cost-you-didn-t-expect/" rel="alternate" type="text/html" title="Deploying to the App Store: The cost you didn’t expect" /><published>2025-03-03T00:00:00+01:00</published><updated>2025-03-03T00:00:00+01:00</updated><id>https://davidederosa.com/2025/03/deploying-to-the-app-store-the-cost-you-didn-t-expect</id><content type="html" xml:base="https://davidederosa.com/2025/03/deploying-to-the-app-store-the-cost-you-didn-t-expect/"><![CDATA[<p>Passepartout has had a <a href="https://github.com/passepartoutvpn/passepartout/actions/runs/13551048532">solid and unique CI/CD workflow</a> for years, from Git commits straight to the App Store. For iPhone, iPad, Mac, and Apple TV.</p>
-
-<p>I dare to say, automated releases are hardly (if <em>ever</em>) seen in open-source *OS apps.</p>
-
-<p><a href="https://docs.fastlane.tools/">fastlane</a>, created by <a href="https://krausefx.com/">Felix Krause</a>, and <a href="https://github.com/features/actions">GitHub Actions</a> helped me immensely with the fast turnaround of Passepartout releases. In the era of LLMs, you have no excuses to waste time for not using these incredible tools.</p>
-
-<p>Let me show why CI/CD is one of the most important and underestimated aspects of making indie software, or software in general.</p>
-
-<h3 id="its-just-an-app-right">It’s just an app, right?</h3>
-
-<p>Many people are confident that <em>The Idea</em> is the most valuable aspect of a product.</p>
-
-<p>Unfortunately, if you developed an app for the App Store, at any level of complexity, you know how exhausting the whole process is. There is so much more than “writing the code”, which is nothing trivial to start with.</p>
-
-<h3 id="the-app-store-requirements-will-beat-you">The App Store requirements will beat you</h3>
-
-<p>Choosing the icons. Crafting the screenshots. Writing the metadata. Picking the categories. Localizations. The business model. In-app purchases. Sorting out the legal aspects. The App Review process. And so on.</p>
-
-<p>Wait, have I mentioned the codesigning process? Development, Ad-Hoc, Distribution. Multiple platforms. Debug and Release.</p>
-
-<p>Especially at the beginning, it’s overwhelming and discouraging. We’ve all been there.</p>
-
-<p>The 15-30% cut that Apple takes from your revenue is almost a marginal cost compared to all this.</p>
-
-<h3 id="the-fear-of-change">The fear of change</h3>
-
-<p>Here’s a very subtle side-effect of the above: once your tedious setup finally works, you might <em>refrain from changing</em>.</p>
-
-<p>Some relatable examples:</p>
-
-<ul>
-  <li>If I change the UI, I will have to change the screenshots for X languages and Y platforms.</li>
-  <li>If I alter some inner logic, I will get a rejection from Apple.</li>
-  <li>If I introduce a regression, I will get bad reviews.</li>
-  <li>Even if I have a hotfix in time, Apple will push my release back for silly reasons.</li>
-</ul>
-
-<p>It goes without saying, this is an atrocious outcome for your product. If you work alone with no one to delegate these annoyances to, you risk falling into the ultimate recipe for failure.</p>
-
-<p><em>Stagnation is the hidden cost of expensive deployment.</em></p>
-
-<h3 id="you-must-learn-to-automate">You MUST learn to automate</h3>
-
-<p>The key to keeping focus on the product is <em>automation</em>. It’s boring at first, but in the long run, it’s your best bet against the inevitable frustration of using App Store Connect.</p>
-
-<ul>
-  <li>If you find yourself doing 3+ times the same task, automate it.</li>
-  <li>If a task doesn’t need constant interaction, automate it.</li>
-  <li>If a task is sensitive to human mistakes, automate it.</li>
-</ul>
-
-<p>Observe your routine and you will soon realize how many hours you are wasting on dumb tasks, time you could have spent on useful features for your customers.</p>
-
-<h3 id="continuous-integration-is-underused">Continuous integration is underused!</h3>
-
-<p>After 15 years working with Apple devices, I can still confirm this trend: the vast majority of iOS developers don’t know jack about <em>continuous integration</em>. Which is crazy because fastlane has been around since 2014. GitHub Actions has a shorter history, but there have always been alternatives: Travis-CI, GitLab, Circle-CI, and whatnot.</p>
-
-<p>In the next posts, I’ll show you how I used fastlane and GitHub Actions to automate the release of Passepartout for iOS, macOS, and tvOS at once.</p>
-
-<p>Stay in touch.</p>]]></content><author><name>Davide De Rosa</name></author><category term="development" /><category term="ci/cd" /><summary type="html"><![CDATA[Passepartout has had a solid and unique CI/CD workflow for years, from Git commits straight to the App Store. For iPhone, iPad, Mac, and Apple TV. I dare to say, automated releases are hardly (if ever) seen in open-source *OS apps. fastlane, created by Felix Krause, and GitHub Actions helped me immensely with the fast turnaround of Passepartout releases. In the era of LLMs, you have no excuses to waste time for not using these incredible tools. Let me show why CI/CD is one of the most important and underestimated aspects of making indie software, or software in general. It’s just an app, right? Many people are confident that The Idea is the most valuable aspect of a product. Unfortunately, if you developed an app for the App Store, at any level of complexity, you know how exhausting the whole process is. There is so much more than “writing the code”, which is nothing trivial to start with. The App Store requirements will beat you Choosing the icons. Crafting the screenshots. Writing the metadata. Picking the categories. Localizations. The business model. In-app purchases. Sorting out the legal aspects. The App Review process. And so on. Wait, have I mentioned the codesigning process? Development, Ad-Hoc, Distribution. Multiple platforms. Debug and Release. Especially at the beginning, it’s overwhelming and discouraging. We’ve all been there. The 15-30% cut that Apple takes from your revenue is almost a marginal cost compared to all this. The fear of change Here’s a very subtle side-effect of the above: once your tedious setup finally works, you might refrain from changing. Some relatable examples: If I change the UI, I will have to change the screenshots for X languages and Y platforms. If I alter some inner logic, I will get a rejection from Apple. If I introduce a regression, I will get bad reviews. Even if I have a hotfix in time, Apple will push my release back for silly reasons. It goes without saying, this is an atrocious outcome for your product. If you work alone with no one to delegate these annoyances to, you risk falling into the ultimate recipe for failure. Stagnation is the hidden cost of expensive deployment. You MUST learn to automate The key to keeping focus on the product is automation. It’s boring at first, but in the long run, it’s your best bet against the inevitable frustration of using App Store Connect. If you find yourself doing 3+ times the same task, automate it. If a task doesn’t need constant interaction, automate it. If a task is sensitive to human mistakes, automate it. Observe your routine and you will soon realize how many hours you are wasting on dumb tasks, time you could have spent on useful features for your customers. Continuous integration is underused! After 15 years working with Apple devices, I can still confirm this trend: the vast majority of iOS developers don’t know jack about continuous integration. Which is crazy because fastlane has been around since 2014. GitHub Actions has a shorter history, but there have always been alternatives: Travis-CI, GitLab, Circle-CI, and whatnot. In the next posts, I’ll show you how I used fastlane and GitHub Actions to automate the release of Passepartout for iOS, macOS, and tvOS at once. Stay in touch.]]></summary></entry></feed>
+<p>Frontend is the face of our product, but UI is only a small part of it. Over the years, the overuse of client-side JavaScript frameworks has made frontend software less of an example of good software design. At the end of the day, though, all design principles still apply, and frontend development deserves the same care and rigor as any other layer of software development.</p>]]></content><author><name>Davide De Rosa</name></author><category term="development" /><summary type="html"><![CDATA[If you are a developer, you have heard this statement at least once. While I believe that any comparison is pointless because everything is about programming, I’d like to add some complexities often neglected in frontend development, within the context of client/server software. Take it seriously Frontend is not a toy. What I find frequent in frontend developers is the recklessness of their choices. Backend developers tend to be more conservative because they are the ones receiving that phone call at night when a service is down, but this doesn’t mean that a frontend bug couldn’t have terrible consequences. Some people claim that backend is harder than frontend because of the “more serious” problems it has to solve: Performance Scalability Robustness Concurrency For some reason, those qualities are considered less of a priority for a well-written client, but they are equally important and sometimes more important. Users may spot slow, sluggish, power-hungry, buggy apps from a distance. It’s also true that if you skip native backend software like web servers or databases, which are a big deal, most developers out there are doing simple web services. Let’s be honest: nowadays, most of the above difficulties are not dealt with at the programming level, they are delegated to long-established SaaS platforms. This is great, but only because backend developers are –in my experience– generally more aware of how things happen under the hood. Sadly, frontend frameworks lead developers in the opposite direction: they make you forget the consequences of bad programming practices. They deviate from the importance of appropriate data structures and algorithms. They convince you that modern machines can endure any load. They overcomplicate code with tons of boilerplate. They waste your time moving your focus on things that nobody cares about e.g. “is that a view or a view model?”. They make you lose the foundations of programming. The result is a far west full of cowboys writing inefficient, dangerous code, but this is not a problem of the frontend itself. Never rely on a backend Not all apps are web-oriented, and Passepartout is an example of frontend development without a backend. Or, better said, frontend development with an uncontrolled backend. What does this imply? You take direct responsibility for your software. In a world where most apps interact with external APIs, it’s appalling how often frontend developers operate in the best-case scenario where everything works as expected. I wonder how many write code that, to name a few: Expects malformed responses Expects no responses Handles timeouts Works fully offline Works headless (without views) Migrates persistent data without data loss This is your responsibility, not the external backend’s, and you do that by giving your frontend a local backend with business logic to rely on. At that point, the presence of an external backend will be of marginal importance. Domain before UI Business logic is another concept that, historically, the backend is more used to than the frontend. I believe that backend developers don’t see the immediate effect of their work until late, whereas it takes a few minutes to create a meaningful UI. The instant gratification that comes from “it works!” may indefinitely delay the key decisions to take early in software development. Presentation is the highest layer in software design, yet in frontend development, the importance of UI is constantly glorified. No surprise, non-tech people and the industry in general judge software from the UI, but frontend developers should prioritize the domain like any other non-UI developer does. Any software should make sense regardless of having a UI, or a remote API, and frontend makes no exception: UI is no more than the visual representation of a domain. I believe that this simple rule also dignifies frontend apps for making them way more meaningful than “a couple of screens”. Troubleshooting How much time do you waste interpreting users’ feedback for the lack of better options? What if you are in a real hurry to solve a frontend problem in production? Clients live in the most unpredictable environments, yet the troubleshooting of their errors is often deferred to backend monitoring. Logging, proper error handling, profiling, and tracking tools are a superpower, but as long as the backend takes care of that, the frontend couldn’t care less. Drop the backend, and troubleshooting becomes a nightmare. Along the lines of “never rely on a backend”, do your homework and invest decent time in logging at least. Make it a requirement, even more than tests. It’s tedious, it’s time-consuming, but it truly pays off when SHTF. Logging is a fundamental trait of software robustness, and it takes a lot of practice to describe what code does through human-readable text in a way that will help your future self later. No software is exempt from the need for logging. In conclusion Frontend is the face of our product, but UI is only a small part of it. Over the years, the overuse of client-side JavaScript frameworks has made frontend software less of an example of good software design. At the end of the day, though, all design principles still apply, and frontend development deserves the same care and rigor as any other layer of software development.]]></summary></entry></feed>

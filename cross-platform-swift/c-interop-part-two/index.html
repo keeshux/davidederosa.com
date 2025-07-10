@@ -1,0 +1,562 @@
+
+
+
+<!DOCTYPE html>
+<html lang="en" itemscope itemtype="http://schema.org/Blog">
+    <head>
+        
+
+
+
+
+
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+<title>Cross-platform Swift: C interop (pt. 2)</title>
+
+<meta name="author" content="Davide De Rosa" />
+<meta name="description" content="I make software. I look around me.">
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="apple-mobile-web-app-title" content="keeshux">
+
+<!-- OpenGraph -->
+
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="Cross-platform Swift: C interop (pt. 2)" />
+<meta property="og:title" content="Cross-platform Swift: C interop (pt. 2)" />
+<meta property="og:description" content="I make software. I look around me." />
+<meta property="og:image" content="https://davidederosa.com/s/f/swift/swift.png?1752142215" />
+<meta property="og:url" content="https://davidederosa.com/cross-platform-swift/c-interop-part-two/" />
+
+<!-- Twitter -->
+
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:site" content="@keeshux" />
+<meta name="twitter:title" content="Cross-platform Swift: C interop (pt. 2)" />
+<meta name="twitter:description" content="I make software. I look around me." />
+<meta name="twitter:image" content="https://davidederosa.com/s/f/swift/swift.png?1752142215" />
+<meta name="twitter:url" content="https://davidederosa.com/cross-platform-swift/c-interop-part-two/" />
+
+<link rel="canonical" href="https://davidederosa.com/cross-platform-swift/c-interop-part-two/" />
+
+
+<link rel="next" href="/cross-platform-swift/c-interop-part-one/" title="Cross-platform Swift: C interop (pt. 1)" />
+
+
+<link rel="stylesheet" href="/s/main.css?1752142215" />
+<link rel="stylesheet" href="/s/main-mobile.css?1752142215" media="only screen and (max-width: 600px)" />
+<link rel="stylesheet" href="/s/syntax.css?1752142215" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway:600,400" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha384-t1nt8BQoYMLFN5p42tRAtuAAFQaCQODekUVeKKZrEnEyp4H2R0RHFz0KWpmj7i8g" crossorigin="anonymous">
+
+<link rel="shortcut icon" href="/s/favicon.ico?1752142215" />
+<link rel="apple-touch-icon" href="/s/iphone-icon-precomposed.png?1752142215" />
+
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-DWPG2HZ9FS"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag() {
+    dataLayer.push(arguments);
+}
+gtag('js', new Date());
+gtag('config', 'G-DWPG2HZ9FS');
+</script>
+
+
+
+    </head>
+    <body>
+        <div id="container">
+            <header>
+                <nav id="menu">
+    <ul>
+        
+    </ul>
+</nav>
+
+            </header>
+            <div>
+                <header>
+                    <h1><a href="/">Davide De Rosa</a></h1>
+                </header>
+                <main>
+                    <article class="post post-full" itemscope itemtype="https://schema.org/Article">
+    <header>
+        
+<div class="post-icon">
+    <a href="/cross-platform-swift/c-interop-part-two/">
+        
+        <img src="/s/f/swift/swift-150.png" alt="Cross-platform Swift: C interop (pt. 2)" />
+        
+    </a>
+</div>
+
+
+        <div>
+            <span class="post-date" itemprop="datepublished">Jul 10, 2025</span>
+            <h2 itemprop="name">
+                
+                Cross-platform Swift: C interop (pt. 2)
+                
+            </h2>
+            
+
+
+
+
+
+
+<div class="post-list post-series-links">
+    part of a <a href="/cross-platform-swift/" title="Cross-platform Swift: Introduction">series</a>:
+    
+    <a href="/cross-platform-swift/c-interop-part-one/" title="Cross-platform Swift: C interop (pt. 1)">&lt; prev</a>
+    
+    |
+    
+    next &gt;
+    
+</div>
+
+
+
+        </div>
+    </header>
+    <div class="post-body">
+        
+
+        
+<header class="post-series-toc">
+    
+    <h3>Table of contents (ongoing)</h3>
+    
+    <ol>
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        <li>
+            
+            <a href="/cross-platform-swift/" title="Introduction">
+                
+                Introduction
+                
+            </a>
+        </li>
+        
+        
+        
+        <li>
+            
+            <a href="/cross-platform-swift/combine/" title="Combine">
+                
+                Combine
+                
+            </a>
+        </li>
+        
+        
+        
+        
+        
+        <li>
+            
+            <a href="/cross-platform-swift/core-libraries/" title="Core libraries">
+                
+                Core libraries
+                
+            </a>
+        </li>
+        
+        
+        
+        
+        
+        <li>
+            
+            <a href="/cross-platform-swift/platform-specifics/" title="Platform specifics">
+                
+                Platform specifics
+                
+            </a>
+        </li>
+        
+        
+        
+        <li>
+            
+            <a href="/cross-platform-swift/c-interop-part-one/" title="C interop (pt. 1)">
+                
+                C interop (pt. 1)
+                
+            </a>
+        </li>
+        
+        
+        
+        <li>
+            
+            <a href="/cross-platform-swift/c-interop-part-two/" title="C interop (pt. 2)">
+                
+                <strong>C interop (pt. 2)</strong>
+                
+            </a>
+        </li>
+        
+        
+    </ol>
+</header>
+
+
+        <p>While writing C in a Swift context makes no difference at all, it takes a few tricks to reduce the friction in Swift code that embeds C routines. Let’s go through them together.</p>
+
+<h2 id="the-mystique-of-swift-pointers">The mystique of Swift pointers</h2>
+
+<p>Swift has often changed the way it interacts with C entities, especially around version 3 and 4, IIRC. It has changed so much that upgrading Xcode to a new minor version would likely break some code with obscure error messages. To this day, the ambiguity around Swift pointer types still beats me.</p>
+
+<p>Have you ever noticed how many variants exist?</p>
+
+<ul>
+  <li><a href="https://developer.apple.com/documentation/swift/unsafepointer">UnsafePointer</a></li>
+  <li><a href="https://developer.apple.com/documentation/swift/unsafebufferpointer">UnsafeBufferPointer</a></li>
+  <li><a href="https://developer.apple.com/documentation/swift/unsaferawpointer">UnsafeRawPointer</a></li>
+  <li><a href="https://developer.apple.com/documentation/swift/unsaferawbufferpointer">UnsafeRawBufferPointer</a></li>
+</ul>
+
+<p>Each of them with its mutable counterpart, totalling EIGHT pointer types. Don’t be offended, Swift, but this is ridiculously complex, and I hope that someday that part of the language will be properly simplified. It’s the single thing, hands down, that makes Swift/C interop unappealing.</p>
+
+<p>Personally, I have a hard time getting them right, and find myself bruteforcing the Swift code until I get it to compile. Don’t even get me started on the <code class="language-plaintext highlighter-rouge">withUnsafeBytes()</code> variants and the horrendously deceptive compiler/LSP errors that they trigger. They are very similar to the ones you stumble upon in complex SwiftUI closures with generics, to get the idea.</p>
+
+<p>Let me show you some lovely examples:</p>
+
+<p><img src="/s/f/cross-platform-swift/c-interop-compile-01.png" alt="" /></p>
+
+<p><img src="/s/f/cross-platform-swift/c-interop-compile-02.png" alt="" /></p>
+
+<p><img src="/s/f/cross-platform-swift/c-interop-compile-03.png" alt="" /></p>
+
+<p><img src="/s/f/cross-platform-swift/c-interop-compile-04.png" alt="" /></p>
+
+<h2 id="unsafe-with-closures">Unsafe <code class="language-plaintext highlighter-rouge">with</code> closures</h2>
+
+<p>When using <code class="language-plaintext highlighter-rouge">withUnsafeBytes()</code>, <code class="language-plaintext highlighter-rouge">withCString()</code>, and other similar closures, make sure to follow these ultimate 3 rules:</p>
+
+<ul>
+  <li><strong>Never ever let the closure arguments outlive the closure</strong>.</li>
+  <li><strong>Never</strong>.</li>
+  <li><strong>Ever</strong>.</li>
+</ul>
+
+<p>Thank me later. You’re welcome.</p>
+
+<p>This is another clunky syntax of Swift. Especially if your C function requires multiple variables to be mapped to their “unsafe representation”, you may quickly end up with this beautiful accordion:</p>
+
+<div class="language-swift highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">var</span> <span class="nv">a</span> <span class="o">=</span> <span class="o">...</span>
+<span class="k">var</span> <span class="nv">b</span> <span class="o">=</span> <span class="o">...</span>
+<span class="k">var</span> <span class="nv">c</span> <span class="o">=</span> <span class="o">...</span>
+<span class="n">a</span><span class="o">.</span><span class="n">withUnsafeBytes</span> <span class="p">{</span> <span class="n">pa</span> <span class="k">in</span>
+    <span class="n">b</span><span class="o">.</span><span class="n">withUnsafeBytes</span> <span class="p">{</span> <span class="n">pb</span> <span class="k">in</span>
+        <span class="n">c</span><span class="o">.</span><span class="n">withUnsafeBytes</span> <span class="p">{</span> <span class="n">pc</span> <span class="k">in</span>
+            <span class="nf">my_demanding_c_function</span><span class="p">(</span><span class="n">pa</span><span class="p">,</span> <span class="n">pb</span><span class="p">,</span> <span class="n">pc</span><span class="p">)</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Then, disgusted by the indentation overflow, you might look for ways to make the code more linear, and naturally think of returning the pointers that the closures provide:</p>
+
+<div class="language-swift highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">let</span> <span class="nv">pa</span> <span class="o">=</span> <span class="n">a</span><span class="o">.</span><span class="n">withUnsafeBytes</span> <span class="p">{</span> <span class="nv">$0</span> <span class="p">}</span>
+<span class="k">let</span> <span class="nv">pb</span> <span class="o">=</span> <span class="n">b</span><span class="o">.</span><span class="n">withUnsafeBytes</span> <span class="p">{</span> <span class="nv">$0</span> <span class="p">}</span>
+<span class="k">let</span> <span class="nv">pc</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">withUnsafeBytes</span> <span class="p">{</span> <span class="nv">$0</span> <span class="p">}</span>
+<span class="nf">my_demanding_c_function</span><span class="p">(</span><span class="n">pa</span><span class="p">,</span> <span class="n">pb</span><span class="p">,</span> <span class="n">pc</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>Much, much cleaner, only to find out that this code will crash, sooner or later, at some point of your life. They call it <em>unpredictable behavior</em>, and I guess it’s for the same reasons why you shouldn’t return a reference to a local variable. So, remember <em>the</em> rule, and kindly accept the nested closures. Or, keep reading.</p>
+
+<h2 id="bridging-to-swift">Bridging to Swift</h2>
+
+<p>Ironically, the above constructs are enough to minimize or even discourage the use of C in Swift. The time I wasted on Swift pointers made me constantly reconsider the balance between Swift and C code %, in that exposing C pointers to Swift was so frustrating that I’d rather write the whole logic in C, and let Swift be a thin wrapper. After all, it’s the best approach because going back and forth from and to Swift/C types is very inconvenient. Why would you ever use a bare <code class="language-plaintext highlighter-rouge">memcpy()</code> or <code class="language-plaintext highlighter-rouge">strlen()</code> in Swift? There are better, native alternatives.</p>
+
+<p>The point of C interop is to perform the low-level logic in C files, and only expose in/out types that are easier to funnel to Swift for use at higher levels of abstraction, especially if you make good use of the <code class="language-plaintext highlighter-rouge">_Nullable</code> and <code class="language-plaintext highlighter-rouge">_Nonnull</code> clang qualifiers.</p>
+
+<p>All in all, Swift bridges C <code class="language-plaintext highlighter-rouge">struct</code> as if it were a Swift value type, and pointers to <code class="language-plaintext highlighter-rouge">struct</code> are naturally mapped to <code class="language-plaintext highlighter-rouge">UnsafePointer&lt;T&gt;</code> or <code class="language-plaintext highlighter-rouge">UnsafeMutablePointer&lt;T&gt;</code> according to their <code class="language-plaintext highlighter-rouge">const</code> modifier. <code class="language-plaintext highlighter-rouge">enum</code> and <code class="language-plaintext highlighter-rouge">union</code> also behave pretty much the same way.</p>
+
+<p>So, what’s the matter? Why would one need more than this? Well, because everything is cool until you hit pointers, strings, and memory management.</p>
+
+<h2 id="opaquepointer">OpaquePointer</h2>
+
+<p>Sure, a C <code class="language-plaintext highlighter-rouge">struct</code> is nicely bridged to Swift, until it has less linear (yet super common) fields like:</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
+    <span class="kt">char</span> <span class="n">str</span><span class="p">[</span><span class="mi">32</span><span class="p">];</span>
+    <span class="kt">uint16_t</span> <span class="o">*</span><span class="n">buf</span><span class="p">;</span>
+    <span class="k">const</span> <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="p">)(</span><span class="kt">char</span> <span class="o">**</span><span class="n">ptr</span><span class="p">);</span>
+    <span class="kt">int</span> <span class="o">**</span><span class="n">matrix</span><span class="p">;</span>
+<span class="p">}</span> <span class="n">my_cool_struct</span><span class="p">;</span>
+</code></pre></div></div>
+
+<p>Good luck with the bridged Swift version of this structure, and good luck to manage its memory layout properly.</p>
+
+<p>But this is when I casually discovered the magic wand, the ultimate structure for C objects in Swift: <a href="https://developer.apple.com/documentation/swift/opaquepointer">OpaquePointer</a>.</p>
+
+<p><img src="/s/f/cross-platform-swift/c-interop-opaque-pointers.jpg" alt="Courtesy of Reddit" /></p>
+
+<p>Opaque pointers are a popular way to attain OOP-like encapsulation in C. You write a <em>forward declaration</em> in a .h header, then the full definition in a .c file. By doing so, the type internals are only exposed to the .c file that needs them to implement its logic. Externally, the pointers are treated as generic I/O handles, and Swift can’t see through them because it can only bridge what it sees in the C headers, i.e. a shallow type name. For the record, Objective-C can do this with <code class="language-plaintext highlighter-rouge">@class MyType</code>.</p>
+
+<h3 id="the-benefits-of-opaquepointer">The benefits of OpaquePointer</h3>
+
+<p>For example, if we have this structure in a C header:</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// .h</span>
+<span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
+    <span class="k">const</span> <span class="n">tls_channel_options</span> <span class="o">*</span><span class="n">_Nonnull</span> <span class="n">opt</span><span class="p">;</span>
+    <span class="n">SSL_CTX</span> <span class="o">*</span><span class="n">_Nonnull</span> <span class="n">ssl_ctx</span><span class="p">;</span>
+    <span class="kt">size_t</span> <span class="n">buf_len</span><span class="p">;</span>
+    <span class="kt">uint8_t</span> <span class="o">*</span><span class="n">_Nonnull</span> <span class="n">buf_cipher</span><span class="p">;</span>
+    <span class="kt">uint8_t</span> <span class="o">*</span><span class="n">_Nonnull</span> <span class="n">buf_plain</span><span class="p">;</span>
+
+    <span class="n">SSL</span> <span class="o">*</span><span class="n">_Nonnull</span> <span class="n">ssl</span><span class="p">;</span>
+    <span class="n">BIO</span> <span class="o">*</span><span class="n">_Nonnull</span> <span class="n">bio_plain</span><span class="p">;</span>
+    <span class="n">BIO</span> <span class="o">*</span><span class="n">_Nonnull</span> <span class="n">bio_cipher_in</span><span class="p">;</span>
+    <span class="n">BIO</span> <span class="o">*</span><span class="n">_Nonnull</span> <span class="n">bio_cipher_out</span><span class="p">;</span>
+    <span class="n">bool</span> <span class="n">is_connected</span><span class="p">;</span>
+<span class="p">}</span> <span class="n">tls_channel</span><span class="p">;</span>
+</code></pre></div></div>
+
+<p>and return e.g. <code class="language-plaintext highlighter-rouge">tls_channel *</code> from a function, its type will map to <code class="language-plaintext highlighter-rouge">UnsafeMutablePointer&lt;tls_channel&gt;</code> in Swift, and we’ll be able to access its fields with <code class="language-plaintext highlighter-rouge">.pointee</code>. We don’t need or want that level of detail, those are C concerns.</p>
+
+<p>Therefore, we split the definitions across two files. The header with a forward pointer declaration:</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// .h</span>
+<span class="k">typedef</span> <span class="k">struct</span> <span class="n">tls_channel</span> <span class="o">*</span><span class="n">tls_channel_ctx</span><span class="p">;</span>
+</code></pre></div></div>
+
+<p>and the .c file, with the full definition, mind the lack of <code class="language-plaintext highlighter-rouge">typedef</code> here:</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// .c</span>
+<span class="k">struct</span> <span class="n">tls_channel</span> <span class="p">{</span>
+    <span class="k">const</span> <span class="n">tls_channel_options</span> <span class="o">*</span><span class="n">_Nonnull</span> <span class="n">opt</span><span class="p">;</span>
+    <span class="n">SSL_CTX</span> <span class="o">*</span><span class="n">_Nonnull</span> <span class="n">ssl_ctx</span><span class="p">;</span>
+    <span class="c1">// ...</span>
+<span class="p">};</span>
+</code></pre></div></div>
+
+<p>At this point, we replace <code class="language-plaintext highlighter-rouge">tls_channel *</code> with the <code class="language-plaintext highlighter-rouge">tls_channel_ctx</code> alias:</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// before</span>
+<span class="n">tls_channel</span> <span class="o">*</span><span class="nf">tls_create_func</span><span class="p">();</span>
+
+<span class="c1">// after</span>
+<span class="n">tls_channel_ctx</span> <span class="nf">tls_create_func</span><span class="p">();</span>
+</code></pre></div></div>
+
+<p>and Swift will consider the returned object to be of <code class="language-plaintext highlighter-rouge">OpaquePointer</code> type.</p>
+
+<p>Benefits:</p>
+
+<ul>
+  <li>No unsafe Swift pointers involved ever again</li>
+  <li>No unsafe <code class="language-plaintext highlighter-rouge">with</code> closures, you pass the object as is to C functions from Swift</li>
+  <li>The C layer is the only responsible of the object, and Swift cannot mess with it</li>
+</ul>
+
+<p>Granted, it’s not a one-size-fits-it-all, but for complex C objects that need to cross the Swift boundary often, opaque pointers may be a good bet.</p>
+
+<p><img src="/s/f/cross-platform-swift/c-interop-opaque-pointers-example.png" alt="Example in Swift" /></p>
+
+<h2 id="debugging">Debugging</h2>
+
+<p>Talking about the Xcode debugger, it is generally able to debug C code called from Swift without issues. Not that I pushed this to the limit, but so far I’ve only noticed two places where the debugger is unhelpful.</p>
+
+<p>For example, due to their very nature, you don’t get to see what opaque pointers point to in Swift code. However, opaque pointers encapsulate private data, so a logical deduction would be that you’d rather put your breakpoint in C files, and let Swift treat them as a black box.</p>
+
+<p>The other situation is <code class="language-plaintext highlighter-rouge">inline</code> functions, where the Xcode debugger clearly struggles to step in (with reason?).</p>
+
+<h2 id="bottom-line">Bottom line</h2>
+
+<p>Interacting with Swift pointers is painful, but we can make our lives easier with some workarounds. The friction is directly proportional to the surface we expose to Swift, so we need to hide the C internals as much as possible, and minimize the roundtrips across languages. Use opaque pointers when types become complex.</p>
+
+<p>Now that we learned a few tricks about C interop, we can go back to the SwiftPM manifest to manage multiple, alternative implementations. See you in the next article.</p>
+
+
+        
+    </div>
+    
+    
+        
+            
+        
+    
+        
+            
+        
+    
+        
+            
+        
+    
+        
+    
+        
+            
+        
+    
+        
+    
+        
+            
+        
+    
+        
+            
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+    
+
+
+
+
+
+
+
+<aside class="sharing" id="sharing-me">
+    <ul>
+        <li><a href="/feed.xml" title="Follow the blog" target="_blank"><i class="fa-solid fa-rss"></i>Subscribe</a></li>
+        <li><a href="https://linkedin.com/in/davidederosa" title="Follow me on LinkedIn" target="_blank"><i class="fab fa-linkedin"></i>LinkedIn</a></li>
+    </ul>
+</aside>
+
+    <aside class="post-related">
+        <p>See also:</p>
+        <ul>
+            
+            <li><a href="/cross-platform-swift/platform-specifics/">Cross-platform Swift: Platform specifics</a></li>
+            
+            <li><a href="/2025/05/a-true-case-for-dependency-injection/">A true case for Dependency Injection</a></li>
+            
+            <li><a href="/cross-platform-swift/core-libraries/">Cross-platform Swift: Core libraries</a></li>
+            
+        </ul>
+    </aside>
+    <div id="disqus_thread"></div>
+    <nav class="paginator">
+    <ul>
+        <li class="paginator-browser older">
+            
+            <a href="/cross-platform-swift/c-interop-part-one/" title="Cross-platform Swift: C interop (pt. 1)"><i class="fa fa-chevron-left"></i> Older</a>
+            
+        </li><li class="paginator-browser home">
+            <a href="/" class="fa fa-home"></a>
+        </li><li class="paginator-browser newer">
+            
+        </li>
+    </ul>
+</nav>
+
+</article>
+<script src="//keeshux.disqus.com/embed.js" async="async"></script>
+
+                </main>
+                <footer id="page-footer">
+                    <p id="social">
+    &copy; 2025 Davide De Rosa
+    <a href="https://github.com/keeshux" title="Browse my GitHub repository" class="fab fa-github"></a>
+    <a href="https://linkedin.com/in/davidederosa" title="Connect on LinkedIn" class="fab fa-linkedin"></a>
+    <a href="https://x.com/keeshux" title="Follow me on X" class="fab fa-x-twitter"></a>
+    <a href="/s/keeshux-gpg.txt" title="My GnuPG public key" class="fa fa-lock"></a>
+    <a href="/feed.xml" title="Follow the blog" class="fa-solid fa-rss"></a>
+</ul>
+
+                </footer>
+            </div>
+        </div>
+        <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    </body>
+</html>
