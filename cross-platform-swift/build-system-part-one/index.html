@@ -26,7 +26,7 @@
 <meta property="og:site_name" content="Cross-platform Swift: Build system (pt. 1)" />
 <meta property="og:title" content="Cross-platform Swift: Build system (pt. 1)" />
 <meta property="og:description" content="I make software. I look around me." />
-<meta property="og:image" content="https://davidederosa.com/s/f/swift/swift.png?1757294663" />
+<meta property="og:image" content="https://davidederosa.com/s/f/swift/swift.png?1757295772" />
 <meta property="og:url" content="https://davidederosa.com/cross-platform-swift/build-system-part-one/" />
 
 <!-- Twitter -->
@@ -35,7 +35,7 @@
 <meta name="twitter:site" content="@keeshux" />
 <meta name="twitter:title" content="Cross-platform Swift: Build system (pt. 1)" />
 <meta name="twitter:description" content="I make software. I look around me." />
-<meta name="twitter:image" content="https://davidederosa.com/s/f/swift/swift.png?1757294663" />
+<meta name="twitter:image" content="https://davidederosa.com/s/f/swift/swift.png?1757295772" />
 <meta name="twitter:url" content="https://davidederosa.com/cross-platform-swift/build-system-part-one/" />
 
 <link rel="canonical" href="https://davidederosa.com/cross-platform-swift/build-system-part-one/" />
@@ -44,14 +44,14 @@
 <link rel="next" href="/2025/08/the-role-of-ai-in-losing-care-for-our-products/" title="The role of AI in losing care for our products" />
 
 
-<link rel="stylesheet" href="/s/main.css?1757294663" />
-<link rel="stylesheet" href="/s/main-mobile.css?1757294663" media="only screen and (max-width: 600px)" />
-<link rel="stylesheet" href="/s/syntax.css?1757294663" />
+<link rel="stylesheet" href="/s/main.css?1757295772" />
+<link rel="stylesheet" href="/s/main-mobile.css?1757295772" media="only screen and (max-width: 600px)" />
+<link rel="stylesheet" href="/s/syntax.css?1757295772" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway:600,400" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha384-t1nt8BQoYMLFN5p42tRAtuAAFQaCQODekUVeKKZrEnEyp4H2R0RHFz0KWpmj7i8g" crossorigin="anonymous">
 
-<link rel="shortcut icon" href="/s/favicon.ico?1757294663" />
-<link rel="apple-touch-icon" href="/s/iphone-icon-precomposed.png?1757294663" />
+<link rel="shortcut icon" href="/s/favicon.ico?1757295772" />
+<link rel="apple-touch-icon" href="/s/iphone-icon-precomposed.png?1757295772" />
 
 
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-DWPG2HZ9FS"></script>
@@ -268,11 +268,11 @@ gtag('config', 'G-DWPG2HZ9FS');
 
 <h2 id="swiftpm-is-just-not-ready">SwiftPM is just not ready</h2>
 
-<p>This post risks having a negative vibe, so I want to discuss solutions before problems. The first advice I can give if you want to build consistently across platforms is to <strong>avoid SwiftPM</strong>, it’s just not fit for the role. XCFrameworks only work on Apple, and binary artifact bundles haven’t been released yet. If you need something that works <em>today</em>, get familiar with <code class="language-plaintext highlighter-rouge">swiftc</code> and <code class="language-plaintext highlighter-rouge">clang</code>, and switch to <strong>CMake with ninja</strong>. With CMake in place, Swift gains back the freedom and power it deserves. You take full control of what’s going on, and this will help you understand and fix the build issues that you’re bound to encounter.</p>
+<p>This post risks having a negative vibe, so I want to discuss solutions before problems. The first advice I can give if you want to build consistently across platforms is to <strong>avoid SwiftPM</strong>, it’s just not fit for the role yet. XCFrameworks only work on Apple, and binary artifact bundles are on their way, but haven’t been released yet. If you need something that works <em>today</em>, get familiar with <code class="language-plaintext highlighter-rouge">swiftc</code> and <code class="language-plaintext highlighter-rouge">clang</code>, and switch to <strong>CMake with ninja</strong>. With CMake in place, Swift gains back the freedom and power it deserves. You take full control of what’s going on, and this will help you understand and fix the build issues that you’re bound to encounter.</p>
 
-<p>At this point, you may come to realize how SwiftPM risks complicating your source hierarchy. The highly granular dependency model encouraged by the manifest is a neat abstraction, and works very well for modular Swift-only systems. But when you have to account for C/C++ targets, modulemaps, DocC, and external non-Swift libraries, it makes you want to jump off the nearest cliff without even a goodbye letter. In that case, getting rid of SwiftPM and making your source hierarchy flat and monolithic will make your life much easier with CMake. Two targets: one for Swift files, and one for C/C++ with a single modulemap.</p>
+<p>At this point, you may come to realize how SwiftPM could lead you to a complex source hierarchy. The highly granular dependency model encouraged by the manifest is a neat abstraction, and works very well for modular Swift-only systems. But when you have to account for C/C++ targets, modulemaps, DocC, and external non-Swift libraries, it makes you want to jump off the nearest cliff without even a goodbye letter. In that case, making your source hierarchy flat and monolithic will make your life much easier. Two targets: one for Swift files, and one for C/C++ with a single modulemap.</p>
 
-<p>Unfortunately, there’s one thing you might want SwiftPM for: the <a href="https://github.com/swiftlang/swift-sdk-generator">Swift SDKs</a>. For what it’s worth, I use a <a href="https://github.com/finagolfin/swift-android-sdk">Swift SDK for my Android builds</a>, and I have no idea if there’s a place for it in a CMake build, but I highly doubt it. Nevertheless, given that Passepartout –and other consumers– still need Partout as a SwiftPM dependency, I’m okay with keeping both the Package.swift and CMake around for some time.</p>
+<p>Unfortunately, there’s one thing you might want SwiftPM for: the <a href="https://github.com/swiftlang/swift-sdk-generator">Swift SDKs</a>. For what it’s worth, I use a <a href="https://github.com/finagolfin/swift-android-sdk">Swift SDK for my Android builds</a>, and I have no idea if there’s a place for it in a CMake build, but I kind of doubt it. Nevertheless, given that Passepartout –and other consumers– still need Partout as a SwiftPM dependency, I’m okay with keeping both the Package.swift and CMake around for some time.</p>
 
 <h2 id="the-swift-runtime">The Swift runtime</h2>
 
@@ -293,9 +293,9 @@ gtag('config', 'G-DWPG2HZ9FS');
 
 <p>Let’s pick Linux, for example, which on a typical modern desktop may come in arm64 or x86_64 flavors. Not only does this imply two runtimes to deal with for distributing our binaries, the Swift runtime is also split into <em>dozens</em> of files. If we close an eye on the footprint, this is still annoying, but less of a problem on platforms where the executable model is self-contained (iOS, macOS, Android, …). You could distribute a self-contained folder/installer on Linux, but it always feels off on a system where libraries are typically shared in <code class="language-plaintext highlighter-rouge">/usr/lib</code> for everybody.</p>
 
-<p>Installing the Swift runtime with a package manager sounds like a smoother solution, and saves us from the burden of manually bundling and maintaining the binaries for each architecture. To my knowledge, <a href="https://launchpad.net/ubuntu/+source/swiftlang">apt has a libswiftlang package</a>. I don’t know how maintained it is, because the apt package is at 6.0.3 with the latest toolchain being at 6.1.2. Not a 100% healthy sign, but not worrying either.</p>
+<p>Installing the Swift runtime with a package manager seems like a smoother solution, and saves us from the burden of manually bundling and maintaining the binaries for each architecture. To my knowledge, <a href="https://launchpad.net/ubuntu/+source/swiftlang">apt has a libswiftlang package</a>. I don’t know how maintained it is, because the apt package is at 6.0.3 with the latest toolchain being at 6.1.2. Not a 100% healthy sign, but not worrying either.</p>
 
-<p>Still, this introduces a dependency, and forces you to either distribute your executable through a package manager, or include manual steps in order to fetch the proper Swift runtime, for the proper platform, and for the proper architecture. In that regard, I find it very frustrating that <a href="https://swift.org">swift.org</a> doesn’t offer direct links to download runtime-only installers, like Java used to do with the Java Runtime Environment (JRE).</p>
+<p>Still, this introduces a dependency, and forces you to either distribute your executable through a package manager, or include manual steps in order to fetch the proper Swift runtime, for the proper platform, and for the proper architecture. In that regard, I don’t like that <a href="https://swift.org">swift.org</a> doesn’t offer direct links to download runtime-only installers, like Java used to do with the Java Runtime Environment (JRE).</p>
 
 <p>A more convenient solution for Linux was <a href="https://forums.swift.org/t/static-linking-on-linux-in-swift-5-3-1/41989">introduced in Swift 5.3.1 with static linking</a> in an attempt to match the self-contained approach of Golang, which is the state of the art for native multiplatform applications. Static linking to the stdlib is not as straightforward as running <code class="language-plaintext highlighter-rouge">go build</code>, but still.</p>
 
@@ -306,6 +306,8 @@ gtag('config', 'G-DWPG2HZ9FS');
 <p>The weight of Windows and Android is on the shoulders of a few kind individuals, whose progress can be followed on the official Swift forums. For example, hard work is being done to bring <a href="https://forums.swift.org/t/upcoming-changes-to-windows-swift-sdks/81313">static linking on Windows</a> as of Swift 6.2 (unreleased yet), and a few months ago, <a href="https://forums.swift.org/t/announcing-the-android-workgroup/80666">an Android workgroup was made official</a>. Until then, Android development was mostly pushed by volunteers.</p>
 
 <p>I’m all about supporting the maintainers of these exciting initiatives, and that’s why I took this winding path to experiment myself, but if you need something that works <em>right away</em> for building production software in Swift, you’d better assume that you’re on your own. There’s still work to be done to make the experience acceptable for the public domain, and Android builds in particular take <em>a lot</em> of manual steps, or way more than a lot.</p>
+
+<p>At the end of the day, it depends on your goals. Personally, I was thrilled when I made Partout connect to a VPN on Android, with Linux syscalls over a Swift codebase. That chill of “could this even work?”, because nobody had done it before. You hardly get that feeling with battle-tested languages, and if you like novelties, Swift is a greenfield that I would encourage to explore and support.</p>
 
 <h2 id="the-footprint-is-huge-by-default">The footprint is huge by default</h2>
 
