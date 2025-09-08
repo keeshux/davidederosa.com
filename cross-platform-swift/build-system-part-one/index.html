@@ -1,0 +1,466 @@
+
+
+
+<!DOCTYPE html>
+<html lang="en" itemscope itemtype="http://schema.org/Blog">
+    <head>
+        
+
+
+
+
+
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+<title>Cross-platform Swift: Build system (pt. 1)</title>
+
+<meta name="author" content="Davide De Rosa" />
+<meta name="description" content="I make software. I look around me.">
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="apple-mobile-web-app-title" content="keeshux">
+
+<!-- OpenGraph -->
+
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="Cross-platform Swift: Build system (pt. 1)" />
+<meta property="og:title" content="Cross-platform Swift: Build system (pt. 1)" />
+<meta property="og:description" content="I make software. I look around me." />
+<meta property="og:image" content="https://davidederosa.com/s/f/swift/swift.png?1757294009" />
+<meta property="og:url" content="https://davidederosa.com/cross-platform-swift/build-system-part-one/" />
+
+<!-- Twitter -->
+
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:site" content="@keeshux" />
+<meta name="twitter:title" content="Cross-platform Swift: Build system (pt. 1)" />
+<meta name="twitter:description" content="I make software. I look around me." />
+<meta name="twitter:image" content="https://davidederosa.com/s/f/swift/swift.png?1757294009" />
+<meta name="twitter:url" content="https://davidederosa.com/cross-platform-swift/build-system-part-one/" />
+
+<link rel="canonical" href="https://davidederosa.com/cross-platform-swift/build-system-part-one/" />
+
+
+<link rel="next" href="/2025/08/the-role-of-ai-in-losing-care-for-our-products/" title="The role of AI in losing care for our products" />
+
+
+<link rel="stylesheet" href="/s/main.css?1757294009" />
+<link rel="stylesheet" href="/s/main-mobile.css?1757294009" media="only screen and (max-width: 600px)" />
+<link rel="stylesheet" href="/s/syntax.css?1757294009" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway:600,400" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha384-t1nt8BQoYMLFN5p42tRAtuAAFQaCQODekUVeKKZrEnEyp4H2R0RHFz0KWpmj7i8g" crossorigin="anonymous">
+
+<link rel="shortcut icon" href="/s/favicon.ico?1757294009" />
+<link rel="apple-touch-icon" href="/s/iphone-icon-precomposed.png?1757294009" />
+
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-DWPG2HZ9FS"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag() {
+    dataLayer.push(arguments);
+}
+gtag('js', new Date());
+gtag('config', 'G-DWPG2HZ9FS');
+</script>
+
+
+
+    </head>
+    <body>
+        <div id="container">
+            <header>
+                <nav id="menu">
+    <ul>
+        
+    </ul>
+</nav>
+
+            </header>
+            <div>
+                <header>
+                    <h1><a href="/">Davide De Rosa</a></h1>
+                </header>
+                <main>
+                    <article class="post post-full" itemscope itemtype="https://schema.org/Article">
+    <header>
+        
+<div class="post-icon">
+    <a href="/cross-platform-swift/build-system-part-one/">
+        
+        <img src="/s/f/swift/swift-150.png" alt="Cross-platform Swift: Build system (pt. 1)" />
+        
+    </a>
+</div>
+
+
+        <div>
+            <span class="post-date" itemprop="datepublished">Sep 7, 2025</span>
+            <h2 itemprop="name">
+                
+                Cross-platform Swift: Build system (pt. 1)
+                
+            </h2>
+            
+
+
+
+
+
+
+<div class="post-list post-series-links">
+    part of a <a href="/cross-platform-swift/" title="Cross-platform Swift: Introduction">series</a>:
+    
+    <a href="/cross-platform-swift/c-interop-part-two/" title="Cross-platform Swift: C interop (pt. 2)">&lt; prev</a>
+    
+    |
+    
+    next &gt;
+    
+</div>
+
+
+
+        </div>
+    </header>
+    <div class="post-body">
+        
+
+        
+<header class="post-series-toc">
+    
+    <h3>Table of contents (ongoing)</h3>
+    
+    <ol>
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        <li>
+            
+            <a href="/cross-platform-swift/" title="Introduction">
+                
+                Introduction
+                
+            </a>
+        </li>
+        
+        
+        
+        <li>
+            
+            <a href="/cross-platform-swift/combine/" title="Combine">
+                
+                Combine
+                
+            </a>
+        </li>
+        
+        
+        
+        
+        
+        <li>
+            
+            <a href="/cross-platform-swift/core-libraries/" title="Core libraries">
+                
+                Core libraries
+                
+            </a>
+        </li>
+        
+        
+        
+        
+        
+        <li>
+            
+            <a href="/cross-platform-swift/platform-specifics/" title="Platform specifics">
+                
+                Platform specifics
+                
+            </a>
+        </li>
+        
+        
+        
+        <li>
+            
+            <a href="/cross-platform-swift/c-interop-part-one/" title="C interop (pt. 1)">
+                
+                C interop (pt. 1)
+                
+            </a>
+        </li>
+        
+        
+        
+        <li>
+            
+            <a href="/cross-platform-swift/c-interop-part-two/" title="C interop (pt. 2)">
+                
+                C interop (pt. 2)
+                
+            </a>
+        </li>
+        
+        
+        
+        
+        
+        <li>
+            
+            <a href="/cross-platform-swift/build-system-part-one/" title="Build system (pt. 1)">
+                
+                <strong>Build system (pt. 1)</strong>
+                
+            </a>
+        </li>
+        
+        
+    </ol>
+</header>
+
+
+        <p>There is a reason why it took me two months since the last post, and ironically it’s the very subject of this writing. I hate to say, but the build tools are the most painful and work-in-progress aspect of Swift, at least at the time of writing. Brace yourself.</p>
+
+<h2 id="swiftpm-is-just-not-ready">SwiftPM is just not ready</h2>
+
+<p>This post risks having a negative vibe, so I want to discuss solutions before problems. The first advice I can give if you want to build consistently across platforms is to <strong>avoid SwiftPM</strong>, it’s just not fit for the role. XCFrameworks only work on Apple, and binary artifact bundles haven’t been released yet. If you need something that works <em>today</em>, get familiar with <code class="language-plaintext highlighter-rouge">swiftc</code> and <code class="language-plaintext highlighter-rouge">clang</code>, and switch to <strong>CMake with ninja</strong>. With CMake in place, Swift gains back the freedom and power it deserves. You take full control of what’s going on, and this will help you understand and fix the build issues that you’re bound to encounter.</p>
+
+<p>At this point, you may come to realize how SwiftPM risks complicating your source hierarchy. The highly granular dependency model encouraged by the manifest is a neat abstraction, and works very well for modular Swift-only systems. But when you have to account for C/C++ targets, modulemaps, DocC, and external non-Swift libraries, it makes you want to jump off the nearest cliff without even a goodbye letter. In that case, getting rid of SwiftPM and making your source hierarchy flat and monolithic will make your life much easier with CMake. Two targets: one for Swift files, and one for C/C++ with a single modulemap.</p>
+
+<p>Unfortunately, there’s one thing you might want SwiftPM for: the <a href="https://github.com/swiftlang/swift-sdk-generator">Swift SDKs</a>. For what it’s worth, I use a <a href="https://github.com/finagolfin/swift-android-sdk">Swift SDK for my Android builds</a>, and I have no idea if there’s a place for it in a CMake build, but I highly doubt it. Nevertheless, given that Passepartout –and other consumers– still need Partout as a SwiftPM dependency, I’m okay with keeping both the Package.swift and CMake around for some time.</p>
+
+<h2 id="the-swift-runtime">The Swift runtime</h2>
+
+<p>There are two common ways to compile Swift files:</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">swiftc</code></li>
+  <li><code class="language-plaintext highlighter-rouge">swift build</code> (Swift Package Manager)</li>
+</ul>
+
+<p>The majority of Swift programmers, hardly use or tweak <code class="language-plaintext highlighter-rouge">swiftc</code> directly, which is similar to how one would use the <code class="language-plaintext highlighter-rouge">clang</code> or <code class="language-plaintext highlighter-rouge">gcc</code> C/C++ compilers. Over the years, the Xcode integration and the fast turnaround of SwiftPM execution from the command line made <code class="language-plaintext highlighter-rouge">swift build</code> the natural way to compile and link Swift projects, both standalone and inside Xcode.</p>
+
+<p>This is all great, until it’s not. The lack of insight into what SwiftPM exactly does may be very problematic when we face a compiler or linker issue. However, pure Swift projects hardly hit major build issues, so don’t be surprised if the average iOS programmer doesn’t know how a Swift executable is generated or what it needs to run on a machine, because Apple devices come with the <strong>Swift runtime</strong> preinstalled.</p>
+
+<p>The language “runtime” is a set of libraries that an executable requires to run on a specific architecture. Let me explain why I find this a serious blocker for Swift adoption.</p>
+
+<h2 id="binary-distribution-is-impractical">Binary distribution is impractical</h2>
+
+<p>Let’s pick Linux, for example, which on a typical modern desktop may come in arm64 or x86_64 flavors. Not only does this imply two runtimes to deal with for distributing our binaries, the Swift runtime is also split into <em>dozens</em> of files. If we close an eye on the footprint, this is still annoying, but less of a problem on platforms where the executable model is self-contained (iOS, macOS, Android, …). You could distribute a self-contained folder/installer on Linux, but it always feels off on a system where libraries are typically shared in <code class="language-plaintext highlighter-rouge">/usr/lib</code> for everybody.</p>
+
+<p>Installing the Swift runtime with a package manager sounds like a smoother solution, and saves us from the burden of manually bundling and maintaining the binaries for each architecture. To my knowledge, <a href="https://launchpad.net/ubuntu/+source/swiftlang">apt has a libswiftlang package</a>. I don’t know how maintained it is, because the apt package is at 6.0.3 with the latest toolchain being at 6.1.2. Not a 100% healthy sign, but not worrying either.</p>
+
+<p>Still, this introduces a dependency, and forces you to either distribute your executable through a package manager, or include manual steps in order to fetch the proper Swift runtime, for the proper platform, and for the proper architecture. In that regard, I find it very frustrating that <a href="https://swift.org">swift.org</a> doesn’t offer direct links to download runtime-only installers, like Java used to do with the Java Runtime Environment (JRE).</p>
+
+<p>A more convenient solution for Linux was <a href="https://forums.swift.org/t/static-linking-on-linux-in-swift-5-3-1/41989">introduced in Swift 5.3.1 with static linking</a> in an attempt to match the self-contained approach of Golang, which is the state of the art for native multiplatform applications. Static linking to the stdlib is not as straightforward as running <code class="language-plaintext highlighter-rouge">go build</code>, but still.</p>
+
+<h2 id="the-loneliness-of-the-other-platforms">The loneliness of the other platforms</h2>
+
+<p>All things considered, the friction remains <em>very</em> real. Now, if this already sounds complicated, what if I told you that Linux is the <em>best</em> supported platform after Apple’s?</p>
+
+<p>The weight of Windows and Android is on the shoulders of a few kind individuals, whose progress can be followed on the official Swift forums. For example, hard work is being done to bring <a href="https://forums.swift.org/t/upcoming-changes-to-windows-swift-sdks/81313">static linking on Windows</a> as of Swift 6.2 (unreleased yet), and a few months ago, <a href="https://forums.swift.org/t/announcing-the-android-workgroup/80666">an Android workgroup was made official</a>. Until then, Android development was mostly pushed by volunteers.</p>
+
+<p>I’m all about supporting the maintainers of these exciting initiatives, and that’s why I took this winding path to experiment myself, but if you need something that works <em>right away</em> for building production software in Swift, you’d better assume that you’re on your own. There’s still work to be done to make the experience acceptable for the public domain, and Android builds in particular take <em>a lot</em> of manual steps, or way more than a lot.</p>
+
+<h2 id="the-footprint-is-huge-by-default">The footprint is huge by default</h2>
+
+<p>In a former article, I mentioned that <a href="/cross-platform-swift/core-libraries/">Foundation is not part of the standard library</a>, as in it’s not part of the essential runtime (libSwiftCore). In terms of size, the core runtime is not excessively concerning at around 10-15MB total. In fact, I’m way more annoyed by the fact that it’s made of tens of files. Well, add Foundation to the mix, and your runtime spikes to almost 100MB, with ICU contributing to around 40MB of it. And Foundation is a hard depedency to avoid. Frankly, that’s <em>insane</em>, but I still want to believe that this is the kind legacy from the Apple era of Swift. Let’s not forget that Foundation is bundled with any Apple OS.</p>
+
+<p>My advice? If you’re starting from scratch, and footprint is a concern, never import Foundation, or maybe <strong>do not even use Swift</strong>, literally. Sorry Swift, but Go is mature, easy to build, ubiquitous. If you want to port your existing Swift app or library to non-Apple, instead, consider dropping Foundation and reimplementing the parts that you need. With careful analysis, you might conclude that, despite its convenience, you don’t need it to the point of justifying a 100MB executable.</p>
+
+<h2 id="bottom-line">Bottom line</h2>
+
+<p>So, it’s 2025 and you want to make native cross-platform apps or libraries. Hard truth: if you want to make them <em>today</em>, Go is a wiser choice. If you want to use Swift, for now, prefer CMake over SwiftPM. Get your feet wet with the raw tooling to understand how Swift libraries are generated. Don’t be like me, keep a flat source hierarchy from the beginning.</p>
+
+<p>In the next article, we’ll go through real examples of how I managed to build consistent outputs with SwiftPM/CMake on macOS, Linux, Windows, and even Android.</p>
+
+
+        
+    </div>
+    
+    
+        
+            
+        
+    
+        
+    
+        
+            
+        
+    
+        
+            
+        
+    
+        
+            
+        
+    
+        
+    
+        
+            
+        
+    
+        
+    
+        
+            
+        
+    
+        
+            
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+    
+
+
+
+
+
+
+
+<aside class="sharing" id="sharing-me">
+    <ul>
+        <li><a href="/feed.xml" title="Follow the blog" target="_blank"><i class="fa-solid fa-rss"></i>Subscribe</a></li>
+        <li>Follow me <a href="https://x.com/keeshux" title="Follow me on X" target="_blank">on X</a> and <a href="https://github.com/keeshux" title="Follow me on GitHub" target="_blank">GitHub</a></li>
+    </ul>
+</aside>
+
+    <aside class="post-related">
+        <p>See also:</p>
+        <ul>
+            
+            <li><a href="/cross-platform-swift/c-interop-part-two/">Cross-platform Swift: C interop (pt. 2)</a></li>
+            
+            <li><a href="/cross-platform-swift/c-interop-part-one/">Cross-platform Swift: C interop (pt. 1)</a></li>
+            
+            <li><a href="/cross-platform-swift/platform-specifics/">Cross-platform Swift: Platform specifics</a></li>
+            
+        </ul>
+    </aside>
+    <div id="disqus_thread"></div>
+    <nav class="paginator">
+    <ul>
+        <li class="paginator-browser older">
+            
+            <a href="/2025/08/the-role-of-ai-in-losing-care-for-our-products/" title="The role of AI in losing care for our products"><i class="fa fa-chevron-left"></i> Older</a>
+            
+        </li><li class="paginator-browser home">
+            <a href="/" class="fa fa-home"></a>
+        </li><li class="paginator-browser newer">
+            
+        </li>
+    </ul>
+</nav>
+
+</article>
+<script src="//keeshux.disqus.com/embed.js" async="async"></script>
+
+                </main>
+                <footer id="page-footer">
+                    <p id="social">
+    &copy; 2025 Davide De Rosa
+    <a href="https://github.com/keeshux" title="Browse my GitHub repository" class="fab fa-github"></a>
+    <a href="https://linkedin.com/in/davidederosa" title="Connect on LinkedIn" class="fab fa-linkedin"></a>
+    <a href="https://x.com/keeshux" title="Follow me on X" class="fab fa-x-twitter"></a>
+    <a href="/s/keeshux-gpg.txt" title="My GnuPG public key" class="fa fa-lock"></a>
+    <a href="/feed.xml" title="Follow the blog" class="fa-solid fa-rss"></a>
+</ul>
+
+                </footer>
+            </div>
+        </div>
+        <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    </body>
+</html>
