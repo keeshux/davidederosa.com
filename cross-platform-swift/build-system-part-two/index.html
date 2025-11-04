@@ -1,0 +1,557 @@
+
+
+
+<!DOCTYPE html>
+<html lang="en" itemscope itemtype="http://schema.org/Blog">
+    <head>
+        
+
+
+
+
+
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+<title>Cross-platform Swift: Build system (pt. 2)</title>
+
+<meta name="author" content="Davide De Rosa" />
+<meta name="description" content="I make software. I look around me.">
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="apple-mobile-web-app-title" content="keeshux">
+
+<!-- OpenGraph -->
+
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="Cross-platform Swift: Build system (pt. 2)" />
+<meta property="og:title" content="Cross-platform Swift: Build system (pt. 2)" />
+<meta property="og:description" content="I make software. I look around me." />
+<meta property="og:image" content="https://davidederosa.com/s/f/swift/swift.png?1762291750" />
+<meta property="og:url" content="https://davidederosa.com/cross-platform-swift/build-system-part-two/" />
+
+<!-- Twitter -->
+
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:site" content="@keeshux" />
+<meta name="twitter:title" content="Cross-platform Swift: Build system (pt. 2)" />
+<meta name="twitter:description" content="I make software. I look around me." />
+<meta name="twitter:image" content="https://davidederosa.com/s/f/swift/swift.png?1762291750" />
+<meta name="twitter:url" content="https://davidederosa.com/cross-platform-swift/build-system-part-two/" />
+
+<link rel="canonical" href="https://davidederosa.com/cross-platform-swift/build-system-part-two/" />
+
+
+<link rel="next" href="/cross-platform-swift/build-system-part-one/" title="Cross-platform Swift: Build system (pt. 1)" />
+
+
+<link rel="stylesheet" href="/s/main.css?1762291750" />
+<link rel="stylesheet" href="/s/main-mobile.css?1762291750" media="only screen and (max-width: 600px)" />
+<link rel="stylesheet" href="/s/syntax.css?1762291750" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway:600,400" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha384-t1nt8BQoYMLFN5p42tRAtuAAFQaCQODekUVeKKZrEnEyp4H2R0RHFz0KWpmj7i8g" crossorigin="anonymous">
+
+<link rel="shortcut icon" href="/s/favicon.ico?1762291750" />
+<link rel="apple-touch-icon" href="/s/iphone-icon-precomposed.png?1762291750" />
+
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-DWPG2HZ9FS"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag() {
+    dataLayer.push(arguments);
+}
+gtag('js', new Date());
+gtag('config', 'G-DWPG2HZ9FS');
+</script>
+
+
+
+    </head>
+    <body>
+        <div id="container">
+            <header>
+                <nav id="menu">
+    <ul>
+        
+    </ul>
+</nav>
+
+            </header>
+            <div>
+                <header>
+                    <h1><a href="/">Davide De Rosa</a></h1>
+                </header>
+                <main>
+                    <article class="post post-full" itemscope itemtype="https://schema.org/Article">
+    <header>
+        
+<div class="post-icon">
+    <a href="/cross-platform-swift/build-system-part-two/">
+        
+        <img src="/s/f/swift/swift-150.png" alt="Cross-platform Swift: Build system (pt. 2)" />
+        
+    </a>
+</div>
+
+
+        <div>
+            <span class="post-date" itemprop="datepublished">Nov 4, 2025</span>
+            <h2 itemprop="name">
+                
+                Cross-platform Swift: Build system (pt. 2)
+                
+            </h2>
+            
+
+
+
+
+
+
+<div class="post-list post-series-links">
+    part of a <a href="/cross-platform-swift/" title="Cross-platform Swift: Introduction">series</a>:
+    
+    <a href="/cross-platform-swift/build-system-part-one/" title="Cross-platform Swift: Build system (pt. 1)">&lt; prev</a>
+    
+    |
+    
+    next &gt;
+    
+</div>
+
+
+
+        </div>
+    </header>
+    <div class="post-body">
+        
+
+        
+<header class="post-series-toc">
+    
+    <h3>Table of contents (ongoing)</h3>
+    
+    <ol>
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        <li>
+            
+            <a href="/cross-platform-swift/" title="Introduction">
+                
+                Introduction
+                
+            </a>
+        </li>
+        
+        
+        
+        <li>
+            
+            <a href="/cross-platform-swift/combine/" title="Combine">
+                
+                Combine
+                
+            </a>
+        </li>
+        
+        
+        
+        
+        
+        <li>
+            
+            <a href="/cross-platform-swift/core-libraries/" title="Core libraries">
+                
+                Core libraries
+                
+            </a>
+        </li>
+        
+        
+        
+        
+        
+        <li>
+            
+            <a href="/cross-platform-swift/platform-specifics/" title="Platform specifics">
+                
+                Platform specifics
+                
+            </a>
+        </li>
+        
+        
+        
+        <li>
+            
+            <a href="/cross-platform-swift/c-interop-part-one/" title="C interop (pt. 1)">
+                
+                C interop (pt. 1)
+                
+            </a>
+        </li>
+        
+        
+        
+        <li>
+            
+            <a href="/cross-platform-swift/c-interop-part-two/" title="C interop (pt. 2)">
+                
+                C interop (pt. 2)
+                
+            </a>
+        </li>
+        
+        
+        
+        
+        
+        <li>
+            
+            <a href="/cross-platform-swift/build-system-part-one/" title="Build system (pt. 1)">
+                
+                Build system (pt. 1)
+                
+            </a>
+        </li>
+        
+        
+        
+        <li>
+            
+            <a href="/cross-platform-swift/build-system-part-two/" title="Build system (pt. 2)">
+                
+                <strong>Build system (pt. 2)</strong>
+                
+            </a>
+        </li>
+        
+        
+    </ol>
+</header>
+
+
+        <h2 id="our-goals">Our goals</h2>
+
+<p>Before heading back to the <a href="https://github.com/partout-io/partout">Partout</a> code, let’s focus on our ultimate goals:</p>
+
+<ol>
+  <li>Build as Swift module on Apple platforms</li>
+  <li>Build as dynamic library on other platforms (.so on Linux/Android, .dll on Windows)</li>
+</ol>
+
+<p>Adding that:</p>
+
+<ul>
+  <li>Step 1 is natural with SwiftPM, except for how to manage dependencies</li>
+  <li>Step 2 involves OpenSSL (C), WireGuard (Go), and Wintun (Windows DLL) at the time of writing, plus the proper Swift runtime for the OS</li>
+</ul>
+
+<h2 id="step-1-building-with-swiftpm">Step 1: Building with SwiftPM</h2>
+
+<p>We know that SwiftPM can handle Swift, C, C++, and ObjC (Apple only) sources with the help of module maps. How do we include dependencies that don’t use neither of these languages, or depend on a custom build system? We bundle them as <em>binary libraries</em>.</p>
+
+<p>We need to take a short break and spot a major annoyance of this: contrary to source files, binary libraries are tied to a CPU architecture. That’s why <a href="https://developer.apple.com/documentation/xcode/distributing-binary-frameworks-as-swift-packages">XCFramework</a> was introduced, because it’s the best way to bundle binary libraries for multiple architectures. With a XCFramework, SwiftPM will pick the right binaries for the target architecture. This is exactly how I integrated OpenSSL and WireGuard into Partout, with the <a href="https://github.com/partout-io/openssl-apple">openssl-apple</a> and <a href="https://github.com/partout-io/wg-go-apple">wg-go-apple</a> repositories respectively.</p>
+
+<p>One may argue that OpenSSL, for example, is written in C and SwiftPM supports C, but a build system may go miles further than a programming language. Building OpenSSL is a <em>very</em> complex task, and distributing prebuilt binaries is a standard way to decouple from such complexity. In exchange, we accept the complexity of handling multiple architectures with an XCFramework.</p>
+
+<p>The problem with XCFrameworks, though, is that they do not work on non-Apple platforms. <strong>Artifact bundles</strong> will solve this limitation, unless Swift 6.2 has already introduced them (I remember this was half-done in July 2025).</p>
+
+<h2 id="step-2-building-with-cmake">Step 2: Building with CMake</h2>
+
+<p>Needless to say, SwiftPM is not mature enough on non-Apple. In order to have consistent builds of Swift code with binary dependencies, we’ll have resort to one of the least loved build tools around: <a href="https://cmake.org/">CMake</a>.</p>
+
+<p>You know the say “love and hate”. Well, the thought of CMake generally leans towards “hate and hate”, because I haven’t heard a single developer that enjoys using it. In all fairness, the low popularity of CMake might stem from being the typical build system of C++ projects. I mean, there could be a bias, but we don’t care here, because CMake is somewhat the <em>only</em> way to accomplish what we need.</p>
+
+<h3 id="why-cmake">Why CMake?</h3>
+
+<p>CMake is not a replacement for Make, it’s rather a “generator of makefiles”, with a makefile being not necessarily the <code class="language-plaintext highlighter-rouge">Makefile</code> file, but the configuration file of a <em>build system</em>. The main feature of CMake is the ability of coordinating multiple projects written in different languages and/or built with different build systems. Since we are assembling a Frankenstein project made of Swift, C (OpenSSL), Go (WireGuard), and other prebuilt binary libraries (Wintun), CMake comes to our rescue.</p>
+
+<p>For the record, CMake supports Swift code only through the <a href="https://ninja-build.org/"><code class="language-plaintext highlighter-rouge">ninja</code></a> generator.</p>
+
+<h3 id="the-layout-of-our-superproject">The layout of our <em>superproject</em></h3>
+
+<p>The first, comprehensive approach is to build our Swift library entirely with CMake. This is the most solid approach.</p>
+
+<p>Partout is built in four steps:</p>
+
+<ol>
+  <li>The vendors are built as binary libraries. OpenSSL produces <code class="language-plaintext highlighter-rouge">libcrypto</code> and <code class="language-plaintext highlighter-rouge">libssl</code>, WireGuard produces <code class="language-plaintext highlighter-rouge">libwg-go</code>.</li>
+  <li>The C/C++ code of our package is compiled as a monolith. Manual module maps must be exposed in the headers search paths for Swift interop with C/C++ code (SwiftPM does this automatically).</li>
+  <li>The Swift code of our package is compiled altogether, thus losing any notion of SwiftPM sub-targets. C modules are available to Swift through step 2.</li>
+  <li>All the outputs are linked together into the final dynamic library.</li>
+</ol>
+
+<p>Without delving into the very details of this complex task, we want to use a single CMake <em>superproject</em> to build our Swift project, Partout, plus all its dependencies. The superproject will treat both our Swift/C code and the vendors as opaque dependencies, i.e. <em>subprojects</em>. This way, CMake can ignore the internals of how any dependency is built.</p>
+
+<p>Assume that each vendored third party comes with its own build system, and we orchestrate them all in a root <a href="https://github.com/partout-io/partout/blob/master/CMakeLists.txt"><code class="language-plaintext highlighter-rouge">CMakeLists.txt</code></a>. The root configuration includes one CMake file (*.cmake) for each vendor, as you can see in the <a href="https://github.com/partout-io/partout/tree/master/vendors"><code class="language-plaintext highlighter-rouge">vendors</code></a> directory of Partout. The .cmake files instruct the root configuration how to build each library as a subproject, and where to find the outputs, typically in the form of static or dynamic libraries.</p>
+
+<p>Our package is also treated <a href="https://github.com/partout-io/partout/blob/master/Sources/CMakeLists.txt">as a subproject</a>, only as a monolith. By monolith, I mean that we give up on the granularity of SwiftPM targets and compile the Swift sources altogether. By doing this, the internal target imports will have to omitted, and we do that with the <code class="language-plaintext highlighter-rouge">PARTOUT_MONOLITH</code> symbol <a href="https://github.com/partout-io/partout/blob/9deda7b34107567ff4b76f53947ca718fe94956e/Sources/partout.cmake#L8">in the CMake project</a> and <a href="https://github.com/partout-io/partout/blob/9deda7b34107567ff4b76f53947ca718fe94956e/Sources/PartoutOS/Apple/AppleJavaScriptEngine.swift#L6">in the Swift code</a>.</p>
+
+<p>You find the entry point of this long process in <a href="https://github.com/partout-io/partout/blob/master/scripts/build.sh"><code class="language-plaintext highlighter-rouge">scripts/build.sh</code></a>.</p>
+
+<h3 id="hybrid-swiftpmcmake">Hybrid SwiftPM/CMake</h3>
+
+<p>The full CMake approach works on all platforms except one: Android.</p>
+
+<p>Why is that? Because, unless you want to rebuild the entire Swift toolchain for Android, the common way to target the Android platform is <a href="https://github.com/finagolfin/swift-android-sdk">through a Swift SDK</a>, and Swift SDKs only work with SwiftPM. On the other hand, building Swift for Android with CMake is still flaky and painful, so I’ll describe what we’re left with.</p>
+
+<p>I chose to go with a hybrid build system where:</p>
+
+<ul>
+  <li>The Partout code (Swift/C) is built with SwiftPM, targeting the Swift Android SDK and the Android NDK.</li>
+  <li>The vendored libraries are still built with CMake, this time for Android (<code class="language-plaintext highlighter-rouge">PP_BUILD_FOR_ANDROID</code> in CMake).</li>
+  <li>SwiftPM depends on the CMake-built binaries via <code class="language-plaintext highlighter-rouge">.unsafeFlags</code> and generates a <code class="language-plaintext highlighter-rouge">.dynamic</code> library (<code class="language-plaintext highlighter-rouge">libpartout.so</code>).</li>
+</ul>
+
+<p>The way I accomplish this is with a <a href="https://github.com/partout-io/partout/blob/master/Package.swift">highly flexible Package.swift</a>. A dynamic manifest helps a lot when you need to overcome the occasional limitations of SwiftPM, and the <code class="language-plaintext highlighter-rouge">Package.swift</code> of Partout handles, among other things, OS conditionals and environment variables as the build input.</p>
+
+<p>For example:</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">PP_BUILD_OS</code> works around the limitation of <code class="language-plaintext highlighter-rouge">#if os(Android)</code>, because the condition fails unless a full Android toolchain is used.</li>
+  <li><code class="language-plaintext highlighter-rouge">PP_BUILD_CMAKE_OUTPUT</code> tells the SwiftPM build where to find the arch-specific outputs of CMake for use with <code class="language-plaintext highlighter-rouge">.unsafeFlags</code> (the well-known <code class="language-plaintext highlighter-rouge">-I</code>, <code class="language-plaintext highlighter-rouge">-L</code>, and <code class="language-plaintext highlighter-rouge">-l</code> flags of the compiler/linker).</li>
+</ul>
+
+<p>You can learn more about the whole process in <a href="https://github.com/partout-io/partout/blob/master/scripts/build-android.sh"><code class="language-plaintext highlighter-rouge">scripts/build-android.sh</code></a>.</p>
+
+<h3 id="distribution">Distribution</h3>
+
+<p>Will your Swift project work with <code class="language-plaintext highlighter-rouge">libpartout.so|.dylib|.dll</code> alone? Of course not. One reason is obvious, and it’s because you need to bundle the OpenSSL/WireGuard binaries too. The other reason is that your end-user will lack the <strong>Swift runtime</strong>, and this is still kind of a big deal.</p>
+
+<p>As I mentioned in earlier posts, the Swift runtime is <em>big</em>, or <em>huge</em> if you use Foundation like nearly every Swift programmer does. It’s not even the worst part, as the one I dislike the most is that distributing the Swift runtime is a heavily manual process, and even the standard lib is made of dozens of files. Use <code class="language-plaintext highlighter-rouge">otool</code> (macOS) or <code class="language-plaintext highlighter-rouge">ldd</code> (Linux) on your output to learn what libraries you need, and beware that your app will crash on launch if it lacks any of them. In my experience, bundling <em>more</em> dependencies than necessary may also lead to runtime crashes.</p>
+
+<p>The <code class="language-plaintext highlighter-rouge">-static-swift-stdlib</code> flag exists to embed the runtime and mitigate the issue, but it seems <a href="https://github.com/swiftlang/swift-package-manager/issues/8198">it doesn’t work properly for dynamic libraries</a>. It doesn’t help with Foundation either because it’s not part of the standard Swift library.</p>
+
+<p>Long story short, <code class="language-plaintext highlighter-rouge">libpartout.so</code> must be distributed side by side with the CMake binaries and the whole Swift runtime for the target architecture. You should find the runtime libraries for your current architecture at:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$SWIFT_HOME/toolchains/&lt;swift_version&gt;/usr/lib/swift/&lt;platform_name&gt;
+</code></pre></div></div>
+
+<p>With an additional dependency on <a href="https://github.com/swiftlang/swift/blob/main/docs/Android.md#3-deploying-the-build-products-to-the-device"><code class="language-plaintext highlighter-rouge">libc++_shared.so</code> for Android</a>.</p>
+
+<p>Anyway, this Linux output should explain better what I’m talking about:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ldd src/passepartout/submodules/partout/.build/debug/libpartout.so 
+	linux-vdso.so.1 (0x0000ec74cd2dc000)
+	libswiftSwiftOnoneSupport.so =&gt; /home/keeshux/.local/share/swiftly/toolchains/6.2.0/usr/lib/swift/linux/libswiftSwiftOnoneSupport.so (0x0000ec74ccc40000)
+	libswiftCore.so =&gt; /home/keeshux/.local/share/swiftly/toolchains/6.2.0/usr/lib/swift/linux/libswiftCore.so (0x0000ec74cc5a0000)
+	libswift_Concurrency.so =&gt; /home/keeshux/.local/share/swiftly/toolchains/6.2.0/usr/lib/swift/linux/libswift_Concurrency.so (0x0000ec74cc4f0000)
+	libswift_StringProcessing.so =&gt; /home/keeshux/.local/share/swiftly/toolchains/6.2.0/usr/lib/swift/linux/libswift_StringProcessing.so (0x0000ec74cc430000)
+	libswift_RegexParser.so =&gt; /home/keeshux/.local/share/swiftly/toolchains/6.2.0/usr/lib/swift/linux/libswift_RegexParser.so (0x0000ec74cc310000)
+	libBlocksRuntime.so =&gt; /home/keeshux/.local/share/swiftly/toolchains/6.2.0/usr/lib/swift/linux/libBlocksRuntime.so (0x0000ec74cc2e0000)
+	libdispatch.so =&gt; /home/keeshux/.local/share/swiftly/toolchains/6.2.0/usr/lib/swift/linux/libdispatch.so (0x0000ec74cc260000)
+	libswiftDispatch.so =&gt; /home/keeshux/.local/share/swiftly/toolchains/6.2.0/usr/lib/swift/linux/libswiftDispatch.so (0x0000ec74cc210000)
+	libssl.so.3 =&gt; /lib/aarch64-linux-gnu/libssl.so.3 (0x0000ec74cc0f0000)
+	libcrypto.so.3 =&gt; /lib/aarch64-linux-gnu/libcrypto.so.3 (0x0000ec74cbb60000)
+	libc.so.6 =&gt; /lib/aarch64-linux-gnu/libc.so.6 (0x0000ec74cb990000)
+	/lib/ld-linux-aarch64.so.1 (0x0000ec74cd2a0000)
+	libstdc++.so.6 =&gt; /lib/aarch64-linux-gnu/libstdc++.so.6 (0x0000ec74cb6f0000)
+	libm.so.6 =&gt; /lib/aarch64-linux-gnu/libm.so.6 (0x0000ec74cb630000)
+	libgcc_s.so.1 =&gt; /lib/aarch64-linux-gnu/libgcc_s.so.1 (0x0000ec74cb5f0000)
+	libswiftGlibc.so =&gt; /home/keeshux/.local/share/swiftly/toolchains/6.2.0/usr/lib/swift/linux/libswiftGlibc.so (0x0000ec74cb5c0000)
+	libz.so.1 =&gt; /lib/aarch64-linux-gnu/libz.so.1 (0x0000ec74cb580000)
+	libzstd.so.1 =&gt; /lib/aarch64-linux-gnu/libzstd.so.1 (0x0000ec74cb4c0000)
+</code></pre></div></div>
+
+<h2 id="bottom-line">Bottom line</h2>
+
+<p>I assumed the readers to be familiar with build systems and CMake in particular, as the subject is vast and goes way beyond the scope of my article. I rather wanted to describe the design that worked for me to build a <em>polyglot</em> Swift library not only for non-Apple platforms, but also with multi-language, real-world dependencies.</p>
+
+<p>This is the real novelty, the one I’m so excited about, and the one that you would have a very hard time finding examples about. I’m bringing up proof that all this stuff <em>works</em> in Swift as Partout, the subject of this series, is not a toy project for the sake of a tutorial, but <strong>software in use by hundreds of thousands of users</strong> every day for streaming, privacy, remote work, and VPNs in general. Think about it for the bright future of the Swift language.</p>
+
+<p>In the next article, we’ll go through the integration of Partout in both Swift and non-Swift applications, with my <a href="https://passepartoutvpn.app">Passepartout</a> app being the living example of it.</p>
+
+
+        
+    </div>
+    
+    
+        
+            
+        
+    
+        
+            
+        
+    
+        
+    
+        
+            
+        
+    
+        
+            
+        
+    
+        
+            
+        
+    
+        
+    
+        
+            
+        
+    
+        
+    
+        
+            
+        
+    
+        
+            
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+    
+
+
+
+
+
+
+
+<aside class="sharing" id="sharing-me">
+    <ul>
+        <li><a href="/feed.xml" title="Follow the blog" target="_blank"><i class="fa-solid fa-rss"></i>Subscribe</a></li>
+        <li>Follow me <a href="https://x.com/keeshux" title="Follow me on X" target="_blank">on X</a> and <a href="https://github.com/keeshux" title="Follow me on GitHub" target="_blank">GitHub</a></li>
+    </ul>
+</aside>
+
+    <aside class="post-related">
+        <p>See also:</p>
+        <ul>
+            
+            <li><a href="/2025/08/the-role-of-ai-in-losing-care-for-our-products/">The role of AI in losing care for our products</a></li>
+            
+            <li><a href="/cross-platform-swift/c-interop-part-two/">Cross-platform Swift: C interop (pt. 2)</a></li>
+            
+            <li><a href="/cross-platform-swift/c-interop-part-one/">Cross-platform Swift: C interop (pt. 1)</a></li>
+            
+        </ul>
+    </aside>
+    <div id="disqus_thread"></div>
+    <nav class="paginator">
+    <ul>
+        <li class="paginator-browser older">
+            
+            <a href="/cross-platform-swift/build-system-part-one/" title="Cross-platform Swift: Build system (pt. 1)"><i class="fa fa-chevron-left"></i> Older</a>
+            
+        </li><li class="paginator-browser home">
+            <a href="/" class="fa fa-home"></a>
+        </li><li class="paginator-browser newer">
+            
+        </li>
+    </ul>
+</nav>
+
+</article>
+<script src="//keeshux.disqus.com/embed.js" async="async"></script>
+
+                </main>
+                <footer id="page-footer">
+                    <p id="social">
+    &copy; 2025 Davide De Rosa
+    <a href="https://github.com/keeshux" title="Browse my GitHub repository" class="fab fa-github"></a>
+    <a href="https://linkedin.com/in/davidederosa" title="Connect on LinkedIn" class="fab fa-linkedin"></a>
+    <a href="https://x.com/keeshux" title="Follow me on X" class="fab fa-x-twitter"></a>
+    <a href="/s/keeshux-gpg.txt" title="My GnuPG public key" class="fa fa-lock"></a>
+    <a href="/feed.xml" title="Follow the blog" class="fa-solid fa-rss"></a>
+</ul>
+
+                </footer>
+            </div>
+        </div>
+        <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    </body>
+</html>

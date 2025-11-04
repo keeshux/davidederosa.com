@@ -26,7 +26,7 @@
 <meta property="og:site_name" content="Cross-platform Swift: Introduction" />
 <meta property="og:title" content="Cross-platform Swift: Introduction" />
 <meta property="og:description" content="I make software. I look around me." />
-<meta property="og:image" content="https://davidederosa.com/s/f/swift/swift.png?1759354795" />
+<meta property="og:image" content="https://davidederosa.com/s/f/swift/swift.png?1762291750" />
 <meta property="og:url" content="https://davidederosa.com/cross-platform-swift/" />
 
 <!-- Twitter -->
@@ -35,7 +35,7 @@
 <meta name="twitter:site" content="@keeshux" />
 <meta name="twitter:title" content="Cross-platform Swift: Introduction" />
 <meta name="twitter:description" content="I make software. I look around me." />
-<meta name="twitter:image" content="https://davidederosa.com/s/f/swift/swift.png?1759354795" />
+<meta name="twitter:image" content="https://davidederosa.com/s/f/swift/swift.png?1762291750" />
 <meta name="twitter:url" content="https://davidederosa.com/cross-platform-swift/" />
 
 <link rel="canonical" href="https://davidederosa.com/cross-platform-swift/" />
@@ -46,14 +46,14 @@
 <link rel="next" href="/2025/03/who-cares-about-performance/" title="Who cares about performance?" />
 
 
-<link rel="stylesheet" href="/s/main.css?1759354795" />
-<link rel="stylesheet" href="/s/main-mobile.css?1759354795" media="only screen and (max-width: 600px)" />
-<link rel="stylesheet" href="/s/syntax.css?1759354795" />
+<link rel="stylesheet" href="/s/main.css?1762291750" />
+<link rel="stylesheet" href="/s/main-mobile.css?1762291750" media="only screen and (max-width: 600px)" />
+<link rel="stylesheet" href="/s/syntax.css?1762291750" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway:600,400" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha384-t1nt8BQoYMLFN5p42tRAtuAAFQaCQODekUVeKKZrEnEyp4H2R0RHFz0KWpmj7i8g" crossorigin="anonymous">
 
-<link rel="shortcut icon" href="/s/favicon.ico?1759354795" />
-<link rel="apple-touch-icon" href="/s/iphone-icon-precomposed.png?1759354795" />
+<link rel="shortcut icon" href="/s/favicon.ico?1762291750" />
+<link rel="apple-touch-icon" href="/s/iphone-icon-precomposed.png?1762291750" />
 
 
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-DWPG2HZ9FS"></script>
@@ -262,11 +262,22 @@ gtag('config', 'G-DWPG2HZ9FS');
         </li>
         
         
+        
+        <li>
+            
+            <a href="/cross-platform-swift/build-system-part-two/" title="Build system (pt. 2)">
+                
+                Build system (pt. 2)
+                
+            </a>
+        </li>
+        
+        
     </ol>
 </header>
 
 
-        <p>As <a href="https://github.com/passepartoutvpn/partout">Partout</a>, my Swift framework for VPN and network configuration on Apple devices, has slowly gained shape, I set foot in an ambitious and novel, pioneering goal: <strong>making Partout a truly multiplatform Swift library</strong>. Also, a library that integrates with multiple programming languages where Swift is the coordinator, with the help of the C interoperability.</p>
+        <p>As <a href="https://github.com/partout-io/partout">Partout</a>, my Swift framework for VPN and network configuration on Apple devices, has slowly gained shape, I set foot in an ambitious and novel, pioneering goal: <strong>making Partout a truly multiplatform Swift library</strong>. Also, a library that integrates with multiple programming languages where Swift is the coordinator, with the help of the C interoperability.</p>
 
 <p>It’s challenging, but it’s fun, and it’s the way to port <a href="https://passepartoutvpn.app">Passepartout</a> beyond the Apple platforms. So, here, I will progressively share my discoveries and encourage other people to give Swift a chance as a portable language. The language itself is fantastic. Using it outside Xcode? Not as much, but I’ve observed the trends over the years, and overall, things are getting better.</p>
 
@@ -283,7 +294,7 @@ gtag('config', 'G-DWPG2HZ9FS');
 
 <h3 id="1-start-with-a-lean-core">1. Start with a lean core</h3>
 
-<p>When I made Partout from the ashes of <a href="https://github.com/passepartoutvpn/tunnelkit">TunnelKit</a>, I put special care into making the library core as lean as possible. No dependencies, no OS implementations, pure Swift. This mantra paid off very well in the long run because you realize how basic the Swift runtime is when you leave the comfortable macOS environment: a stripped version of the Foundation and Dispatch frameworks, not even Combine, and little more. I promise, this will hit you hard the first time.</p>
+<p>When I made Partout from the ashes of <a href="https://github.com/partout-io/tunnelkit">TunnelKit</a>, I put special care into making the library core as lean as possible. No dependencies, no OS implementations, pure Swift. This mantra paid off very well in the long run because you realize how basic the Swift runtime is when you leave the comfortable macOS environment: a stripped version of the Foundation and Dispatch frameworks, not even Combine, and little more. I promise, this will hit you hard the first time.</p>
 
 <p>I was equally shocked, yet positively, when <code class="language-plaintext highlighter-rouge">async</code> methods worked out of the box. This is not about Swift, though, rather about Windows. The level of discomfort I feel when I use Windows puts me in a constant disbelief when things, eventually, work as intended. As in “this is Windows, nothing can work without Visual Studio”. Fun fact: Swift requires the Visual Studio Build Tools.</p>
 
@@ -335,6 +346,10 @@ gtag('config', 'G-DWPG2HZ9FS');
         
     </div>
     
+    
+        
+            
+        
     
         
             
@@ -435,11 +450,11 @@ gtag('config', 'G-DWPG2HZ9FS');
         <p>See also:</p>
         <ul>
             
+            <li><a href="/cross-platform-swift/build-system-part-one/">Cross-platform Swift: Build system (pt. 1)</a></li>
+            
             <li><a href="/2025/08/the-role-of-ai-in-losing-care-for-our-products/">The role of AI in losing care for our products</a></li>
             
             <li><a href="/cross-platform-swift/c-interop-part-two/">Cross-platform Swift: C interop (pt. 2)</a></li>
-            
-            <li><a href="/cross-platform-swift/c-interop-part-one/">Cross-platform Swift: C interop (pt. 1)</a></li>
             
         </ul>
     </aside>
