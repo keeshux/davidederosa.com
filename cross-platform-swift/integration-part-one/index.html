@@ -1,0 +1,608 @@
+
+
+
+<!DOCTYPE html>
+<html lang="en" itemscope itemtype="http://schema.org/Blog">
+    <head>
+        
+
+
+
+
+
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+<title>Cross-platform Swift: Integration (pt. 1)</title>
+
+<meta name="author" content="Davide De Rosa" />
+<meta name="description" content="I make software. I look around me.">
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="apple-mobile-web-app-title" content="keeshux">
+
+<!-- OpenGraph -->
+
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="Cross-platform Swift: Integration (pt. 1)" />
+<meta property="og:title" content="Cross-platform Swift: Integration (pt. 1)" />
+<meta property="og:description" content="I make software. I look around me." />
+<meta property="og:image" content="https://davidederosa.com/s/f/swift/swift.png?1766390132" />
+<meta property="og:url" content="https://davidederosa.com/cross-platform-swift/integration-part-one/" />
+
+<!-- Twitter -->
+
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:site" content="@keeshux" />
+<meta name="twitter:title" content="Cross-platform Swift: Integration (pt. 1)" />
+<meta name="twitter:description" content="I make software. I look around me." />
+<meta name="twitter:image" content="https://davidederosa.com/s/f/swift/swift.png?1766390132" />
+<meta name="twitter:url" content="https://davidederosa.com/cross-platform-swift/integration-part-one/" />
+
+<link rel="canonical" href="https://davidederosa.com/cross-platform-swift/integration-part-one/" />
+
+
+<link rel="next" href="/cross-platform-swift/build-system-part-three/" title="Cross-platform Swift: Build system (pt. 3)" />
+
+
+<link rel="stylesheet" href="/s/main.css?1766390132" />
+<link rel="stylesheet" href="/s/main-mobile.css?1766390132" media="only screen and (max-width: 600px)" />
+<link rel="stylesheet" href="/s/syntax.css?1766390132" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway:600,400" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha384-t1nt8BQoYMLFN5p42tRAtuAAFQaCQODekUVeKKZrEnEyp4H2R0RHFz0KWpmj7i8g" crossorigin="anonymous">
+
+<link rel="shortcut icon" href="/s/favicon.ico?1766390132" />
+<link rel="apple-touch-icon" href="/s/iphone-icon-precomposed.png?1766390132" />
+
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-DWPG2HZ9FS"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag() {
+    dataLayer.push(arguments);
+}
+gtag('js', new Date());
+gtag('config', 'G-DWPG2HZ9FS');
+</script>
+
+
+
+    </head>
+    <body>
+        <div id="container">
+            <header>
+                <nav id="menu">
+    <ul>
+        
+    </ul>
+</nav>
+
+            </header>
+            <div>
+                <header>
+                    <h1><a href="/">Davide De Rosa</a></h1>
+                </header>
+                <main>
+                    <article class="post post-full" itemscope itemtype="https://schema.org/Article">
+    <header>
+        
+<div class="post-icon">
+    <a href="/cross-platform-swift/integration-part-one/">
+        
+        <img src="/s/f/swift/swift-150.png" alt="Cross-platform Swift: Integration (pt. 1)" />
+        
+    </a>
+</div>
+
+
+        <div>
+            <span class="post-date" itemprop="datepublished">Dec 22, 2025</span>
+            <h2 itemprop="name">
+                
+                Cross-platform Swift: Integration (pt. 1)
+                
+            </h2>
+            
+
+
+
+
+
+
+<div class="post-list post-series-links">
+    part of a <a href="/cross-platform-swift/" title="Cross-platform Swift: Introduction">series</a>:
+    
+    <a href="/cross-platform-swift/build-system-part-three/" title="Cross-platform Swift: Build system (pt. 3)">&lt; prev</a>
+    
+    |
+    
+    next &gt;
+    
+</div>
+
+
+
+        </div>
+    </header>
+    <div class="post-body">
+        
+
+        
+<header class="post-series-toc">
+    
+    <h3>Table of contents (ongoing)</h3>
+    
+    <ol>
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        <li>
+            
+            <a href="/cross-platform-swift/" title="Introduction">
+                
+                Introduction
+                
+            </a>
+        </li>
+        
+        
+        
+        <li>
+            
+            <a href="/cross-platform-swift/combine/" title="Combine">
+                
+                Combine
+                
+            </a>
+        </li>
+        
+        
+        
+        
+        
+        <li>
+            
+            <a href="/cross-platform-swift/core-libraries/" title="Core libraries">
+                
+                Core libraries
+                
+            </a>
+        </li>
+        
+        
+        
+        
+        
+        <li>
+            
+            <a href="/cross-platform-swift/platform-specifics/" title="Platform specifics">
+                
+                Platform specifics
+                
+            </a>
+        </li>
+        
+        
+        
+        <li>
+            
+            <a href="/cross-platform-swift/c-interop-part-one/" title="C interop (pt. 1)">
+                
+                C interop (pt. 1)
+                
+            </a>
+        </li>
+        
+        
+        
+        <li>
+            
+            <a href="/cross-platform-swift/c-interop-part-two/" title="C interop (pt. 2)">
+                
+                C interop (pt. 2)
+                
+            </a>
+        </li>
+        
+        
+        
+        
+        
+        <li>
+            
+            <a href="/cross-platform-swift/build-system-part-one/" title="Build system (pt. 1)">
+                
+                Build system (pt. 1)
+                
+            </a>
+        </li>
+        
+        
+        
+        <li>
+            
+            <a href="/cross-platform-swift/build-system-part-two/" title="Build system (pt. 2)">
+                
+                Build system (pt. 2)
+                
+            </a>
+        </li>
+        
+        
+        
+        <li>
+            
+            <a href="/cross-platform-swift/build-system-part-three/" title="Build system (pt. 3)">
+                
+                Build system (pt. 3)
+                
+            </a>
+        </li>
+        
+        
+        
+        <li>
+            
+            <a href="/cross-platform-swift/integration-part-one/" title="Integration (pt. 1)">
+                
+                <strong>Integration (pt. 1)</strong>
+                
+            </a>
+        </li>
+        
+        
+    </ol>
+</header>
+
+
+        <p>We are at a stage where Partout, our cross-platform Swift library:</p>
+
+<ul>
+  <li>Builds as a static library</li>
+  <li>Emits a Swift module interface for use in other Swift code</li>
+  <li>Comes with a few vendored dependencies as dynamic libraries (OpenSSL, WireGuard)</li>
+  <li>Uses C for low-level routines, including OS frameworks or the NDK on Android</li>
+  <li>Doesn’t use Apple frameworks, unless behind availability conditionals</li>
+  <li>Doesn’t use Objective-C</li>
+  <li>Depends on the Swift runtime</li>
+</ul>
+
+<p>It’s time to actually <em>use</em> the library, be it in an app or another library. I’ll skip the obvious case of using a Swift library in a Swift project, for which SwiftPM remains the recommended way to do it.</p>
+
+<h2 id="cross-language-integration">Cross-language integration</h2>
+
+<p>Earlier in the series, I think I mentioned how the C language is the typical denominator of multi-language interactions between binary programs. In other words, C is sort of the English language of programming languages, the midway where foreign languages meet, and in fact the preferred way to deal with <a href="https://en.wikipedia.org/wiki/Foreign_function_interface">FFI</a>. As a consequence, in order to use a Swift library in a non-Swift project, it must learn to speak C.</p>
+
+<p>There are important design considerations to make before picking what to expose, but we could summarize them in a clear principle: your library must be able to behave like an API. C is a powerful yet very basic imperative language, so you’d better rethink your business logic in terms of simple types and function calls.</p>
+
+<p>For example, a REST API translates quite well to a C interface:</p>
+
+<ul>
+  <li>Function name -&gt; HTTP Method + Path</li>
+  <li>Function input -&gt; URL Components or HTTP Request</li>
+  <li>Function output -&gt; HTTP Response</li>
+  <li>Data types -&gt; JSON (untyped)</li>
+</ul>
+
+<p>More specifically, this Swift code:</p>
+
+<div class="language-swift highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">final</span> <span class="kd">class</span> <span class="kt">BankAccount</span> <span class="p">{</span>
+    <span class="nf">init</span><span class="p">(</span><span class="nv">customerId</span><span class="p">:</span> <span class="kt">String</span><span class="p">)</span> <span class="p">{</span> <span class="o">...</span> <span class="p">}</span>
+    <span class="kd">func</span> <span class="nf">withdraw</span><span class="p">(</span><span class="nv">amount</span><span class="p">:</span> <span class="kt">Int</span><span class="p">)</span> <span class="k">throws</span> <span class="p">{</span> <span class="o">...</span> <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Could be exposed from a REST API like:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>GET /banks/&lt;customer_id&gt;
+PUT /banks/&lt;customer_id&gt;/withdraw {"amount":...}
+</code></pre></div></div>
+
+<p>And linearized in a C API like:</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// Returns an opaque handle for subsequent calls</span>
+<span class="kt">void</span> <span class="o">*</span><span class="nf">bank_account_find</span><span class="p">(</span><span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">customer_id</span><span class="p">);</span>
+<span class="n">bool</span> <span class="nf">bank_account_withdraw</span><span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="n">account</span><span class="p">,</span> <span class="kt">int</span> <span class="n">amount</span><span class="p">);</span>
+<span class="kt">int</span> <span class="nf">bank_account_last_error</span><span class="p">();</span>
+</code></pre></div></div>
+
+<p>That is, with global, “static” vanilla functions. Swift abstractions <em>must</em> be left aside in this process.</p>
+
+<h2 id="introducing-_cdecl">Introducing <code class="language-plaintext highlighter-rouge">@_cdecl</code></h2>
+
+<p>Let’s follow up on the previous example:</p>
+
+<div class="language-swift highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">private</span> <span class="k">var</span> <span class="nv">lastError</span><span class="p">:</span> <span class="kt">Error</span><span class="p">?</span>
+
+<span class="kd">func</span> <span class="nf">bankAccountFind</span><span class="p">(</span><span class="nv">customerId</span><span class="p">:</span> <span class="kt">String</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">BankAccount</span><span class="p">?</span> <span class="p">{</span>
+    <span class="c1">// Imagine a central database</span>
+    <span class="kt">BankDatabase</span><span class="o">.</span><span class="n">shared</span><span class="o">.</span><span class="nf">find</span><span class="p">(</span><span class="n">customerId</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="nf">bankAccountWithdraw</span><span class="p">(</span><span class="nv">account</span><span class="p">:</span> <span class="kt">BankAccount</span><span class="p">,</span> <span class="nv">amount</span><span class="p">:</span> <span class="kt">Int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">Bool</span> <span class="p">{</span>
+    <span class="k">do</span> <span class="p">{</span>
+        <span class="k">try</span> <span class="n">account</span><span class="o">.</span><span class="nf">withdraw</span><span class="p">(</span><span class="nv">amount</span><span class="p">:</span> <span class="n">amount</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">true</span>
+    <span class="p">}</span> <span class="k">catch</span> <span class="p">{</span>
+        <span class="n">lastError</span> <span class="o">=</span> <span class="n">error</span>
+        <span class="k">return</span> <span class="kc">false</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="nf">bankAccountLastError</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kt">Error</span><span class="p">?</span> <span class="p">{</span>
+    <span class="n">lastError</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>See how we expose Swift logic through global functions, with a minor notion of statefulness in <code class="language-plaintext highlighter-rouge">lastError</code>. State can be retained in different ways, e.g. with a context object, but the global variable is enough here for the sake of the example. The programming pattern is now close to the C imperative, but something is still off.</p>
+
+<p>We must get rid of any Swift in the <em>public</em> interfaces, and there are several occurrences to fix in this code:</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">String</code> in the <code class="language-plaintext highlighter-rouge">bankAccountFind</code> signature</li>
+  <li><code class="language-plaintext highlighter-rouge">BankAccount</code> in the <code class="language-plaintext highlighter-rouge">bankAccountFind</code> and the <code class="language-plaintext highlighter-rouge">bankAccountWithdraw</code> signatures</li>
+  <li><code class="language-plaintext highlighter-rouge">Error?</code> in the <code class="language-plaintext highlighter-rouge">bankAccountLastError</code> signature</li>
+</ul>
+
+<p>Our candidate C functions must only use C-compatible types, therefore:</p>
+
+<ul>
+  <li>Replace <code class="language-plaintext highlighter-rouge">String</code> with <code class="language-plaintext highlighter-rouge">UnsafePointer&lt;CChar&gt;</code> (i.e. <code class="language-plaintext highlighter-rouge">const char *</code>)</li>
+  <li>Replace <code class="language-plaintext highlighter-rouge">BankAccount</code> with a generic pointer (i.e. <code class="language-plaintext highlighter-rouge">void *</code> or some unique identifier)</li>
+  <li>Replace <code class="language-plaintext highlighter-rouge">Error</code> with an integer error code, for example</li>
+</ul>
+
+<p>Once we sort this out, we’re ready to make the functions publicly available, and we do that with the <strong><code class="language-plaintext highlighter-rouge">@_cdecl</code></strong> keyword:</p>
+
+<div class="language-swift highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">private</span> <span class="kd">enum</span> <span class="kt">ErrorCode</span><span class="p">:</span> <span class="kt">Int</span> <span class="p">{</span>
+    <span class="k">case</span> <span class="n">success</span>
+    <span class="k">case</span> <span class="n">notFound</span>
+    <span class="k">case</span> <span class="n">noMoney</span>
+<span class="p">}</span>
+
+<span class="kd">private</span> <span class="k">var</span> <span class="nv">lastErrorCode</span><span class="p">:</span> <span class="kt">ErrorCode</span><span class="p">?</span>
+
+<span class="kd">@_cdecl</span><span class="p">(</span><span class="s">"bank_account_find"</span><span class="p">)</span>
+<span class="kd">func</span> <span class="nf">bankAccountFind</span><span class="p">(</span><span class="n">customerId</span> <span class="nv">rawCustomerId</span><span class="p">:</span> <span class="kt">UnsafePointer</span><span class="o">&lt;</span><span class="kt">CChar</span><span class="o">&gt;</span><span class="p">?)</span> <span class="o">-&gt;</span> <span class="kt">UnsafeMutableRawPointer</span><span class="p">?</span> <span class="p">{</span>
+    <span class="k">guard</span> <span class="k">let</span> <span class="nv">rawCustomerId</span> <span class="k">else</span> <span class="p">{</span> <span class="nf">preconditionFailure</span><span class="p">()</span> <span class="p">}</span>
+    <span class="k">let</span> <span class="nv">customerId</span> <span class="o">=</span> <span class="kt">String</span><span class="p">(</span><span class="nv">cString</span><span class="p">:</span> <span class="n">rawCustomerId</span><span class="p">)</span>
+    <span class="k">guard</span> <span class="k">let</span> <span class="nv">existing</span> <span class="o">=</span> <span class="kt">BankDatabase</span><span class="o">.</span><span class="n">shared</span><span class="o">.</span><span class="nf">find</span><span class="p">(</span><span class="n">customerId</span><span class="p">)</span> <span class="k">else</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="kc">nil</span>
+    <span class="p">}</span>
+    <span class="k">let</span> <span class="nv">rawAccount</span> <span class="o">=</span> <span class="kt">Unmanaged</span><span class="o">.</span><span class="nf">passUnretained</span><span class="p">(</span><span class="n">existing</span><span class="p">)</span><span class="o">.</span><span class="nf">toOpaque</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">rawAccount</span>
+<span class="p">}</span>
+
+<span class="kd">@_cdecl</span><span class="p">(</span><span class="s">"bank_account_withdraw"</span><span class="p">)</span>
+<span class="kd">func</span> <span class="nf">bankAccountWithdraw</span><span class="p">(</span><span class="n">account</span> <span class="nv">rawAccount</span><span class="p">:</span> <span class="kt">UnsafeMutableRawPointer</span><span class="p">?,</span> <span class="nv">amount</span><span class="p">:</span> <span class="kt">Int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">Bool</span> <span class="p">{</span>
+    <span class="k">guard</span> <span class="k">let</span> <span class="nv">rawAccount</span> <span class="k">else</span> <span class="p">{</span> <span class="nf">preconditionFailure</span><span class="p">()</span> <span class="p">}</span>
+    <span class="k">let</span> <span class="nv">account</span> <span class="o">=</span> <span class="kt">Unmanaged</span><span class="o">.</span><span class="nf">fromOpaque</span><span class="p">(</span><span class="n">rawAccount</span><span class="p">)</span><span class="o">.</span><span class="nf">takeUnretainedValue</span><span class="p">()</span>
+    <span class="k">do</span> <span class="p">{</span>
+        <span class="k">try</span> <span class="n">account</span><span class="o">.</span><span class="nf">withdraw</span><span class="p">(</span><span class="nv">amount</span><span class="p">:</span> <span class="n">amount</span><span class="p">)</span>
+        <span class="n">lastErrorCode</span> <span class="o">=</span> <span class="kc">nil</span>
+        <span class="k">return</span> <span class="kc">true</span>
+    <span class="p">}</span> <span class="k">catch</span> <span class="p">{</span>
+        <span class="n">lastErrorCode</span> <span class="o">=</span> <span class="o">.</span><span class="n">noMoney</span>
+        <span class="k">return</span> <span class="kc">false</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kd">@_cdecl</span><span class="p">(</span><span class="s">"bank_account_last_error"</span><span class="p">)</span>
+<span class="kd">func</span> <span class="nf">bankAccountLastError</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kt">Int</span> <span class="p">{</span>
+    <span class="n">lastErrorCode</span> <span class="p">??</span> <span class="o">.</span><span class="n">success</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>The optional arguments are there for maximum interop with C compilers. Standard C doesn’t provide nullability information, it’s something you must assert yourself. If you only use <code class="language-plaintext highlighter-rouge">clang</code>, though, you can leverage the <code class="language-plaintext highlighter-rouge">_Nonnull</code> and <code class="language-plaintext highlighter-rouge">_Nullable</code> qualifiers to avoid the unwraps and make your Swift code safer at compile-time.</p>
+
+<p>Ultimately, you would bundle the library with a C header like the one we originally envisioned:</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">void</span> <span class="o">*</span><span class="nf">bank_account_find</span><span class="p">(</span><span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">customer_id</span><span class="p">);</span>
+<span class="n">bool</span> <span class="nf">bank_account_withdraw</span><span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="n">account</span><span class="p">,</span> <span class="kt">int</span> <span class="n">amount</span><span class="p">);</span>
+<span class="kt">int</span> <span class="nf">bank_account_last_error</span><span class="p">();</span>
+</code></pre></div></div>
+
+<p>And the external C consumer will call into Swift code without even knowing that it’s Swift. If one day you decide to switch from Swift to another language, be it Rust, Go, or C itself, the library consumers will not be affected. This is a nice-to-have for durable software.</p>
+
+<h2 id="bottom-line">Bottom line</h2>
+
+<p>The way Swift supports FFI, i.e. communication with other programming languages, is with <code class="language-plaintext highlighter-rouge">@_cdecl</code> and C-compatible types. The ability for a Swift library to also exist as a pure C library allows it to be reusable across a vast number of environments without modifications. Swift consumers will certainly get more benefits and better ergonomics, but a well-designed C interface will cover any other non-Swift scenario that you can think of. More on this in the next article.</p>
+
+        
+    </div>
+    
+    
+        
+            
+        
+    
+        
+            
+        
+    
+        
+            
+        
+    
+        
+            
+        
+    
+        
+    
+        
+            
+        
+    
+        
+            
+        
+    
+        
+            
+        
+    
+        
+    
+        
+            
+        
+    
+        
+    
+        
+            
+        
+    
+        
+            
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+    
+
+
+
+
+
+
+
+<aside class="sharing" id="sharing-me">
+    <ul>
+        <li><a href="/feed.xml" title="Follow the blog" target="_blank"><i class="fa-solid fa-rss"></i>Subscribe</a></li>
+        <li>Follow me <a href="https://x.com/keeshux" title="Follow me on X" target="_blank">on X</a> and <a href="https://github.com/keeshux" title="Follow me on GitHub" target="_blank">GitHub</a></li>
+    </ul>
+</aside>
+
+    <aside class="post-related">
+        <p>See also:</p>
+        <ul>
+            
+            <li><a href="/cross-platform-swift/build-system-part-two/">Cross-platform Swift: Build system (pt. 2)</a></li>
+            
+            <li><a href="/cross-platform-swift/build-system-part-one/">Cross-platform Swift: Build system (pt. 1)</a></li>
+            
+            <li><a href="/2025/08/the-role-of-ai-in-losing-care-for-our-products/">The role of AI in losing care for our products</a></li>
+            
+        </ul>
+    </aside>
+    <div id="disqus_thread"></div>
+    <nav class="paginator">
+    <ul>
+        <li class="paginator-browser older">
+            
+            <a href="/cross-platform-swift/build-system-part-three/" title="Cross-platform Swift: Build system (pt. 3)"><i class="fa fa-chevron-left"></i> Older</a>
+            
+        </li><li class="paginator-browser home">
+            <a href="/" class="fa fa-home"></a>
+        </li><li class="paginator-browser newer">
+            
+        </li>
+    </ul>
+</nav>
+
+</article>
+<script src="//keeshux.disqus.com/embed.js" async="async"></script>
+
+                </main>
+                <footer id="page-footer">
+                    <p id="social">
+    &copy; 2025 Davide De Rosa
+    <a href="https://github.com/keeshux" title="Browse my GitHub repository" class="fab fa-github"></a>
+    <a href="https://linkedin.com/in/davidederosa" title="Connect on LinkedIn" class="fab fa-linkedin"></a>
+    <a href="https://x.com/keeshux" title="Follow me on X" class="fab fa-x-twitter"></a>
+    <a href="/s/keeshux-gpg.txt" title="My GnuPG public key" class="fa fa-lock"></a>
+    <a href="/feed.xml" title="Follow the blog" class="fa-solid fa-rss"></a>
+</ul>
+
+                </footer>
+            </div>
+        </div>
+        <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    </body>
+</html>
