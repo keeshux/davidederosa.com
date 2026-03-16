@@ -1,4 +1,291 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://davidederosa.com/feed.xml" rel="self" type="application/atom+xml" /><link href="https://davidederosa.com/" rel="alternate" type="text/html" /><updated>2026-01-04T20:46:36+01:00</updated><id>https://davidederosa.com/feed.xml</id><title type="html">Davide De Rosa</title><subtitle>I make software. I look around me.</subtitle><author><name>Davide De Rosa</name></author><entry><title type="html">Cross-platform Swift: Integration (pt. 1)</title><link href="https://davidederosa.com/cross-platform-swift/integration-part-one/" rel="alternate" type="text/html" title="Cross-platform Swift: Integration (pt. 1)" /><published>2025-12-22T00:00:00+01:00</published><updated>2025-12-22T00:00:00+01:00</updated><id>https://davidederosa.com/cross-platform-swift/cross-platform-swift-integration-part-one</id><content type="html" xml:base="https://davidederosa.com/cross-platform-swift/integration-part-one/"><![CDATA[<p>We are at a stage where Partout, our cross-platform Swift library:</p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://davidederosa.com/feed.xml" rel="self" type="application/atom+xml" /><link href="https://davidederosa.com/" rel="alternate" type="text/html" /><updated>2026-03-16T23:48:06+01:00</updated><id>https://davidederosa.com/feed.xml</id><title type="html">Davide De Rosa</title><subtitle>I make software. I look around me.</subtitle><author><name>Davide De Rosa</name></author><entry><title type="html">Cross-platform Swift: Integration (pt. 2)</title><link href="https://davidederosa.com/cross-platform-swift/integration-part-two/" rel="alternate" type="text/html" title="Cross-platform Swift: Integration (pt. 2)" /><published>2026-03-15T00:00:00+01:00</published><updated>2026-03-15T00:00:00+01:00</updated><id>https://davidederosa.com/cross-platform-swift/cross-platform-swift-integration-part-two</id><content type="html" xml:base="https://davidederosa.com/cross-platform-swift/integration-part-two/"><![CDATA[<p>In the <a href="/cross-platform-swift/integration-part-one/">previous post</a>, I threw in a few ideas about how to integrate Swift logic with non-Swift code. We learned how to call Swift code from other languages with <a href="/cross-platform-swift/integration-part-one/#introducing-_cdecl"><code class="language-plaintext highlighter-rouge">@_cdecl</code></a>, but now we need to fill a few remaining gaps to build a modern non-Swift application on top of our Swift library.</p>
+
+<p>You can find the <a href="https://github.com/keeshux/cross-platform-swift/tree/master/Sources/SimpleABIConsumer_C">source code</a> of these examples on GitHub.</p>
+
+<h2 id="asynchronous-calls">Asynchronous calls</h2>
+
+<p>There’s no such thing as concurrency keywords in C. The only tool we have at disposal to return an async result is with a callback. To some extent, this reminds of completion handlers before Swift Concurrency entered the scene. However, Swift completion handlers are still closures, as in they can capture variables from the enclosing context. This is not the case for C callbacks, which are stateless pointers to function and therefore closer to <code class="language-plaintext highlighter-rouge">static</code> functions. The common pattern to mimic Swift completion handlers in C is by providing a <strong>callback context</strong>. Let’s go step by step.</p>
+
+<p>For example, we may want to get the result of this <code class="language-plaintext highlighter-rouge">async</code> function:</p>
+
+<div class="language-swift highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">swiftSlowResult</span><span class="p">()</span> <span class="k">async</span> <span class="k">throws</span> <span class="o">-&gt;</span> <span class="kt">Int</span> <span class="p">{</span>
+    <span class="o">...</span> <span class="c1">// Code may throw here</span>
+    <span class="k">return</span> <span class="mi">100</span> <span class="c1">// Whatever works, we only care about the function signature</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h3 id="c-types-in-arguments">C types in arguments</h3>
+
+<p>We cannot attach a <code class="language-plaintext highlighter-rouge">@_cdecl</code> attribute as long as we use features that don’t transpose to C, and <code class="language-plaintext highlighter-rouge">async</code> is one of them. Let’s take an intermediate step and wrap the function like the preconcurrency counterpart of many standard Swift APIs:</p>
+
+<div class="language-swift highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">swiftSlowResultWrapper</span><span class="p">(</span>
+    <span class="nv">completion</span><span class="p">:</span> <span class="kd">@Sendable</span> <span class="p">(</span><span class="kt">Int</span><span class="p">?,</span> <span class="kt">Error</span><span class="p">?)</span> <span class="o">-&gt;</span> <span class="kt">Void</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">Void</span> <span class="p">{</span>
+    <span class="kt">Task</span> <span class="p">{</span>
+        <span class="k">do</span> <span class="p">{</span>
+            <span class="k">let</span> <span class="nv">result</span> <span class="o">=</span> <span class="k">try</span> <span class="k">await</span> <span class="nf">swiftSlowResult</span><span class="p">()</span>
+            <span class="nf">completion</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="kc">nil</span><span class="p">)</span>
+        <span class="p">}</span> <span class="k">catch</span> <span class="p">{</span>
+            <span class="c1">// The first argument should be discarded on failure</span>
+            <span class="nf">completion</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">error</span><span class="p">)</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Cool, we got rid of <code class="language-plaintext highlighter-rouge">async</code> with the callback pattern. As we saw before, optionals and <code class="language-plaintext highlighter-rouge">Error</code> are other points of friction, so we introduce a user-defined error code enum, that is a plain <code class="language-plaintext highlighter-rouge">int</code> in C. All things considered, this is the first half-working version of our signature:</p>
+
+<div class="language-swift highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">enum</span> <span class="kt">SlowError</span><span class="p">:</span> <span class="kt">Int</span><span class="p">,</span> <span class="kt">Error</span> <span class="p">{</span>
+    <span class="k">case</span> <span class="n">foo</span> <span class="o">=</span> <span class="mi">10</span>
+    <span class="k">case</span> <span class="n">bar</span> <span class="o">=</span> <span class="mi">20</span>
+    <span class="k">case</span> <span class="n">unknown</span> <span class="o">=</span> <span class="mi">1000</span>
+<span class="p">}</span>
+
+<span class="kd">@_cdecl</span><span class="p">(</span><span class="s">"swift_slow_result"</span><span class="p">)</span>
+<span class="kd">public</span> <span class="kd">func</span> <span class="nf">swiftSlowResultWrapper</span><span class="p">(</span>
+    <span class="nv">completion</span><span class="p">:</span> <span class="kd">@Sendable</span> <span class="p">(</span><span class="kt">Int</span><span class="p">,</span> <span class="kt">Int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">Void</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">Void</span> <span class="p">{</span>
+    <span class="kt">Task</span> <span class="p">{</span>
+        <span class="k">do</span> <span class="p">{</span>
+            <span class="k">let</span> <span class="nv">result</span> <span class="o">=</span> <span class="k">try</span> <span class="k">await</span> <span class="nf">swiftSlowResult</span><span class="p">()</span>
+            <span class="c1">// Error code 0 means success</span>
+            <span class="nf">completion</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="p">}</span> <span class="k">catch</span> <span class="k">let</span> <span class="nv">error</span> <span class="k">as</span> <span class="kt">SlowError</span> <span class="p">{</span>
+            <span class="c1">// The first argument must be ignored on failure</span>
+            <span class="nf">completion</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">error</span><span class="o">.</span><span class="n">rawValue</span><span class="p">)</span>
+        <span class="p">}</span> <span class="k">catch</span> <span class="p">{</span>
+            <span class="nf">completion</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="kt">SlowError</span><span class="o">.</span><span class="n">unknown</span><span class="o">.</span><span class="n">rawValue</span><span class="p">)</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>And a trivial example of its usage:</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp">
+</span>
+<span class="k">typedef</span> <span class="k">enum</span> <span class="p">{</span>
+    <span class="n">slow_error_none</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="n">slow_error_foo</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
+    <span class="n">slow_error_bar</span> <span class="o">=</span> <span class="mi">20</span><span class="p">,</span>
+    <span class="n">slow_error_unknown</span> <span class="o">=</span> <span class="mi">1000</span>
+<span class="p">}</span> <span class="n">slow_error</span><span class="p">;</span>
+
+<span class="k">static</span> <span class="kt">void</span> <span class="nf">my_result_callback</span><span class="p">(</span><span class="kt">int</span> <span class="n">result</span><span class="p">,</span> <span class="n">slow_error</span> <span class="n">error_code</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">error_code</span> <span class="o">!=</span> <span class="n">slow_error_none</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">printf</span><span class="p">(</span><span class="s">"Error: %d</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">error_code</span><span class="p">);</span>
+        <span class="k">return</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="n">printf</span><span class="p">(</span><span class="s">"Result: %d</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">result</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="kt">void</span> <span class="nf">invoke_swift_async_function</span><span class="p">()</span> <span class="p">{</span>
+    <span class="cm">/* ... */</span>
+    <span class="n">swift_slow_result</span><span class="p">(</span><span class="n">my_result_callback</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h3 id="providing-context">Providing context</h3>
+
+<p>Another problem to address is supporting captures behavior in the <code class="language-plaintext highlighter-rouge">completion</code> callback, because we probably want to do something useful upon completion. The <em>de facto</em> way to do it in C is, as mentioned before, by propagating a context:</p>
+
+<div class="language-swift highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">swiftSlowResultWrapper</span><span class="p">(</span>
+    <span class="nv">ctx</span><span class="p">:</span> <span class="kt">UnsafeMutableRawPointer</span><span class="p">?,</span>
+    <span class="nv">completion</span><span class="p">:</span> <span class="kd">@Sendable</span> <span class="p">(</span><span class="kt">UnsafeMutableRawPointer</span><span class="p">?,</span> <span class="kt">Int</span><span class="p">,</span> <span class="kt">Int</span><span class="p">)</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">Void</span> <span class="p">{</span>
+    <span class="nf">nonisolated</span><span class="p">(</span><span class="n">unsafe</span><span class="p">)</span> <span class="k">let</span> <span class="nv">unsafeCtx</span> <span class="o">=</span> <span class="n">ctx</span>
+    <span class="kt">Task</span> <span class="p">{</span>
+        <span class="o">...</span>
+        <span class="nf">completion</span><span class="p">(</span><span class="n">unsafeCtx</span><span class="p">,</span> <span class="n">result</span><span class="p">,</span> <span class="n">errorCode</span><span class="p">)</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Unsafe and generic by nature, a context can be literally anything. Unsurprisingly, Swift <code class="language-plaintext highlighter-rouge">UnsafeMutableRawPointer</code> maps to <code class="language-plaintext highlighter-rouge">void *</code> in C.</p>
+
+<p>This is the second version of our C program interacting with Swift async code:</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/* Initialized elsewhere. */</span>
+<span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
+    <span class="kt">int</span> <span class="n">initial_value</span><span class="p">;</span>
+    <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">perform</span><span class="p">)(</span><span class="kt">int</span><span class="p">);</span>
+    <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">report_failure</span><span class="p">)(</span><span class="n">slow_error</span><span class="p">);</span>
+<span class="p">}</span> <span class="n">complex_object</span><span class="p">;</span>
+
+<span class="k">static</span> <span class="kt">void</span> <span class="nf">my_result_callback</span><span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="n">ctx</span><span class="p">,</span> <span class="kt">int</span> <span class="n">result</span><span class="p">,</span> <span class="n">slow_error</span> <span class="n">error_code</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">complex_object</span> <span class="o">*</span><span class="n">obj</span> <span class="o">=</span> <span class="p">(</span><span class="n">complex_object</span> <span class="o">*</span><span class="p">)</span><span class="n">ctx</span><span class="p">;</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">error_code</span> <span class="o">!=</span> <span class="n">slow_error_none</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">printf</span><span class="p">(</span><span class="s">"Error: %d</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">error_code</span><span class="p">);</span>
+        <span class="n">obj</span><span class="o">-&gt;</span><span class="n">report_failure</span><span class="p">(</span><span class="n">error_code</span><span class="p">);</span>
+        <span class="k">return</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="k">const</span> <span class="kt">int</span> <span class="n">compound_result</span> <span class="o">=</span> <span class="n">obj</span><span class="o">-&gt;</span><span class="n">initial_value</span> <span class="o">+</span> <span class="n">result</span><span class="p">;</span>
+    <span class="n">printf</span><span class="p">(</span><span class="s">"Compound result: %d</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">compound_result</span><span class="p">);</span>
+    <span class="cm">/* Move on with our lives. */</span>
+    <span class="n">obj</span><span class="o">-&gt;</span><span class="n">perform</span><span class="p">(</span><span class="n">compound_result</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="cm">/* We assume `obj` to be the context to act upon, and we expect it
+ * to survive the synchronous function call. A pointer to a local
+ * variable cannot be the context of an async function, because
+ * the callback would eventually refer to a dangling pointer.
+ */</span>
+<span class="kt">void</span> <span class="nf">invoke_swift_async_function</span><span class="p">(</span><span class="n">complex_object</span> <span class="o">*</span><span class="n">obj</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">swift_slow_result</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">my_result_callback</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h3 id="calling-convention">Calling convention</h3>
+
+<p>Nevertheless, the code lacks a final touch, also a very obscure one. As is, the signature still accepts a Swift closure (or ObjC block) for the <code class="language-plaintext highlighter-rouge">completion</code> argument, and this will inevitably lead to arcane compile issues or runtime crashes because of the wrong <strong>calling convention</strong>.</p>
+
+<p><img src="/s/f/cross-platform-swift/integration-02-callback-crash.png" alt="Obscure crash in C due to wrong calling convention" /></p>
+
+<p>We must enforce the <code class="language-plaintext highlighter-rouge">@convention(c)</code> attribute to restrict the input to C-style pointers to function, i.e., without captures:</p>
+
+<div class="language-swift highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">swiftSlowResultWrapper</span><span class="p">(</span>
+    <span class="nv">ctx</span><span class="p">:</span> <span class="kt">UnsafeMutableRawPointer</span><span class="p">?,</span>
+    <span class="nv">completion</span><span class="p">:</span> <span class="kd">@Sendable</span> <span class="kd">@convention</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="p">(</span><span class="kt">UnsafeMutableRawPointer</span><span class="p">?,</span> <span class="kt">Int</span><span class="p">,</span> <span class="kt">Int</span><span class="p">)</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">Void</span> <span class="p">{</span> <span class="o">...</span> <span class="p">}</span>
+</code></pre></div></div>
+
+<p>I might be wrong, but as far as I can tell, the Swift compiler is unable to enforce the C calling convention in <code class="language-plaintext highlighter-rouge">@_cdecl</code>-enabled functions, because I believe it should.</p>
+
+<h2 id="event-handling">Event handling</h2>
+
+<p>Another crux of a modern application is delivering and handling asynchronous events at scale. In the recent years, Combine was the most used tool for this purpose, and the SwiftUI <code class="language-plaintext highlighter-rouge">onReceive()</code> function certainly favored Combine publishers for emitting events. But… remember? <a href="/cross-platform-swift/combine/">Combine is not available</a> outside Apple.</p>
+
+<p>Regardless of how we emit events, though, that is a concern of the Swift library. When we build a non-Swift app on top of a Swift library, we only need a way to <em>observe</em> the events that the library emits. No magic involved, C is a simple language: we can register to events with a callback. The inherent difference with completion handlers, for example, is that an event callback will be a pointer to function that follows the application lifecycle.</p>
+
+<h3 id="emit-the-events-from-swift">Emit the events from Swift</h3>
+
+<p>Let’s start with a dumb events emitter. Here we emit events represented by integer codes from 1 to 3 at a 500 milliseconds interval. We use the same callback mechanism with an optional context. The consumer will start the events emitter and subscribe to it contextually.</p>
+
+<div class="language-swift highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">enum</span> <span class="kt">EventCode</span><span class="p">:</span> <span class="kt">Int</span><span class="p">,</span> <span class="kt">CaseIterable</span> <span class="p">{</span>
+    <span class="k">case</span> <span class="n">one</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">case</span> <span class="n">two</span>
+    <span class="k">case</span> <span class="n">three</span>
+<span class="p">}</span>
+
+<span class="kd">@_cdecl</span><span class="p">(</span><span class="s">"swift_start_events_emitter"</span><span class="p">)</span>
+<span class="kd">public</span> <span class="kd">func</span> <span class="nf">swiftStartEventsEmitter</span><span class="p">(</span>
+    <span class="nv">ctx</span><span class="p">:</span> <span class="kt">UnsafeMutableRawPointer</span><span class="p">?,</span>
+    <span class="nv">callback</span><span class="p">:</span> <span class="p">(</span><span class="kd">@Sendable</span> <span class="kd">@convention</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="p">(</span><span class="kt">UnsafeMutableRawPointer</span><span class="p">?,</span> <span class="kt">Int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">Void</span><span class="p">)?</span>
+<span class="p">)</span> <span class="p">{</span>
+    <span class="nf">nonisolated</span><span class="p">(</span><span class="n">unsafe</span><span class="p">)</span> <span class="k">let</span> <span class="nv">unsafeCtx</span> <span class="o">=</span> <span class="n">ctx</span>
+    <span class="kt">Task</span> <span class="p">{</span> <span class="kd">@Sendable</span> <span class="k">in</span>
+        <span class="k">while</span> <span class="kc">true</span> <span class="p">{</span>
+            <span class="k">guard</span> <span class="k">let</span> <span class="nv">randomEvent</span> <span class="o">=</span> <span class="kt">EventCode</span><span class="o">.</span><span class="n">allCases</span><span class="o">.</span><span class="nf">randomElement</span><span class="p">()</span> <span class="k">else</span> <span class="p">{</span> <span class="k">continue</span> <span class="p">}</span>
+            <span class="nf">callback</span><span class="p">?(</span><span class="n">unsafeCtx</span><span class="p">,</span> <span class="n">randomEvent</span><span class="o">.</span><span class="n">rawValue</span><span class="p">)</span>
+            <span class="k">try</span> <span class="k">await</span> <span class="kt">Task</span><span class="o">.</span><span class="nf">sleep</span><span class="p">(</span><span class="nv">for</span><span class="p">:</span> <span class="o">.</span><span class="nf">milliseconds</span><span class="p">(</span><span class="mi">500</span><span class="p">))</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h3 id="subscribe-to-the-events-from-c">Subscribe to the events from C</h3>
+
+<p>We reuse the same object from the previous example as the context, after adding a new method:</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
+    <span class="p">...</span>
+    <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">on_event</span><span class="p">)(</span><span class="kt">int</span><span class="p">);</span>
+<span class="p">}</span> <span class="n">complex_object</span><span class="p">;</span>
+</code></pre></div></div>
+
+<p>So that the callback can be simply:</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">static</span> <span class="kt">void</span> <span class="nf">my_event_callback</span><span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="n">ctx</span><span class="p">,</span> <span class="kt">int</span> <span class="n">event_code</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">complex_object</span> <span class="o">*</span><span class="n">obj</span> <span class="o">=</span> <span class="p">(</span><span class="n">complex_object</span> <span class="o">*</span><span class="p">)</span><span class="n">ctx</span><span class="p">;</span>
+    <span class="n">obj</span><span class="o">-&gt;</span><span class="n">on_event</span><span class="p">(</span><span class="n">event_code</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>When the application starts, we also start the emitter and register to it with our callback:</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">swift_start_events_emitter</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">my_event_callback</span><span class="p">);</span>
+</code></pre></div></div>
+
+<p>And that’s basically it. The <code class="language-plaintext highlighter-rouge">on_event()</code> method can then forward the event to other areas of the application as it pleases.</p>
+
+<h2 id="data-exchange">Data exchange</h2>
+
+<p>Okay, this can be <em>really</em> annoying, especially if your application is not a greenfield: exchanging strongly typed data across the Swift boundary. There’s a fundamental issue with any form of FFI, which is exchanging data between different programming languages. Keep in mind that returning opaque C pointers to Swift objects with <code class="language-plaintext highlighter-rouge">Unmanaged</code> is not comparable, because the C code is not meant to understand the contents of the memory. Such pointers are treated like integer identifiers. The trouble begins when we expect C code to understand the <em>layout</em> of Swift structures.</p>
+
+<h3 id="the-single-source-of-truth">The single source of truth</h3>
+
+<p>The best way to deal with data is to pick a common format like JSON or <a href="https://protobuf.dev/">Google Protocol Buffers (protobuf)</a>, that is, formats that are easy to encode and decode in any programming language. The approach is as follows:</p>
+
+<ul>
+  <li>Define your application entities in an <strong>Intermediate Representation</strong> (IR).</li>
+  <li>Autogenerate the Swift and non-Swift models from the IR, the single source of truth.</li>
+  <li>Pass text (JSON) or binary data (protobuf) whenever a <code class="language-plaintext highlighter-rouge">@_cdecl</code> function requires a complex entity.</li>
+  <li>Encode and decode entities to the native representation as needed.</li>
+</ul>
+
+<p>For what it’s worth, <a href="https://quicktype.io/">Quicktype</a> and JSON Schemas can be a simpler IR alternative to <code class="language-plaintext highlighter-rouge">protobuf</code>.</p>
+
+<h3 id="example-flow">Example flow</h3>
+
+<p>Below we define a Swift function taking an entity input encoded as JSON:</p>
+
+<div class="language-swift highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/* The entity is autogenerated. */</span>
+<span class="kd">public</span> <span class="kd">struct</span> <span class="kt">Entity</span><span class="p">:</span> <span class="kt">Codable</span> <span class="p">{</span>
+    <span class="k">let</span> <span class="nv">num</span><span class="p">:</span> <span class="kt">Int</span>
+    <span class="k">let</span> <span class="nv">ch</span><span class="p">:</span> <span class="kt">Character</span>
+<span class="p">}</span>
+
+<span class="kd">@_cdecl</span><span class="p">(</span><span class="s">"swift_function"</span><span class="p">)</span>
+<span class="kd">public</span> <span class="kd">func</span> <span class="nf">swift_function</span><span class="p">(</span><span class="nv">obj</span><span class="p">:</span> <span class="kt">UnsafePointer</span><span class="o">&lt;</span><span class="kt">CChar</span><span class="o">&gt;</span><span class="p">?)</span> <span class="p">{</span>
+    <span class="k">guard</span> <span class="k">let</span> <span class="nv">obj</span><span class="p">,</span> <span class="k">let</span> <span class="nv">json</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="nf">data</span><span class="p">(</span><span class="nv">using</span><span class="p">:</span> <span class="o">.</span><span class="n">utf8</span><span class="p">)</span> <span class="k">else</span> <span class="p">{</span> <span class="k">return</span> <span class="p">}</span>
+    <span class="k">do</span> <span class="p">{</span>
+        <span class="k">let</span> <span class="nv">entity</span> <span class="o">=</span> <span class="k">try</span> <span class="kt">JSONDecoder</span><span class="p">()</span><span class="o">.</span><span class="nf">decode</span><span class="p">(</span><span class="kt">Entity</span><span class="o">.</span><span class="k">self</span><span class="p">,</span> <span class="nv">from</span><span class="p">:</span> <span class="n">json</span><span class="p">)</span>
+        <span class="nf">print</span><span class="p">(</span><span class="s">"Entity: </span><span class="se">\(</span><span class="n">entity</span><span class="se">)</span><span class="s">"</span><span class="p">)</span>
+    <span class="p">}</span> <span class="k">catch</span> <span class="p">{</span>
+        <span class="nf">print</span><span class="p">(</span><span class="s">"Failure: </span><span class="se">\(</span><span class="n">error</span><span class="se">)</span><span class="s">"</span><span class="p">)</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>This is how we invoke the Swift function in C:</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/* The entity and the JSON encoder are autogenerated. */</span>
+<span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
+    <span class="kt">int</span> <span class="n">num</span><span class="p">;</span>
+    <span class="kt">char</span> <span class="n">ch</span><span class="p">;</span>
+<span class="p">}</span> <span class="n">entity</span><span class="p">;</span>
+<span class="k">extern</span> <span class="kt">char</span> <span class="o">*</span><span class="nf">encode_json</span><span class="p">(</span><span class="k">const</span> <span class="n">entity</span> <span class="o">*</span><span class="p">);</span>
+
+<span class="n">func</span> <span class="nf">c_function</span><span class="p">()</span> <span class="p">{</span>
+    <span class="n">entity</span> <span class="n">obj</span> <span class="o">=</span> <span class="p">{</span> <span class="mi">100</span><span class="p">,</span> <span class="sc">'a'</span> <span class="p">};</span>
+    <span class="kt">char</span> <span class="o">*</span><span class="n">json</span> <span class="o">=</span> <span class="n">encode_json</span><span class="p">(</span><span class="n">obj</span><span class="p">);</span>
+    <span class="n">swift_function</span><span class="p">(</span><span class="n">json</span><span class="p">);</span>
+    <span class="n">free</span><span class="p">(</span><span class="n">json</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h3 id="limitations">Limitations</h3>
+
+<p>Unfortunately, the IR approach is unfriendly to apps that were written with a Swift-only mindset, and both Passepartout and Partout have a long-standing set of <code class="language-plaintext highlighter-rouge">Codable</code> domain entities. The switch to a JSON or <code class="language-plaintext highlighter-rouge">protobuf</code> codegen can be very challenging if you like me have relied on:</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">RawRepresentable</code></li>
+  <li>Enums with associated values</li>
+  <li>Custom <code class="language-plaintext highlighter-rouge">Codable</code> implementations</li>
+  <li>Other strongly typed semantics</li>
+</ul>
+
+<p>Because there are often no 1:1 counterparts in other languages. Especially if the entities are involved in a persistence layer, you must be extremely careful with any refactoring of the data model to avoid data loss or crashes.</p>
+
+<p>In my case, I tried to rewrite my domain with JSON Schema or <a href="https://github.com/apple/swift-protobuf">swift-protobuf</a>, but eventually chose to <a href="https://github.com/partout-io/partout/tree/master/Sources/PartoutCodegen">write my own codegen</a> with <a href="https://github.com/swiftlang/swift-syntax">SwiftSyntax</a> to keep Swift as the source of truth. The codegen parses an IR from Swift and proceeds to transpile it to Kotlin for Android and C++ for Linux and Windows (later). It was tiring but safer because I didn’t need to change much of the application code, whereas a strict JSON domain would have been a potentially disruptive change. Better be safe than sorry.</p>
+
+<h2 id="bottom-line">Bottom line</h2>
+
+<p>It’s been a long journey, but this article should wrap up everything you need to know to bring your Apple-only Swift/SwiftUI app to any other platform that Swift supports. It’s now time to make sense of all this yapping and build a real application with what we learned from Passepartout/Partout.</p>
+
+<p>Going forward, we’ll build a simple –but thorough– non-Swift application on top of a Swift library. The sample application will feature a native UI (both SwiftUI and non-Swift) interacting with Swift business logic through a C ABI layer. In other words, a scalable architecture to port a SwiftUI app to Linux, Android, and Windows.</p>
+
+<p>Last but not least, even friendly to AI agentic coding. See you in the next article.</p>]]></content><author><name>Davide De Rosa</name></author><category term="development" /><category term="swift" /><category term="c" /><category term="make" /><category term="cmake" /><summary type="html"><![CDATA[In the previous post, I threw in a few ideas about how to integrate Swift logic with non-Swift code. We learned how to call Swift code from other languages with @_cdecl, but now we need to fill a few remaining gaps to build a modern non-Swift application on top of our Swift library. You can find the source code of these examples on GitHub. Asynchronous calls There’s no such thing as concurrency keywords in C. The only tool we have at disposal to return an async result is with a callback. To some extent, this reminds of completion handlers before Swift Concurrency entered the scene. However, Swift completion handlers are still closures, as in they can capture variables from the enclosing context. This is not the case for C callbacks, which are stateless pointers to function and therefore closer to static functions. The common pattern to mimic Swift completion handlers in C is by providing a callback context. Let’s go step by step. For example, we may want to get the result of this async function: public func swiftSlowResult() async throws -&gt; Int { ... // Code may throw here return 100 // Whatever works, we only care about the function signature } C types in arguments We cannot attach a @_cdecl attribute as long as we use features that don’t transpose to C, and async is one of them. Let’s take an intermediate step and wrap the function like the preconcurrency counterpart of many standard Swift APIs: public func swiftSlowResultWrapper( completion: @Sendable (Int?, Error?) -&gt; Void ) -&gt; Void { Task { do { let result = try await swiftSlowResult() completion(result, nil) } catch { // The first argument should be discarded on failure completion(0, error) } } } Cool, we got rid of async with the callback pattern. As we saw before, optionals and Error are other points of friction, so we introduce a user-defined error code enum, that is a plain int in C. All things considered, this is the first half-working version of our signature: enum SlowError: Int, Error { case foo = 10 case bar = 20 case unknown = 1000 } @_cdecl("swift_slow_result") public func swiftSlowResultWrapper( completion: @Sendable (Int, Int) -&gt; Void ) -&gt; Void { Task { do { let result = try await swiftSlowResult() // Error code 0 means success completion(result, 0) } catch let error as SlowError { // The first argument must be ignored on failure completion(0, error.rawValue) } catch { completion(0, SlowError.unknown.rawValue) } } } And a trivial example of its usage: #include &lt;stdio.h&gt; typedef enum { slow_error_none = 0, slow_error_foo = 10, slow_error_bar = 20, slow_error_unknown = 1000 } slow_error; static void my_result_callback(int result, slow_error error_code) { if (error_code != slow_error_none) { printf("Error: %d\n", error_code); return; } printf("Result: %d\n", result); } void invoke_swift_async_function() { /* ... */ swift_slow_result(my_result_callback); } Providing context Another problem to address is supporting captures behavior in the completion callback, because we probably want to do something useful upon completion. The de facto way to do it in C is, as mentioned before, by propagating a context: public func swiftSlowResultWrapper( ctx: UnsafeMutableRawPointer?, completion: @Sendable (UnsafeMutableRawPointer?, Int, Int) ) -&gt; Void { nonisolated(unsafe) let unsafeCtx = ctx Task { ... completion(unsafeCtx, result, errorCode) } } Unsafe and generic by nature, a context can be literally anything. Unsurprisingly, Swift UnsafeMutableRawPointer maps to void * in C. This is the second version of our C program interacting with Swift async code: /* Initialized elsewhere. */ typedef struct { int initial_value; void (*perform)(int); void (*report_failure)(slow_error); } complex_object; static void my_result_callback(void *ctx, int result, slow_error error_code) { complex_object *obj = (complex_object *)ctx; if (error_code != slow_error_none) { printf("Error: %d\n", error_code); obj-&gt;report_failure(error_code); return; } const int compound_result = obj-&gt;initial_value + result; printf("Compound result: %d\n", compound_result); /* Move on with our lives. */ obj-&gt;perform(compound_result); } /* We assume `obj` to be the context to act upon, and we expect it * to survive the synchronous function call. A pointer to a local * variable cannot be the context of an async function, because * the callback would eventually refer to a dangling pointer. */ void invoke_swift_async_function(complex_object *obj) { swift_slow_result(obj, my_result_callback); } Calling convention Nevertheless, the code lacks a final touch, also a very obscure one. As is, the signature still accepts a Swift closure (or ObjC block) for the completion argument, and this will inevitably lead to arcane compile issues or runtime crashes because of the wrong calling convention. We must enforce the @convention(c) attribute to restrict the input to C-style pointers to function, i.e., without captures: public func swiftSlowResultWrapper( ctx: UnsafeMutableRawPointer?, completion: @Sendable @convention(c) (UnsafeMutableRawPointer?, Int, Int) ) -&gt; Void { ... } I might be wrong, but as far as I can tell, the Swift compiler is unable to enforce the C calling convention in @_cdecl-enabled functions, because I believe it should. Event handling Another crux of a modern application is delivering and handling asynchronous events at scale. In the recent years, Combine was the most used tool for this purpose, and the SwiftUI onReceive() function certainly favored Combine publishers for emitting events. But… remember? Combine is not available outside Apple. Regardless of how we emit events, though, that is a concern of the Swift library. When we build a non-Swift app on top of a Swift library, we only need a way to observe the events that the library emits. No magic involved, C is a simple language: we can register to events with a callback. The inherent difference with completion handlers, for example, is that an event callback will be a pointer to function that follows the application lifecycle. Emit the events from Swift Let’s start with a dumb events emitter. Here we emit events represented by integer codes from 1 to 3 at a 500 milliseconds interval. We use the same callback mechanism with an optional context. The consumer will start the events emitter and subscribe to it contextually. enum EventCode: Int, CaseIterable { case one = 1 case two case three } @_cdecl("swift_start_events_emitter") public func swiftStartEventsEmitter( ctx: UnsafeMutableRawPointer?, callback: (@Sendable @convention(c) (UnsafeMutableRawPointer?, Int) -&gt; Void)? ) { nonisolated(unsafe) let unsafeCtx = ctx Task { @Sendable in while true { guard let randomEvent = EventCode.allCases.randomElement() else { continue } callback?(unsafeCtx, randomEvent.rawValue) try await Task.sleep(for: .milliseconds(500)) } } } Subscribe to the events from C We reuse the same object from the previous example as the context, after adding a new method: typedef struct { ... void (*on_event)(int); } complex_object; So that the callback can be simply: static void my_event_callback(void *ctx, int event_code) { complex_object *obj = (complex_object *)ctx; obj-&gt;on_event(event_code); } When the application starts, we also start the emitter and register to it with our callback: swift_start_events_emitter(obj, my_event_callback); And that’s basically it. The on_event() method can then forward the event to other areas of the application as it pleases. Data exchange Okay, this can be really annoying, especially if your application is not a greenfield: exchanging strongly typed data across the Swift boundary. There’s a fundamental issue with any form of FFI, which is exchanging data between different programming languages. Keep in mind that returning opaque C pointers to Swift objects with Unmanaged is not comparable, because the C code is not meant to understand the contents of the memory. Such pointers are treated like integer identifiers. The trouble begins when we expect C code to understand the layout of Swift structures. The single source of truth The best way to deal with data is to pick a common format like JSON or Google Protocol Buffers (protobuf), that is, formats that are easy to encode and decode in any programming language. The approach is as follows: Define your application entities in an Intermediate Representation (IR). Autogenerate the Swift and non-Swift models from the IR, the single source of truth. Pass text (JSON) or binary data (protobuf) whenever a @_cdecl function requires a complex entity. Encode and decode entities to the native representation as needed. For what it’s worth, Quicktype and JSON Schemas can be a simpler IR alternative to protobuf. Example flow Below we define a Swift function taking an entity input encoded as JSON: /* The entity is autogenerated. */ public struct Entity: Codable { let num: Int let ch: Character } @_cdecl("swift_function") public func swift_function(obj: UnsafePointer&lt;CChar&gt;?) { guard let obj, let json = obj.data(using: .utf8) else { return } do { let entity = try JSONDecoder().decode(Entity.self, from: json) print("Entity: \(entity)") } catch { print("Failure: \(error)") } } This is how we invoke the Swift function in C: /* The entity and the JSON encoder are autogenerated. */ typedef struct { int num; char ch; } entity; extern char *encode_json(const entity *); func c_function() { entity obj = { 100, 'a' }; char *json = encode_json(obj); swift_function(json); free(json); } Limitations Unfortunately, the IR approach is unfriendly to apps that were written with a Swift-only mindset, and both Passepartout and Partout have a long-standing set of Codable domain entities. The switch to a JSON or protobuf codegen can be very challenging if you like me have relied on: RawRepresentable Enums with associated values Custom Codable implementations Other strongly typed semantics Because there are often no 1:1 counterparts in other languages. Especially if the entities are involved in a persistence layer, you must be extremely careful with any refactoring of the data model to avoid data loss or crashes. In my case, I tried to rewrite my domain with JSON Schema or swift-protobuf, but eventually chose to write my own codegen with SwiftSyntax to keep Swift as the source of truth. The codegen parses an IR from Swift and proceeds to transpile it to Kotlin for Android and C++ for Linux and Windows (later). It was tiring but safer because I didn’t need to change much of the application code, whereas a strict JSON domain would have been a potentially disruptive change. Better be safe than sorry. Bottom line It’s been a long journey, but this article should wrap up everything you need to know to bring your Apple-only Swift/SwiftUI app to any other platform that Swift supports. It’s now time to make sense of all this yapping and build a real application with what we learned from Passepartout/Partout. Going forward, we’ll build a simple –but thorough– non-Swift application on top of a Swift library. The sample application will feature a native UI (both SwiftUI and non-Swift) interacting with Swift business logic through a C ABI layer. In other words, a scalable architecture to port a SwiftUI app to Linux, Android, and Windows. Last but not least, even friendly to AI agentic coding. See you in the next article.]]></summary></entry><entry><title type="html">Cross-platform Swift: Integration (pt. 1)</title><link href="https://davidederosa.com/cross-platform-swift/integration-part-one/" rel="alternate" type="text/html" title="Cross-platform Swift: Integration (pt. 1)" /><published>2025-12-22T00:00:00+01:00</published><updated>2025-12-22T00:00:00+01:00</updated><id>https://davidederosa.com/cross-platform-swift/cross-platform-swift-integration-part-one</id><content type="html" xml:base="https://davidederosa.com/cross-platform-swift/integration-part-one/"><![CDATA[<p>We are at a stage where Partout, our cross-platform Swift library:</p>
 
 <ul>
   <li>Builds as a static library</li>
@@ -914,130 +1201,4 @@ PUT /banks/&lt;customer_id&gt;/withdraw {"amount":...}
 
 <p>By the way, in many corporate projects people use DI because “everybody does”, rather than understanding the real benefits and tradeoffs. The overhead of maintaining abstract layers, or even third parties, for entities that will <em>always</em> have one implementation is sadly laughable. Please, do not avoid concrete classes just because you read that on some book. As I said in the beginning, you shouldn’t use a solution for a problem you don’t have, and most projects don’t need bulky external third parties to deal with their trivial dependencies. If you wasted hours to track down the order and lifecycle of the objects that an app creates on launch, you know what I’m talking about.</p>
 
-<p>Sometimes, it really seems that some modern programmers don’t know how to initialize objects in the first place. In that case, rather than a dependency injection engine –whatever that means–, why not go back to the basics?</p>]]></content><author><name>Davide De Rosa</name></author><category term="development" /><category term="dependency injection" /><summary type="html"><![CDATA[When studying the foundations of a programming language, for example, during a career in Computer Science, very rarely are design patterns and the concept of software architecture presented in a way that can be transferred to real-world scenarios. Add to that, you may never use most of the well-known patterns, and it’s okay because you don’t want to be a hammer looking for a nail. You shouldn’t force a design pattern for the sake of using it. Below, I’ll show you how a popular design pattern helped me rework Passepartout for Mac to distribute it outside of the App Store, without messing too much with the existing and stable codebase. Experience produces patterns Patterns are simply an outcome of your programming experience, in that you recognize a common problem for which a common solution also exists. Yet, the amount of buzzwords in the online communities around what some erroneously call “architectures” is ridiculous –the MVVM acronym being the one I stand the least–, to the point that the poor newcomers may feel intimidated. The risk of being ostracized for not using “the right name for the thing” is real, even if the same thing could be named differently the moment you visit a different community. But hey, listen, the reality is brighter: compilers don’t give a damn about the name you give to your grand architectures. The only names that matter, at the end of the day, are those coming from the syntax of the programming language you use. Popular design patterns Nevertheless, some design patterns are so popular that their names are de facto universal: Builder Command Factory Singleton Strategy … You’re bound to cross them at least once in your lifetime. If you like practice more than theory, you definitely used any of the above without the need to give them a name. These patterns are undoubtly useful, they resolve basic architectural problems and, contrary to some beliefs, by no means are they tied to OOP. Then there is Dependency Injection (DI). I hate giving this one a name, but there it is. More than a design pattern, DI is an approach to making software. I call it that way to avoid the terrible mistake of thinking that there is only one way to do it. I mean, if you’re a Java programmer, you don’t need the Spring Framework to do DI. Here’s how I like to phrase it: DI is the act of decoupling your software from the underlying implementations of its dependencies. How DI helps me scale Passepartout Weeks ago, I decided to make Passepartout for Mac available outside of the App Store. Making such a VPN app standalone is no trivial task because the way it operates is radically different: the UI is still a frontend to the VPN backend, but the app and the VPN processes execute as different users, and they do not easily communicate. Specifically, the VPN is deployed as System Extension, and therefore runs as root. By leaving the App Store, I was about to lose a big chunk of features: App Groups: required for app/VPN IPC (inter-process communication), data sharing, and logs Shared keychain: used to persist the VPN profiles In-app purchases iCloud In-app purchases and iCloud could be postponed by stripping paid features, but the core functionality of Passepartout relied on both App Groups and the shared keychain. I hit a tough blocker. Here’s where DI comes to the rescue: you don’t change the business logic of your software, you rather change how that logic is implemented deep down in the leaves of the dependency tree. I still wanted to “share data between the app and the VPN process” (business logic), but I needed to change how that data was shared (dependency). Remember, this isolation is only possible if the two concerns are sharply separated, but this is the core principle behind DI. The core library of Passepartout, Partout, is 100% pure Swift for this reason: the logic of the library is always the same, with the “low-level” implementations abstracted as protocols, and for which the app is free to provide (inject) truly different implementations. In my case, it turned out that I could just craft new implementations for the standalone Mac app, whereas anything else would stay untouched. Swap out the broken pieces The process is fairly simple: For each dependency, identify the “broken” implementation of a protocol Write a new implementation, compatible with the target Unit test behavior as per the protocol pre/post conditions Swap the unsupported implementation with the new one After these steps, passing the tests would imply that the app will work like before, but regardless of being downloaded from the App Store or not. I can’t tell how thrilling it is when you see the magic of programming in action. This is a real-world situation where good practices and constant refactoring pay off. The new Mac app eventually works around the missing functionalities by dynamically replacing (supportsAppGroups is false in this case): UserDefaultsEnvironment with NETunnelEnvironment, which does IPC by sending messages to the System Extension, rather than sharing data through the App Group UserDefaults. They both implement the TunnelEnvironmentReader protocol, meant for reading VPN data from the app. public protocol TunnelEnvironmentReader: Sendable { func environmentValue&lt;T&gt;(forKey key: TunnelEnvironmentKey&lt;T&gt;) -&gt; T? where T: Decodable } KeychainNEProtocolCoder with ProviderNEProtocolCoder, which installs the VPN profiles without the keychain, using the Network Extension map in providerConfiguration. They both implement the NEProtocolCoder protocol, meant for VPN profiles serialization. public protocol NEProtocolCoder: Sendable { func protocolConfiguration(from profile: Profile, title: (Profile) -&gt; String) throws -&gt; NETunnelProviderProtocol func profile(from protocolConfiguration: NETunnelProviderProtocol) throws -&gt; Profile } Do you really need DI? You’d better follow the DI approach early in your software development, but not immediately, because you may never need to convert a code module into a pluggable dependency. If you foresee that your software will scale enough to justify such an abstraction, then start pulling out third parties from your concrete classes. By the way, in many corporate projects people use DI because “everybody does”, rather than understanding the real benefits and tradeoffs. The overhead of maintaining abstract layers, or even third parties, for entities that will always have one implementation is sadly laughable. Please, do not avoid concrete classes just because you read that on some book. As I said in the beginning, you shouldn’t use a solution for a problem you don’t have, and most projects don’t need bulky external third parties to deal with their trivial dependencies. If you wasted hours to track down the order and lifecycle of the objects that an app creates on launch, you know what I’m talking about. Sometimes, it really seems that some modern programmers don’t know how to initialize objects in the first place. In that case, rather than a dependency injection engine –whatever that means–, why not go back to the basics?]]></summary></entry><entry><title type="html">Cross-platform Swift: Core libraries</title><link href="https://davidederosa.com/cross-platform-swift/core-libraries/" rel="alternate" type="text/html" title="Cross-platform Swift: Core libraries" /><published>2025-05-05T00:00:00+02:00</published><updated>2025-05-05T00:00:00+02:00</updated><id>https://davidederosa.com/cross-platform-swift/cross-platform-swift-core-libraries</id><content type="html" xml:base="https://davidederosa.com/cross-platform-swift/core-libraries/"><![CDATA[<p>When programming Swift in Xcode, we take for granted a few things that are in fact different when you compile on other platforms. Here I show you those I stumbled upon, and how I worked around some limitations of the bare Swift toolchain.</p>
-
-<h2 id="foundation">Foundation</h2>
-
-<p>Have you ever compiled Swift code without importing <a href="https://developer.apple.com/documentation/foundation/"><code class="language-plaintext highlighter-rouge">Foundation</code></a>? Do you even think it’s possible? Look at the most basic Swift template in Xcode:</p>
-
-<div class="language-swift highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">//</span>
-<span class="c1">//  File.swift</span>
-<span class="c1">//  Passepartout</span>
-<span class="c1">//</span>
-<span class="c1">//  Created by Davide De Rosa on 5/5/25.</span>
-<span class="c1">//</span>
-
-<span class="kd">import</span> <span class="kt">Foundation</span>
-</code></pre></div></div>
-
-<p>which in Objective-C would be:</p>
-
-<div class="language-objective_c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">//</span>
-<span class="c1">//  File.m</span>
-<span class="c1">//  Passepartout</span>
-<span class="c1">//</span>
-<span class="c1">//  Created by Davide De Rosa on 5/5/25.</span>
-<span class="c1">//</span>
-
-<span class="cp">#import &lt;Foundation/Foundation.h&gt;
-</span></code></pre></div></div>
-
-<p>Let’s cut it short to the bad news: <strong><code class="language-plaintext highlighter-rouge">Foundation</code> is not part of the Swift language</strong>.</p>
-
-<p><code class="language-plaintext highlighter-rouge">Foundation</code> is, however, available as an import in the prebuilt Swift toolchains for non-Apple platforms. Why is that? Over the years, those pseudo-implicit imports may have convinced most of us that <code class="language-plaintext highlighter-rouge">Foundation</code> has always been a standard library. First, as an Objective-C wrapper of <a href="https://developer.apple.com/documentation/corefoundation/"><code class="language-plaintext highlighter-rouge">CoreFoundation</code></a>. Later, as an integral part of Swift.</p>
-
-<p>The maintainers of the otherwise modern Apple language are well aware of this heavy legacy, so they created a replacement for <code class="language-plaintext highlighter-rouge">Foundation</code> that is not bound to the Apple SDK. Beware that if you build the Swift toolchain by yourself, <code class="language-plaintext highlighter-rouge">Foundation</code> is not included by default. This tells me that maybe, <em>maybe</em>, <code class="language-plaintext highlighter-rouge">Foundation</code> will also depart from Swift someday. You were warned.</p>
-
-<p>Below are a few <code class="language-plaintext highlighter-rouge">Foundation</code> entities that many developers are familiar with:</p>
-
-<ul>
-  <li><code class="language-plaintext highlighter-rouge">Data</code> for binary data (bridging ObjC <code class="language-plaintext highlighter-rouge">NSData</code>)</li>
-  <li><code class="language-plaintext highlighter-rouge">Date</code> for dates and timestamps (briding ObjC <code class="language-plaintext highlighter-rouge">NSDate</code>)</li>
-  <li><code class="language-plaintext highlighter-rouge">UUID</code> for unique identifiers</li>
-  <li><code class="language-plaintext highlighter-rouge">JSONEncoder</code> and <code class="language-plaintext highlighter-rouge">JSONDecoder</code> (these are pure Swift)</li>
-  <li><code class="language-plaintext highlighter-rouge">URL</code>, <code class="language-plaintext highlighter-rouge">URLSession</code> and tasks (bridigng ObjC <code class="language-plaintext highlighter-rouge">NSURL</code> and <code class="language-plaintext highlighter-rouge">NSURLSession</code>)</li>
-  <li><code class="language-plaintext highlighter-rouge">FileManager</code></li>
-  <li>A bunch of other <code class="language-plaintext highlighter-rouge">NS</code>-prefixed stuff</li>
-</ul>
-
-<p>The <code class="language-plaintext highlighter-rouge">Foundation</code> import is not as a comprehensive as on Apple. This new version has opt-in modules due to the dependencies that they imply:</p>
-
-<ul>
-  <li><code class="language-plaintext highlighter-rouge">FoundationNetworking</code> for <code class="language-plaintext highlighter-rouge">URL</code> and <code class="language-plaintext highlighter-rouge">URLSession</code>, due to the dependency on <code class="language-plaintext highlighter-rouge">libcurl</code></li>
-  <li><code class="language-plaintext highlighter-rouge">FoundationXML</code> for <code class="language-plaintext highlighter-rouge">XMLParser</code>, due to the dependency on <code class="language-plaintext highlighter-rouge">libxml2</code></li>
-</ul>
-
-<p>Can you get rid of all this stuff already? I doubt you can, unless you started a new project knowing these gotchas beforehand. In my case, I need to keep the burden of this non-standard library, at least until Swift will have a richer standard library.</p>
-
-<p>Last but not least, <code class="language-plaintext highlighter-rouge">Foundation</code> comes with the <a href="https://developer.apple.com/documentation/dispatch">Grand Central Dispatch</a> API, but listen to me: it’s time you learn <a href="https://developer.apple.com/documentation/swift/concurrency"><code class="language-plaintext highlighter-rouge">Concurrency</code></a>.</p>
-
-<h2 id="swift-standard-library">Swift standard library</h2>
-
-<p>You heard that, Swift has a <a href="https://developer.apple.com/documentation/swift/swift-standard-library"><em>standard library</em></a>, but few would be able to delineate its boundaries. The Apple documentation certainly doesn’t help when figuring out what comes from the language, and what comes from <code class="language-plaintext highlighter-rouge">Foundation</code>.</p>
-
-<p>A partial list:</p>
-
-<ul>
-  <li>Primitive types: <code class="language-plaintext highlighter-rouge">Bool</code>, <code class="language-plaintext highlighter-rouge">Int</code>, <code class="language-plaintext highlighter-rouge">String</code>, <code class="language-plaintext highlighter-rouge">Double</code>, …, but <em>not</em> <code class="language-plaintext highlighter-rouge">Data</code> or <code class="language-plaintext highlighter-rouge">Date</code>!</li>
-  <li>Protocols: <code class="language-plaintext highlighter-rouge">Comparable</code>, <code class="language-plaintext highlighter-rouge">Equatable</code>, <code class="language-plaintext highlighter-rouge">Hashable</code>, <code class="language-plaintext highlighter-rouge">Identifiable</code>, <code class="language-plaintext highlighter-rouge">Codable</code>, …</li>
-  <li>Collections: <code class="language-plaintext highlighter-rouge">Array</code>, <code class="language-plaintext highlighter-rouge">Dictionary</code>, <code class="language-plaintext highlighter-rouge">Set</code>, <code class="language-plaintext highlighter-rouge">Collection</code>, …</li>
-  <li>Flow constructs: <code class="language-plaintext highlighter-rouge">Result</code>, <code class="language-plaintext highlighter-rouge">Error</code></li>
-  <li>String description protocols: <code class="language-plaintext highlighter-rouge">CustomStringConvertible</code> and variations</li>
-</ul>
-
-<p>Thank God, <code class="language-plaintext highlighter-rouge">Concurrency</code> is also part of the library.</p>
-
-<h2 id="platform-specific-packages">Platform-specific packages</h2>
-
-<p>When developing on macOS, you may notice that standard C functions are implicitly bridged to Swift code. This autocompletion is proof:</p>
-
-<p><img src="/s/f/cross-platform-swift/core-libraries-xcode-c-autocompletion.png" alt="C autocompletion of memcpy in Xcode" /></p>
-
-<p>The other Swift environments behave differently, and honestly, I prefer it that way. I’d rather import things explicitly when needed. Therefore, the compiler will stop at C symbols in Swift code out of the box. Windows in particular doesn’t follow the POSIX naming, and some symbols come from very differently named headers. For example, the first symbol that triggered a compiler failure for me was <code class="language-plaintext highlighter-rouge">AF_INET</code>, which on Windows is part of <code class="language-plaintext highlighter-rouge">WinSock2.h</code>.</p>
-
-<p>While the header names are relevant in C code, Swift remains a bit more agnostic by hiding them behind platform-specific packages:</p>
-
-<ul>
-  <li><code class="language-plaintext highlighter-rouge">import WinSDK</code> on Windows</li>
-  <li><code class="language-plaintext highlighter-rouge">import Linux</code> on Linux</li>
-  <li><code class="language-plaintext highlighter-rouge">import Android</code> on Android</li>
-</ul>
-
-<p>The imports still require some <code class="language-plaintext highlighter-rouge">#if</code> conditionals here and there. At that point, you may run into a few C symbols that are only available on Apple platforms, like any variation of <code class="language-plaintext highlighter-rouge">NSEC_PER_*</code> in my library. In that case, you can redefine those symbols yourself, or refactor the code to not use them at all.</p>
-
-<p>Another thing I noticed is name clashes. To name one, Windows seems to have a name clash on <code class="language-plaintext highlighter-rouge">UUID</code> (alias for <code class="language-plaintext highlighter-rouge">GUID</code> in Win32), which I resolved this way:</p>
-
-<div class="language-swift highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#if os(Windows)</span>
-<span class="kd">import</span> <span class="kt">WinSDK</span>
-<span class="kd">public</span> <span class="kd">typealias</span> <span class="kt">UUID</span> <span class="o">=</span> <span class="kt">Foundation</span><span class="o">.</span><span class="kt">UUID</span>
-<span class="cp">#endif</span>
-</code></pre></div></div>
-
-<p>There might be more similar occurrences, but you can get around them with conditionals and forced <code class="language-plaintext highlighter-rouge">typealias</code>. If you know better ways, please leave a comment below the post.</p>
-
-<h2 id="objective-c-runtime">Objective-C runtime</h2>
-
-<p>The need for the Objective-C runtime in your Swift code may be incredibly subtle. Look at a linker error I faced:</p>
-
-<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>lld-link: error: undefined symbol: objc_autoreleaseReturnValue
-</code></pre></div></div>
-
-<p>I was lucky to catch the issue in a place where the compiler could not provide any hint. The culprit was a class of the Partout API that was using the <a href="https://developer.apple.com/documentation/javascriptcore"><code class="language-plaintext highlighter-rouge">JavaScriptCore</code></a> framework, which in turn required Swift closures to be Objective-C blocks to inject custom functions into the JavaScript code. If you’ve never seen that, here’s a bit of the offending code:</p>
-
-<div class="language-swift highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nf">inject</span><span class="p">(</span><span class="s">"getText"</span><span class="p">,</span> <span class="nv">object</span><span class="p">:</span> <span class="n">vm</span><span class="o">.</span><span class="n">getText</span> <span class="k">as</span> <span class="kd">@convention</span><span class="p">(</span><span class="n">block</span><span class="p">)</span> <span class="p">(</span><span class="kt">String</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">Any</span><span class="p">?)</span>
-</code></pre></div></div>
-
-<p>Frankly, I wondered why the code compiled at all, so I tried to put <code class="language-plaintext highlighter-rouge">@objc</code> on top of a Swift class on Linux:</p>
-
-<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>File.swift:1:2: error: Objective-C interoperability is disabled
-</code></pre></div></div>
-
-<p>Gosh, then why does <code class="language-plaintext highlighter-rouge">@convention(block)</code> compile on non-Apple, if the linker is always bound to fail? I have no idea, but look at your code carefully if it compiles fine but the linker complains about some Objective-C runtime or obscure <code class="language-plaintext highlighter-rouge">NS*</code> entity.</p>
-
-<p>Fun fact: <code class="language-plaintext highlighter-rouge">JavaScriptCore</code> is an Objective-C framework with iOS 16 as the <em>minimum target</em>, which deceived me into seeing it as a “new thing”.</p>
-
-<h2 id="bottom-line">Bottom line</h2>
-
-<p>Stick with pure Swift as much as you can, and when you use <code class="language-plaintext highlighter-rouge">Foundation</code>, do it with a grain of salt: the Swift standard library is much smaller than you think. Spot any Objective-C sorcery, and kill it for good.</p>
-
-<p>In the next article, I will show you how conditionals and dependency injection allows us to still use frameworks that are not available on all platforms.</p>]]></content><author><name>Davide De Rosa</name></author><category term="development" /><category term="swift" /><category term="c" /><summary type="html"><![CDATA[When programming Swift in Xcode, we take for granted a few things that are in fact different when you compile on other platforms. Here I show you those I stumbled upon, and how I worked around some limitations of the bare Swift toolchain. Foundation Have you ever compiled Swift code without importing Foundation? Do you even think it’s possible? Look at the most basic Swift template in Xcode: // // File.swift // Passepartout // // Created by Davide De Rosa on 5/5/25. // import Foundation which in Objective-C would be: // // File.m // Passepartout // // Created by Davide De Rosa on 5/5/25. // #import &lt;Foundation/Foundation.h&gt; Let’s cut it short to the bad news: Foundation is not part of the Swift language. Foundation is, however, available as an import in the prebuilt Swift toolchains for non-Apple platforms. Why is that? Over the years, those pseudo-implicit imports may have convinced most of us that Foundation has always been a standard library. First, as an Objective-C wrapper of CoreFoundation. Later, as an integral part of Swift. The maintainers of the otherwise modern Apple language are well aware of this heavy legacy, so they created a replacement for Foundation that is not bound to the Apple SDK. Beware that if you build the Swift toolchain by yourself, Foundation is not included by default. This tells me that maybe, maybe, Foundation will also depart from Swift someday. You were warned. Below are a few Foundation entities that many developers are familiar with: Data for binary data (bridging ObjC NSData) Date for dates and timestamps (briding ObjC NSDate) UUID for unique identifiers JSONEncoder and JSONDecoder (these are pure Swift) URL, URLSession and tasks (bridigng ObjC NSURL and NSURLSession) FileManager A bunch of other NS-prefixed stuff The Foundation import is not as a comprehensive as on Apple. This new version has opt-in modules due to the dependencies that they imply: FoundationNetworking for URL and URLSession, due to the dependency on libcurl FoundationXML for XMLParser, due to the dependency on libxml2 Can you get rid of all this stuff already? I doubt you can, unless you started a new project knowing these gotchas beforehand. In my case, I need to keep the burden of this non-standard library, at least until Swift will have a richer standard library. Last but not least, Foundation comes with the Grand Central Dispatch API, but listen to me: it’s time you learn Concurrency. Swift standard library You heard that, Swift has a standard library, but few would be able to delineate its boundaries. The Apple documentation certainly doesn’t help when figuring out what comes from the language, and what comes from Foundation. A partial list: Primitive types: Bool, Int, String, Double, …, but not Data or Date! Protocols: Comparable, Equatable, Hashable, Identifiable, Codable, … Collections: Array, Dictionary, Set, Collection, … Flow constructs: Result, Error String description protocols: CustomStringConvertible and variations Thank God, Concurrency is also part of the library. Platform-specific packages When developing on macOS, you may notice that standard C functions are implicitly bridged to Swift code. This autocompletion is proof: The other Swift environments behave differently, and honestly, I prefer it that way. I’d rather import things explicitly when needed. Therefore, the compiler will stop at C symbols in Swift code out of the box. Windows in particular doesn’t follow the POSIX naming, and some symbols come from very differently named headers. For example, the first symbol that triggered a compiler failure for me was AF_INET, which on Windows is part of WinSock2.h. While the header names are relevant in C code, Swift remains a bit more agnostic by hiding them behind platform-specific packages: import WinSDK on Windows import Linux on Linux import Android on Android The imports still require some #if conditionals here and there. At that point, you may run into a few C symbols that are only available on Apple platforms, like any variation of NSEC_PER_* in my library. In that case, you can redefine those symbols yourself, or refactor the code to not use them at all. Another thing I noticed is name clashes. To name one, Windows seems to have a name clash on UUID (alias for GUID in Win32), which I resolved this way: #if os(Windows) import WinSDK public typealias UUID = Foundation.UUID #endif There might be more similar occurrences, but you can get around them with conditionals and forced typealias. If you know better ways, please leave a comment below the post. Objective-C runtime The need for the Objective-C runtime in your Swift code may be incredibly subtle. Look at a linker error I faced: lld-link: error: undefined symbol: objc_autoreleaseReturnValue I was lucky to catch the issue in a place where the compiler could not provide any hint. The culprit was a class of the Partout API that was using the JavaScriptCore framework, which in turn required Swift closures to be Objective-C blocks to inject custom functions into the JavaScript code. If you’ve never seen that, here’s a bit of the offending code: inject("getText", object: vm.getText as @convention(block) (String) -&gt; Any?) Frankly, I wondered why the code compiled at all, so I tried to put @objc on top of a Swift class on Linux: File.swift:1:2: error: Objective-C interoperability is disabled Gosh, then why does @convention(block) compile on non-Apple, if the linker is always bound to fail? I have no idea, but look at your code carefully if it compiles fine but the linker complains about some Objective-C runtime or obscure NS* entity. Fun fact: JavaScriptCore is an Objective-C framework with iOS 16 as the minimum target, which deceived me into seeing it as a “new thing”. Bottom line Stick with pure Swift as much as you can, and when you use Foundation, do it with a grain of salt: the Swift standard library is much smaller than you think. Spot any Objective-C sorcery, and kill it for good. In the next article, I will show you how conditionals and dependency injection allows us to still use frameworks that are not available on all platforms.]]></summary></entry></feed>
+<p>Sometimes, it really seems that some modern programmers don’t know how to initialize objects in the first place. In that case, rather than a dependency injection engine –whatever that means–, why not go back to the basics?</p>]]></content><author><name>Davide De Rosa</name></author><category term="development" /><category term="dependency injection" /><summary type="html"><![CDATA[When studying the foundations of a programming language, for example, during a career in Computer Science, very rarely are design patterns and the concept of software architecture presented in a way that can be transferred to real-world scenarios. Add to that, you may never use most of the well-known patterns, and it’s okay because you don’t want to be a hammer looking for a nail. You shouldn’t force a design pattern for the sake of using it. Below, I’ll show you how a popular design pattern helped me rework Passepartout for Mac to distribute it outside of the App Store, without messing too much with the existing and stable codebase. Experience produces patterns Patterns are simply an outcome of your programming experience, in that you recognize a common problem for which a common solution also exists. Yet, the amount of buzzwords in the online communities around what some erroneously call “architectures” is ridiculous –the MVVM acronym being the one I stand the least–, to the point that the poor newcomers may feel intimidated. The risk of being ostracized for not using “the right name for the thing” is real, even if the same thing could be named differently the moment you visit a different community. But hey, listen, the reality is brighter: compilers don’t give a damn about the name you give to your grand architectures. The only names that matter, at the end of the day, are those coming from the syntax of the programming language you use. Popular design patterns Nevertheless, some design patterns are so popular that their names are de facto universal: Builder Command Factory Singleton Strategy … You’re bound to cross them at least once in your lifetime. If you like practice more than theory, you definitely used any of the above without the need to give them a name. These patterns are undoubtly useful, they resolve basic architectural problems and, contrary to some beliefs, by no means are they tied to OOP. Then there is Dependency Injection (DI). I hate giving this one a name, but there it is. More than a design pattern, DI is an approach to making software. I call it that way to avoid the terrible mistake of thinking that there is only one way to do it. I mean, if you’re a Java programmer, you don’t need the Spring Framework to do DI. Here’s how I like to phrase it: DI is the act of decoupling your software from the underlying implementations of its dependencies. How DI helps me scale Passepartout Weeks ago, I decided to make Passepartout for Mac available outside of the App Store. Making such a VPN app standalone is no trivial task because the way it operates is radically different: the UI is still a frontend to the VPN backend, but the app and the VPN processes execute as different users, and they do not easily communicate. Specifically, the VPN is deployed as System Extension, and therefore runs as root. By leaving the App Store, I was about to lose a big chunk of features: App Groups: required for app/VPN IPC (inter-process communication), data sharing, and logs Shared keychain: used to persist the VPN profiles In-app purchases iCloud In-app purchases and iCloud could be postponed by stripping paid features, but the core functionality of Passepartout relied on both App Groups and the shared keychain. I hit a tough blocker. Here’s where DI comes to the rescue: you don’t change the business logic of your software, you rather change how that logic is implemented deep down in the leaves of the dependency tree. I still wanted to “share data between the app and the VPN process” (business logic), but I needed to change how that data was shared (dependency). Remember, this isolation is only possible if the two concerns are sharply separated, but this is the core principle behind DI. The core library of Passepartout, Partout, is 100% pure Swift for this reason: the logic of the library is always the same, with the “low-level” implementations abstracted as protocols, and for which the app is free to provide (inject) truly different implementations. In my case, it turned out that I could just craft new implementations for the standalone Mac app, whereas anything else would stay untouched. Swap out the broken pieces The process is fairly simple: For each dependency, identify the “broken” implementation of a protocol Write a new implementation, compatible with the target Unit test behavior as per the protocol pre/post conditions Swap the unsupported implementation with the new one After these steps, passing the tests would imply that the app will work like before, but regardless of being downloaded from the App Store or not. I can’t tell how thrilling it is when you see the magic of programming in action. This is a real-world situation where good practices and constant refactoring pay off. The new Mac app eventually works around the missing functionalities by dynamically replacing (supportsAppGroups is false in this case): UserDefaultsEnvironment with NETunnelEnvironment, which does IPC by sending messages to the System Extension, rather than sharing data through the App Group UserDefaults. They both implement the TunnelEnvironmentReader protocol, meant for reading VPN data from the app. public protocol TunnelEnvironmentReader: Sendable { func environmentValue&lt;T&gt;(forKey key: TunnelEnvironmentKey&lt;T&gt;) -&gt; T? where T: Decodable } KeychainNEProtocolCoder with ProviderNEProtocolCoder, which installs the VPN profiles without the keychain, using the Network Extension map in providerConfiguration. They both implement the NEProtocolCoder protocol, meant for VPN profiles serialization. public protocol NEProtocolCoder: Sendable { func protocolConfiguration(from profile: Profile, title: (Profile) -&gt; String) throws -&gt; NETunnelProviderProtocol func profile(from protocolConfiguration: NETunnelProviderProtocol) throws -&gt; Profile } Do you really need DI? You’d better follow the DI approach early in your software development, but not immediately, because you may never need to convert a code module into a pluggable dependency. If you foresee that your software will scale enough to justify such an abstraction, then start pulling out third parties from your concrete classes. By the way, in many corporate projects people use DI because “everybody does”, rather than understanding the real benefits and tradeoffs. The overhead of maintaining abstract layers, or even third parties, for entities that will always have one implementation is sadly laughable. Please, do not avoid concrete classes just because you read that on some book. As I said in the beginning, you shouldn’t use a solution for a problem you don’t have, and most projects don’t need bulky external third parties to deal with their trivial dependencies. If you wasted hours to track down the order and lifecycle of the objects that an app creates on launch, you know what I’m talking about. Sometimes, it really seems that some modern programmers don’t know how to initialize objects in the first place. In that case, rather than a dependency injection engine –whatever that means–, why not go back to the basics?]]></summary></entry></feed>

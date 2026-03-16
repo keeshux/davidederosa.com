@@ -1,0 +1,760 @@
+
+
+
+<!DOCTYPE html>
+<html lang="en" itemscope itemtype="http://schema.org/Blog">
+    <head>
+        
+
+
+
+
+
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+<title>Cross-platform Swift: Integration (pt. 2)</title>
+
+<meta name="author" content="Davide De Rosa" />
+<meta name="description" content="I make software. I look around me.">
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="apple-mobile-web-app-title" content="keeshux">
+
+<!-- OpenGraph -->
+
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="Cross-platform Swift: Integration (pt. 2)" />
+<meta property="og:title" content="Cross-platform Swift: Integration (pt. 2)" />
+<meta property="og:description" content="I make software. I look around me." />
+<meta property="og:image" content="https://davidederosa.com/s/f/swift/swift.png?1773701286" />
+<meta property="og:url" content="https://davidederosa.com/cross-platform-swift/integration-part-two/" />
+
+<!-- Twitter -->
+
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:site" content="@keeshux" />
+<meta name="twitter:title" content="Cross-platform Swift: Integration (pt. 2)" />
+<meta name="twitter:description" content="I make software. I look around me." />
+<meta name="twitter:image" content="https://davidederosa.com/s/f/swift/swift.png?1773701286" />
+<meta name="twitter:url" content="https://davidederosa.com/cross-platform-swift/integration-part-two/" />
+
+<link rel="canonical" href="https://davidederosa.com/cross-platform-swift/integration-part-two/" />
+
+
+<link rel="next" href="/cross-platform-swift/integration-part-one/" title="Cross-platform Swift: Integration (pt. 1)" />
+
+
+<link rel="stylesheet" href="/s/main.css?1773701286" />
+<link rel="stylesheet" href="/s/main-mobile.css?1773701286" media="only screen and (max-width: 600px)" />
+<link rel="stylesheet" href="/s/syntax.css?1773701286" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway:600,400" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha384-t1nt8BQoYMLFN5p42tRAtuAAFQaCQODekUVeKKZrEnEyp4H2R0RHFz0KWpmj7i8g" crossorigin="anonymous">
+
+<link rel="shortcut icon" href="/s/favicon.ico?1773701286" />
+<link rel="apple-touch-icon" href="/s/iphone-icon-precomposed.png?1773701286" />
+
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-DWPG2HZ9FS"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag() {
+    dataLayer.push(arguments);
+}
+gtag('js', new Date());
+gtag('config', 'G-DWPG2HZ9FS');
+</script>
+
+
+
+    </head>
+    <body>
+        <div id="container">
+            <header>
+                <nav id="menu">
+    <ul>
+        
+    </ul>
+</nav>
+
+            </header>
+            <div>
+                <header>
+                    <h1><a href="/">Davide De Rosa</a></h1>
+                </header>
+                <main>
+                    <article class="post post-full" itemscope itemtype="https://schema.org/Article">
+    <header>
+        
+<div class="post-icon">
+    <a href="/cross-platform-swift/integration-part-two/">
+        
+        <img src="/s/f/swift/swift-150.png" alt="Cross-platform Swift: Integration (pt. 2)" />
+        
+    </a>
+</div>
+
+
+        <div>
+            <span class="post-date" itemprop="datepublished">Mar 15, 2026</span>
+            <h2 itemprop="name">
+                
+                Cross-platform Swift: Integration (pt. 2)
+                
+            </h2>
+            
+
+
+
+
+
+
+<div class="post-list post-series-links">
+    part of a <a href="/cross-platform-swift/" title="Cross-platform Swift: Introduction">series</a>:
+    
+    <a href="/cross-platform-swift/integration-part-one/" title="Cross-platform Swift: Integration (pt. 1)">&lt; prev</a>
+    
+    |
+    
+    next &gt;
+    
+</div>
+
+
+
+        </div>
+    </header>
+    <div class="post-body">
+        
+
+        
+<header class="post-series-toc">
+    
+    <h3>Table of contents (ongoing)</h3>
+    
+    <ol>
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        <li>
+            
+            <a href="/cross-platform-swift/" title="Introduction">
+                
+                Introduction
+                
+            </a>
+        </li>
+        
+        
+        
+        <li>
+            
+            <a href="/cross-platform-swift/combine/" title="Combine">
+                
+                Combine
+                
+            </a>
+        </li>
+        
+        
+        
+        
+        
+        <li>
+            
+            <a href="/cross-platform-swift/core-libraries/" title="Core libraries">
+                
+                Core libraries
+                
+            </a>
+        </li>
+        
+        
+        
+        
+        
+        <li>
+            
+            <a href="/cross-platform-swift/platform-specifics/" title="Platform specifics">
+                
+                Platform specifics
+                
+            </a>
+        </li>
+        
+        
+        
+        <li>
+            
+            <a href="/cross-platform-swift/c-interop-part-one/" title="C interop (pt. 1)">
+                
+                C interop (pt. 1)
+                
+            </a>
+        </li>
+        
+        
+        
+        <li>
+            
+            <a href="/cross-platform-swift/c-interop-part-two/" title="C interop (pt. 2)">
+                
+                C interop (pt. 2)
+                
+            </a>
+        </li>
+        
+        
+        
+        
+        
+        <li>
+            
+            <a href="/cross-platform-swift/build-system-part-one/" title="Build system (pt. 1)">
+                
+                Build system (pt. 1)
+                
+            </a>
+        </li>
+        
+        
+        
+        <li>
+            
+            <a href="/cross-platform-swift/build-system-part-two/" title="Build system (pt. 2)">
+                
+                Build system (pt. 2)
+                
+            </a>
+        </li>
+        
+        
+        
+        <li>
+            
+            <a href="/cross-platform-swift/build-system-part-three/" title="Build system (pt. 3)">
+                
+                Build system (pt. 3)
+                
+            </a>
+        </li>
+        
+        
+        
+        <li>
+            
+            <a href="/cross-platform-swift/integration-part-one/" title="Integration (pt. 1)">
+                
+                Integration (pt. 1)
+                
+            </a>
+        </li>
+        
+        
+        
+        <li>
+            
+            <a href="/cross-platform-swift/integration-part-two/" title="Integration (pt. 2)">
+                
+                <strong>Integration (pt. 2)</strong>
+                
+            </a>
+        </li>
+        
+        
+    </ol>
+</header>
+
+
+        <p>In the <a href="/cross-platform-swift/integration-part-one/">previous post</a>, I threw in a few ideas about how to integrate Swift logic with non-Swift code. We learned how to call Swift code from other languages with <a href="/cross-platform-swift/integration-part-one/#introducing-_cdecl"><code class="language-plaintext highlighter-rouge">@_cdecl</code></a>, but now we need to fill a few remaining gaps to build a modern non-Swift application on top of our Swift library.</p>
+
+<p>You can find the <a href="https://github.com/keeshux/cross-platform-swift/tree/master/Sources/SimpleABIConsumer_C">source code</a> of these examples on GitHub.</p>
+
+<h2 id="asynchronous-calls">Asynchronous calls</h2>
+
+<p>There’s no such thing as concurrency keywords in C. The only tool we have at disposal to return an async result is with a callback. To some extent, this reminds of completion handlers before Swift Concurrency entered the scene. However, Swift completion handlers are still closures, as in they can capture variables from the enclosing context. This is not the case for C callbacks, which are stateless pointers to function and therefore closer to <code class="language-plaintext highlighter-rouge">static</code> functions. The common pattern to mimic Swift completion handlers in C is by providing a <strong>callback context</strong>. Let’s go step by step.</p>
+
+<p>For example, we may want to get the result of this <code class="language-plaintext highlighter-rouge">async</code> function:</p>
+
+<div class="language-swift highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">swiftSlowResult</span><span class="p">()</span> <span class="k">async</span> <span class="k">throws</span> <span class="o">-&gt;</span> <span class="kt">Int</span> <span class="p">{</span>
+    <span class="o">...</span> <span class="c1">// Code may throw here</span>
+    <span class="k">return</span> <span class="mi">100</span> <span class="c1">// Whatever works, we only care about the function signature</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h3 id="c-types-in-arguments">C types in arguments</h3>
+
+<p>We cannot attach a <code class="language-plaintext highlighter-rouge">@_cdecl</code> attribute as long as we use features that don’t transpose to C, and <code class="language-plaintext highlighter-rouge">async</code> is one of them. Let’s take an intermediate step and wrap the function like the preconcurrency counterpart of many standard Swift APIs:</p>
+
+<div class="language-swift highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">swiftSlowResultWrapper</span><span class="p">(</span>
+    <span class="nv">completion</span><span class="p">:</span> <span class="kd">@Sendable</span> <span class="p">(</span><span class="kt">Int</span><span class="p">?,</span> <span class="kt">Error</span><span class="p">?)</span> <span class="o">-&gt;</span> <span class="kt">Void</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">Void</span> <span class="p">{</span>
+    <span class="kt">Task</span> <span class="p">{</span>
+        <span class="k">do</span> <span class="p">{</span>
+            <span class="k">let</span> <span class="nv">result</span> <span class="o">=</span> <span class="k">try</span> <span class="k">await</span> <span class="nf">swiftSlowResult</span><span class="p">()</span>
+            <span class="nf">completion</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="kc">nil</span><span class="p">)</span>
+        <span class="p">}</span> <span class="k">catch</span> <span class="p">{</span>
+            <span class="c1">// The first argument should be discarded on failure</span>
+            <span class="nf">completion</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">error</span><span class="p">)</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Cool, we got rid of <code class="language-plaintext highlighter-rouge">async</code> with the callback pattern. As we saw before, optionals and <code class="language-plaintext highlighter-rouge">Error</code> are other points of friction, so we introduce a user-defined error code enum, that is a plain <code class="language-plaintext highlighter-rouge">int</code> in C. All things considered, this is the first half-working version of our signature:</p>
+
+<div class="language-swift highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">enum</span> <span class="kt">SlowError</span><span class="p">:</span> <span class="kt">Int</span><span class="p">,</span> <span class="kt">Error</span> <span class="p">{</span>
+    <span class="k">case</span> <span class="n">foo</span> <span class="o">=</span> <span class="mi">10</span>
+    <span class="k">case</span> <span class="n">bar</span> <span class="o">=</span> <span class="mi">20</span>
+    <span class="k">case</span> <span class="n">unknown</span> <span class="o">=</span> <span class="mi">1000</span>
+<span class="p">}</span>
+
+<span class="kd">@_cdecl</span><span class="p">(</span><span class="s">"swift_slow_result"</span><span class="p">)</span>
+<span class="kd">public</span> <span class="kd">func</span> <span class="nf">swiftSlowResultWrapper</span><span class="p">(</span>
+    <span class="nv">completion</span><span class="p">:</span> <span class="kd">@Sendable</span> <span class="p">(</span><span class="kt">Int</span><span class="p">,</span> <span class="kt">Int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">Void</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">Void</span> <span class="p">{</span>
+    <span class="kt">Task</span> <span class="p">{</span>
+        <span class="k">do</span> <span class="p">{</span>
+            <span class="k">let</span> <span class="nv">result</span> <span class="o">=</span> <span class="k">try</span> <span class="k">await</span> <span class="nf">swiftSlowResult</span><span class="p">()</span>
+            <span class="c1">// Error code 0 means success</span>
+            <span class="nf">completion</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="p">}</span> <span class="k">catch</span> <span class="k">let</span> <span class="nv">error</span> <span class="k">as</span> <span class="kt">SlowError</span> <span class="p">{</span>
+            <span class="c1">// The first argument must be ignored on failure</span>
+            <span class="nf">completion</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">error</span><span class="o">.</span><span class="n">rawValue</span><span class="p">)</span>
+        <span class="p">}</span> <span class="k">catch</span> <span class="p">{</span>
+            <span class="nf">completion</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="kt">SlowError</span><span class="o">.</span><span class="n">unknown</span><span class="o">.</span><span class="n">rawValue</span><span class="p">)</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>And a trivial example of its usage:</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp">
+</span>
+<span class="k">typedef</span> <span class="k">enum</span> <span class="p">{</span>
+    <span class="n">slow_error_none</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="n">slow_error_foo</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
+    <span class="n">slow_error_bar</span> <span class="o">=</span> <span class="mi">20</span><span class="p">,</span>
+    <span class="n">slow_error_unknown</span> <span class="o">=</span> <span class="mi">1000</span>
+<span class="p">}</span> <span class="n">slow_error</span><span class="p">;</span>
+
+<span class="k">static</span> <span class="kt">void</span> <span class="nf">my_result_callback</span><span class="p">(</span><span class="kt">int</span> <span class="n">result</span><span class="p">,</span> <span class="n">slow_error</span> <span class="n">error_code</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">error_code</span> <span class="o">!=</span> <span class="n">slow_error_none</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">printf</span><span class="p">(</span><span class="s">"Error: %d</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">error_code</span><span class="p">);</span>
+        <span class="k">return</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="n">printf</span><span class="p">(</span><span class="s">"Result: %d</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">result</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="kt">void</span> <span class="nf">invoke_swift_async_function</span><span class="p">()</span> <span class="p">{</span>
+    <span class="cm">/* ... */</span>
+    <span class="n">swift_slow_result</span><span class="p">(</span><span class="n">my_result_callback</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h3 id="providing-context">Providing context</h3>
+
+<p>Another problem to address is supporting captures behavior in the <code class="language-plaintext highlighter-rouge">completion</code> callback, because we probably want to do something useful upon completion. The <em>de facto</em> way to do it in C is, as mentioned before, by propagating a context:</p>
+
+<div class="language-swift highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">swiftSlowResultWrapper</span><span class="p">(</span>
+    <span class="nv">ctx</span><span class="p">:</span> <span class="kt">UnsafeMutableRawPointer</span><span class="p">?,</span>
+    <span class="nv">completion</span><span class="p">:</span> <span class="kd">@Sendable</span> <span class="p">(</span><span class="kt">UnsafeMutableRawPointer</span><span class="p">?,</span> <span class="kt">Int</span><span class="p">,</span> <span class="kt">Int</span><span class="p">)</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">Void</span> <span class="p">{</span>
+    <span class="nf">nonisolated</span><span class="p">(</span><span class="n">unsafe</span><span class="p">)</span> <span class="k">let</span> <span class="nv">unsafeCtx</span> <span class="o">=</span> <span class="n">ctx</span>
+    <span class="kt">Task</span> <span class="p">{</span>
+        <span class="o">...</span>
+        <span class="nf">completion</span><span class="p">(</span><span class="n">unsafeCtx</span><span class="p">,</span> <span class="n">result</span><span class="p">,</span> <span class="n">errorCode</span><span class="p">)</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Unsafe and generic by nature, a context can be literally anything. Unsurprisingly, Swift <code class="language-plaintext highlighter-rouge">UnsafeMutableRawPointer</code> maps to <code class="language-plaintext highlighter-rouge">void *</code> in C.</p>
+
+<p>This is the second version of our C program interacting with Swift async code:</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/* Initialized elsewhere. */</span>
+<span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
+    <span class="kt">int</span> <span class="n">initial_value</span><span class="p">;</span>
+    <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">perform</span><span class="p">)(</span><span class="kt">int</span><span class="p">);</span>
+    <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">report_failure</span><span class="p">)(</span><span class="n">slow_error</span><span class="p">);</span>
+<span class="p">}</span> <span class="n">complex_object</span><span class="p">;</span>
+
+<span class="k">static</span> <span class="kt">void</span> <span class="nf">my_result_callback</span><span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="n">ctx</span><span class="p">,</span> <span class="kt">int</span> <span class="n">result</span><span class="p">,</span> <span class="n">slow_error</span> <span class="n">error_code</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">complex_object</span> <span class="o">*</span><span class="n">obj</span> <span class="o">=</span> <span class="p">(</span><span class="n">complex_object</span> <span class="o">*</span><span class="p">)</span><span class="n">ctx</span><span class="p">;</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">error_code</span> <span class="o">!=</span> <span class="n">slow_error_none</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">printf</span><span class="p">(</span><span class="s">"Error: %d</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">error_code</span><span class="p">);</span>
+        <span class="n">obj</span><span class="o">-&gt;</span><span class="n">report_failure</span><span class="p">(</span><span class="n">error_code</span><span class="p">);</span>
+        <span class="k">return</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="k">const</span> <span class="kt">int</span> <span class="n">compound_result</span> <span class="o">=</span> <span class="n">obj</span><span class="o">-&gt;</span><span class="n">initial_value</span> <span class="o">+</span> <span class="n">result</span><span class="p">;</span>
+    <span class="n">printf</span><span class="p">(</span><span class="s">"Compound result: %d</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">compound_result</span><span class="p">);</span>
+    <span class="cm">/* Move on with our lives. */</span>
+    <span class="n">obj</span><span class="o">-&gt;</span><span class="n">perform</span><span class="p">(</span><span class="n">compound_result</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="cm">/* We assume `obj` to be the context to act upon, and we expect it
+ * to survive the synchronous function call. A pointer to a local
+ * variable cannot be the context of an async function, because
+ * the callback would eventually refer to a dangling pointer.
+ */</span>
+<span class="kt">void</span> <span class="nf">invoke_swift_async_function</span><span class="p">(</span><span class="n">complex_object</span> <span class="o">*</span><span class="n">obj</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">swift_slow_result</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">my_result_callback</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h3 id="calling-convention">Calling convention</h3>
+
+<p>Nevertheless, the code lacks a final touch, also a very obscure one. As is, the signature still accepts a Swift closure (or ObjC block) for the <code class="language-plaintext highlighter-rouge">completion</code> argument, and this will inevitably lead to arcane compile issues or runtime crashes because of the wrong <strong>calling convention</strong>.</p>
+
+<p><img src="/s/f/cross-platform-swift/integration-02-callback-crash.png" alt="Obscure crash in C due to wrong calling convention" /></p>
+
+<p>We must enforce the <code class="language-plaintext highlighter-rouge">@convention(c)</code> attribute to restrict the input to C-style pointers to function, i.e., without captures:</p>
+
+<div class="language-swift highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">swiftSlowResultWrapper</span><span class="p">(</span>
+    <span class="nv">ctx</span><span class="p">:</span> <span class="kt">UnsafeMutableRawPointer</span><span class="p">?,</span>
+    <span class="nv">completion</span><span class="p">:</span> <span class="kd">@Sendable</span> <span class="kd">@convention</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="p">(</span><span class="kt">UnsafeMutableRawPointer</span><span class="p">?,</span> <span class="kt">Int</span><span class="p">,</span> <span class="kt">Int</span><span class="p">)</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">Void</span> <span class="p">{</span> <span class="o">...</span> <span class="p">}</span>
+</code></pre></div></div>
+
+<p>I might be wrong, but as far as I can tell, the Swift compiler is unable to enforce the C calling convention in <code class="language-plaintext highlighter-rouge">@_cdecl</code>-enabled functions, because I believe it should.</p>
+
+<h2 id="event-handling">Event handling</h2>
+
+<p>Another crux of a modern application is delivering and handling asynchronous events at scale. In the recent years, Combine was the most used tool for this purpose, and the SwiftUI <code class="language-plaintext highlighter-rouge">onReceive()</code> function certainly favored Combine publishers for emitting events. But… remember? <a href="/cross-platform-swift/combine/">Combine is not available</a> outside Apple.</p>
+
+<p>Regardless of how we emit events, though, that is a concern of the Swift library. When we build a non-Swift app on top of a Swift library, we only need a way to <em>observe</em> the events that the library emits. No magic involved, C is a simple language: we can register to events with a callback. The inherent difference with completion handlers, for example, is that an event callback will be a pointer to function that follows the application lifecycle.</p>
+
+<h3 id="emit-the-events-from-swift">Emit the events from Swift</h3>
+
+<p>Let’s start with a dumb events emitter. Here we emit events represented by integer codes from 1 to 3 at a 500 milliseconds interval. We use the same callback mechanism with an optional context. The consumer will start the events emitter and subscribe to it contextually.</p>
+
+<div class="language-swift highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">enum</span> <span class="kt">EventCode</span><span class="p">:</span> <span class="kt">Int</span><span class="p">,</span> <span class="kt">CaseIterable</span> <span class="p">{</span>
+    <span class="k">case</span> <span class="n">one</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">case</span> <span class="n">two</span>
+    <span class="k">case</span> <span class="n">three</span>
+<span class="p">}</span>
+
+<span class="kd">@_cdecl</span><span class="p">(</span><span class="s">"swift_start_events_emitter"</span><span class="p">)</span>
+<span class="kd">public</span> <span class="kd">func</span> <span class="nf">swiftStartEventsEmitter</span><span class="p">(</span>
+    <span class="nv">ctx</span><span class="p">:</span> <span class="kt">UnsafeMutableRawPointer</span><span class="p">?,</span>
+    <span class="nv">callback</span><span class="p">:</span> <span class="p">(</span><span class="kd">@Sendable</span> <span class="kd">@convention</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="p">(</span><span class="kt">UnsafeMutableRawPointer</span><span class="p">?,</span> <span class="kt">Int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">Void</span><span class="p">)?</span>
+<span class="p">)</span> <span class="p">{</span>
+    <span class="nf">nonisolated</span><span class="p">(</span><span class="n">unsafe</span><span class="p">)</span> <span class="k">let</span> <span class="nv">unsafeCtx</span> <span class="o">=</span> <span class="n">ctx</span>
+    <span class="kt">Task</span> <span class="p">{</span> <span class="kd">@Sendable</span> <span class="k">in</span>
+        <span class="k">while</span> <span class="kc">true</span> <span class="p">{</span>
+            <span class="k">guard</span> <span class="k">let</span> <span class="nv">randomEvent</span> <span class="o">=</span> <span class="kt">EventCode</span><span class="o">.</span><span class="n">allCases</span><span class="o">.</span><span class="nf">randomElement</span><span class="p">()</span> <span class="k">else</span> <span class="p">{</span> <span class="k">continue</span> <span class="p">}</span>
+            <span class="nf">callback</span><span class="p">?(</span><span class="n">unsafeCtx</span><span class="p">,</span> <span class="n">randomEvent</span><span class="o">.</span><span class="n">rawValue</span><span class="p">)</span>
+            <span class="k">try</span> <span class="k">await</span> <span class="kt">Task</span><span class="o">.</span><span class="nf">sleep</span><span class="p">(</span><span class="nv">for</span><span class="p">:</span> <span class="o">.</span><span class="nf">milliseconds</span><span class="p">(</span><span class="mi">500</span><span class="p">))</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h3 id="subscribe-to-the-events-from-c">Subscribe to the events from C</h3>
+
+<p>We reuse the same object from the previous example as the context, after adding a new method:</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
+    <span class="p">...</span>
+    <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">on_event</span><span class="p">)(</span><span class="kt">int</span><span class="p">);</span>
+<span class="p">}</span> <span class="n">complex_object</span><span class="p">;</span>
+</code></pre></div></div>
+
+<p>So that the callback can be simply:</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">static</span> <span class="kt">void</span> <span class="nf">my_event_callback</span><span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="n">ctx</span><span class="p">,</span> <span class="kt">int</span> <span class="n">event_code</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">complex_object</span> <span class="o">*</span><span class="n">obj</span> <span class="o">=</span> <span class="p">(</span><span class="n">complex_object</span> <span class="o">*</span><span class="p">)</span><span class="n">ctx</span><span class="p">;</span>
+    <span class="n">obj</span><span class="o">-&gt;</span><span class="n">on_event</span><span class="p">(</span><span class="n">event_code</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>When the application starts, we also start the emitter and register to it with our callback:</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">swift_start_events_emitter</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">my_event_callback</span><span class="p">);</span>
+</code></pre></div></div>
+
+<p>And that’s basically it. The <code class="language-plaintext highlighter-rouge">on_event()</code> method can then forward the event to other areas of the application as it pleases.</p>
+
+<h2 id="data-exchange">Data exchange</h2>
+
+<p>Okay, this can be <em>really</em> annoying, especially if your application is not a greenfield: exchanging strongly typed data across the Swift boundary. There’s a fundamental issue with any form of FFI, which is exchanging data between different programming languages. Keep in mind that returning opaque C pointers to Swift objects with <code class="language-plaintext highlighter-rouge">Unmanaged</code> is not comparable, because the C code is not meant to understand the contents of the memory. Such pointers are treated like integer identifiers. The trouble begins when we expect C code to understand the <em>layout</em> of Swift structures.</p>
+
+<h3 id="the-single-source-of-truth">The single source of truth</h3>
+
+<p>The best way to deal with data is to pick a common format like JSON or <a href="https://protobuf.dev/">Google Protocol Buffers (protobuf)</a>, that is, formats that are easy to encode and decode in any programming language. The approach is as follows:</p>
+
+<ul>
+  <li>Define your application entities in an <strong>Intermediate Representation</strong> (IR).</li>
+  <li>Autogenerate the Swift and non-Swift models from the IR, the single source of truth.</li>
+  <li>Pass text (JSON) or binary data (protobuf) whenever a <code class="language-plaintext highlighter-rouge">@_cdecl</code> function requires a complex entity.</li>
+  <li>Encode and decode entities to the native representation as needed.</li>
+</ul>
+
+<p>For what it’s worth, <a href="https://quicktype.io/">Quicktype</a> and JSON Schemas can be a simpler IR alternative to <code class="language-plaintext highlighter-rouge">protobuf</code>.</p>
+
+<h3 id="example-flow">Example flow</h3>
+
+<p>Below we define a Swift function taking an entity input encoded as JSON:</p>
+
+<div class="language-swift highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/* The entity is autogenerated. */</span>
+<span class="kd">public</span> <span class="kd">struct</span> <span class="kt">Entity</span><span class="p">:</span> <span class="kt">Codable</span> <span class="p">{</span>
+    <span class="k">let</span> <span class="nv">num</span><span class="p">:</span> <span class="kt">Int</span>
+    <span class="k">let</span> <span class="nv">ch</span><span class="p">:</span> <span class="kt">Character</span>
+<span class="p">}</span>
+
+<span class="kd">@_cdecl</span><span class="p">(</span><span class="s">"swift_function"</span><span class="p">)</span>
+<span class="kd">public</span> <span class="kd">func</span> <span class="nf">swift_function</span><span class="p">(</span><span class="nv">obj</span><span class="p">:</span> <span class="kt">UnsafePointer</span><span class="o">&lt;</span><span class="kt">CChar</span><span class="o">&gt;</span><span class="p">?)</span> <span class="p">{</span>
+    <span class="k">guard</span> <span class="k">let</span> <span class="nv">obj</span><span class="p">,</span> <span class="k">let</span> <span class="nv">json</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="nf">data</span><span class="p">(</span><span class="nv">using</span><span class="p">:</span> <span class="o">.</span><span class="n">utf8</span><span class="p">)</span> <span class="k">else</span> <span class="p">{</span> <span class="k">return</span> <span class="p">}</span>
+    <span class="k">do</span> <span class="p">{</span>
+        <span class="k">let</span> <span class="nv">entity</span> <span class="o">=</span> <span class="k">try</span> <span class="kt">JSONDecoder</span><span class="p">()</span><span class="o">.</span><span class="nf">decode</span><span class="p">(</span><span class="kt">Entity</span><span class="o">.</span><span class="k">self</span><span class="p">,</span> <span class="nv">from</span><span class="p">:</span> <span class="n">json</span><span class="p">)</span>
+        <span class="nf">print</span><span class="p">(</span><span class="s">"Entity: </span><span class="se">\(</span><span class="n">entity</span><span class="se">)</span><span class="s">"</span><span class="p">)</span>
+    <span class="p">}</span> <span class="k">catch</span> <span class="p">{</span>
+        <span class="nf">print</span><span class="p">(</span><span class="s">"Failure: </span><span class="se">\(</span><span class="n">error</span><span class="se">)</span><span class="s">"</span><span class="p">)</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>This is how we invoke the Swift function in C:</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/* The entity and the JSON encoder are autogenerated. */</span>
+<span class="k">typedef</span> <span class="k">struct</span> <span class="p">{</span>
+    <span class="kt">int</span> <span class="n">num</span><span class="p">;</span>
+    <span class="kt">char</span> <span class="n">ch</span><span class="p">;</span>
+<span class="p">}</span> <span class="n">entity</span><span class="p">;</span>
+<span class="k">extern</span> <span class="kt">char</span> <span class="o">*</span><span class="nf">encode_json</span><span class="p">(</span><span class="k">const</span> <span class="n">entity</span> <span class="o">*</span><span class="p">);</span>
+
+<span class="n">func</span> <span class="nf">c_function</span><span class="p">()</span> <span class="p">{</span>
+    <span class="n">entity</span> <span class="n">obj</span> <span class="o">=</span> <span class="p">{</span> <span class="mi">100</span><span class="p">,</span> <span class="sc">'a'</span> <span class="p">};</span>
+    <span class="kt">char</span> <span class="o">*</span><span class="n">json</span> <span class="o">=</span> <span class="n">encode_json</span><span class="p">(</span><span class="n">obj</span><span class="p">);</span>
+    <span class="n">swift_function</span><span class="p">(</span><span class="n">json</span><span class="p">);</span>
+    <span class="n">free</span><span class="p">(</span><span class="n">json</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h3 id="limitations">Limitations</h3>
+
+<p>Unfortunately, the IR approach is unfriendly to apps that were written with a Swift-only mindset, and both Passepartout and Partout have a long-standing set of <code class="language-plaintext highlighter-rouge">Codable</code> domain entities. The switch to a JSON or <code class="language-plaintext highlighter-rouge">protobuf</code> codegen can be very challenging if you like me have relied on:</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">RawRepresentable</code></li>
+  <li>Enums with associated values</li>
+  <li>Custom <code class="language-plaintext highlighter-rouge">Codable</code> implementations</li>
+  <li>Other strongly typed semantics</li>
+</ul>
+
+<p>Because there are often no 1:1 counterparts in other languages. Especially if the entities are involved in a persistence layer, you must be extremely careful with any refactoring of the data model to avoid data loss or crashes.</p>
+
+<p>In my case, I tried to rewrite my domain with JSON Schema or <a href="https://github.com/apple/swift-protobuf">swift-protobuf</a>, but eventually chose to <a href="https://github.com/partout-io/partout/tree/master/Sources/PartoutCodegen">write my own codegen</a> with <a href="https://github.com/swiftlang/swift-syntax">SwiftSyntax</a> to keep Swift as the source of truth. The codegen parses an IR from Swift and proceeds to transpile it to Kotlin for Android and C++ for Linux and Windows (later). It was tiring but safer because I didn’t need to change much of the application code, whereas a strict JSON domain would have been a potentially disruptive change. Better be safe than sorry.</p>
+
+<h2 id="bottom-line">Bottom line</h2>
+
+<p>It’s been a long journey, but this article should wrap up everything you need to know to bring your Apple-only Swift/SwiftUI app to any other platform that Swift supports. It’s now time to make sense of all this yapping and build a real application with what we learned from Passepartout/Partout.</p>
+
+<p>Going forward, we’ll build a simple –but thorough– non-Swift application on top of a Swift library. The sample application will feature a native UI (both SwiftUI and non-Swift) interacting with Swift business logic through a C ABI layer. In other words, a scalable architecture to port a SwiftUI app to Linux, Android, and Windows.</p>
+
+<p>Last but not least, even friendly to AI agentic coding. See you in the next article.</p>
+
+
+        
+    </div>
+    
+    
+        
+            
+        
+    
+        
+            
+        
+    
+        
+            
+        
+    
+        
+            
+        
+    
+        
+            
+        
+    
+        
+    
+        
+            
+        
+    
+        
+            
+        
+    
+        
+            
+        
+    
+        
+    
+        
+            
+        
+    
+        
+    
+        
+            
+        
+    
+        
+            
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+    
+
+
+
+
+
+
+
+<aside class="sharing" id="sharing-me">
+    <ul>
+        <li><a href="/feed.xml" title="Follow the blog" target="_blank"><i class="fa-solid fa-rss"></i>Subscribe</a></li>
+        <li>Follow me <a href="https://x.com/keeshux" title="Follow me on X" target="_blank">on X</a> and <a href="https://github.com/keeshux" title="Follow me on GitHub" target="_blank">GitHub</a></li>
+    </ul>
+</aside>
+
+    <aside class="post-related">
+        <p>See also:</p>
+        <ul>
+            
+            <li><a href="/cross-platform-swift/build-system-part-three/">Cross-platform Swift: Build system (pt. 3)</a></li>
+            
+            <li><a href="/cross-platform-swift/build-system-part-two/">Cross-platform Swift: Build system (pt. 2)</a></li>
+            
+            <li><a href="/cross-platform-swift/build-system-part-one/">Cross-platform Swift: Build system (pt. 1)</a></li>
+            
+        </ul>
+    </aside>
+    <div id="disqus_thread"></div>
+    <nav class="paginator">
+    <ul>
+        <li class="paginator-browser older">
+            
+            <a href="/cross-platform-swift/integration-part-one/" title="Cross-platform Swift: Integration (pt. 1)"><i class="fa fa-chevron-left"></i> Older</a>
+            
+        </li><li class="paginator-browser home">
+            <a href="/" class="fa fa-home"></a>
+        </li><li class="paginator-browser newer">
+            
+        </li>
+    </ul>
+</nav>
+
+</article>
+<script src="//keeshux.disqus.com/embed.js" async="async"></script>
+
+                </main>
+                <footer id="page-footer">
+                    <p id="social">
+    &copy; 2026 Davide De Rosa
+    <a href="https://github.com/keeshux" title="Browse my GitHub repository" class="fab fa-github"></a>
+    <a href="https://linkedin.com/in/davidederosa" title="Connect on LinkedIn" class="fab fa-linkedin"></a>
+    <a href="https://x.com/keeshux" title="Follow me on X" class="fab fa-x-twitter"></a>
+    <a href="/s/keeshux-gpg.txt" title="My GnuPG public key" class="fa fa-lock"></a>
+    <a href="/feed.xml" title="Follow the blog" class="fa-solid fa-rss"></a>
+</ul>
+
+                </footer>
+            </div>
+        </div>
+        <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    </body>
+</html>
