@@ -26,7 +26,7 @@
 <meta property="og:site_name" content="Cross-platform Swift: Integration (pt. 2)" />
 <meta property="og:title" content="Cross-platform Swift: Integration (pt. 2)" />
 <meta property="og:description" content="I make software. I look around me." />
-<meta property="og:image" content="https://davidederosa.com/s/f/swift/swift.png?1773701286" />
+<meta property="og:image" content="https://davidederosa.com/s/f/swift/swift.png?1773731071" />
 <meta property="og:url" content="https://davidederosa.com/cross-platform-swift/integration-part-two/" />
 
 <!-- Twitter -->
@@ -35,7 +35,7 @@
 <meta name="twitter:site" content="@keeshux" />
 <meta name="twitter:title" content="Cross-platform Swift: Integration (pt. 2)" />
 <meta name="twitter:description" content="I make software. I look around me." />
-<meta name="twitter:image" content="https://davidederosa.com/s/f/swift/swift.png?1773701286" />
+<meta name="twitter:image" content="https://davidederosa.com/s/f/swift/swift.png?1773731071" />
 <meta name="twitter:url" content="https://davidederosa.com/cross-platform-swift/integration-part-two/" />
 
 <link rel="canonical" href="https://davidederosa.com/cross-platform-swift/integration-part-two/" />
@@ -44,14 +44,14 @@
 <link rel="next" href="/cross-platform-swift/integration-part-one/" title="Cross-platform Swift: Integration (pt. 1)" />
 
 
-<link rel="stylesheet" href="/s/main.css?1773701286" />
-<link rel="stylesheet" href="/s/main-mobile.css?1773701286" media="only screen and (max-width: 600px)" />
-<link rel="stylesheet" href="/s/syntax.css?1773701286" />
+<link rel="stylesheet" href="/s/main.css?1773731071" />
+<link rel="stylesheet" href="/s/main-mobile.css?1773731071" media="only screen and (max-width: 600px)" />
+<link rel="stylesheet" href="/s/syntax.css?1773731071" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway:600,400" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha384-t1nt8BQoYMLFN5p42tRAtuAAFQaCQODekUVeKKZrEnEyp4H2R0RHFz0KWpmj7i8g" crossorigin="anonymous">
 
-<link rel="shortcut icon" href="/s/favicon.ico?1773701286" />
-<link rel="apple-touch-icon" href="/s/iphone-icon-precomposed.png?1773701286" />
+<link rel="shortcut icon" href="/s/favicon.ico?1773731071" />
+<link rel="apple-touch-icon" href="/s/iphone-icon-precomposed.png?1773731071" />
 
 
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-DWPG2HZ9FS"></script>
@@ -316,15 +316,15 @@ gtag('config', 'G-DWPG2HZ9FS');
 
 <p>There’s no such thing as concurrency keywords in C. The only tool we have at disposal to return an async result is with a callback. To some extent, this reminds of completion handlers before Swift Concurrency entered the scene. However, Swift completion handlers are still closures, as in they can capture variables from the enclosing context. This is not the case for C callbacks, which are stateless pointers to function and therefore closer to <code class="language-plaintext highlighter-rouge">static</code> functions. The common pattern to mimic Swift completion handlers in C is by providing a <strong>callback context</strong>. Let’s go step by step.</p>
 
-<p>For example, we may want to get the result of this <code class="language-plaintext highlighter-rouge">async</code> function:</p>
+<h3 id="c-types-in-arguments">C types in arguments</h3>
+
+<p>Say we may want to get the result of this <code class="language-plaintext highlighter-rouge">async</code> function:</p>
 
 <div class="language-swift highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">swiftSlowResult</span><span class="p">()</span> <span class="k">async</span> <span class="k">throws</span> <span class="o">-&gt;</span> <span class="kt">Int</span> <span class="p">{</span>
     <span class="o">...</span> <span class="c1">// Code may throw here</span>
     <span class="k">return</span> <span class="mi">100</span> <span class="c1">// Whatever works, we only care about the function signature</span>
 <span class="p">}</span>
 </code></pre></div></div>
-
-<h3 id="c-types-in-arguments">C types in arguments</h3>
 
 <p>We cannot attach a <code class="language-plaintext highlighter-rouge">@_cdecl</code> attribute as long as we use features that don’t transpose to C, and <code class="language-plaintext highlighter-rouge">async</code> is one of them. Let’s take an intermediate step and wrap the function like the preconcurrency counterpart of many standard Swift APIs:</p>
 
@@ -337,7 +337,7 @@ gtag('config', 'G-DWPG2HZ9FS');
             <span class="nf">completion</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="kc">nil</span><span class="p">)</span>
         <span class="p">}</span> <span class="k">catch</span> <span class="p">{</span>
             <span class="c1">// The first argument should be discarded on failure</span>
-            <span class="nf">completion</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">error</span><span class="p">)</span>
+            <span class="nf">completion</span><span class="p">(</span><span class="kc">nil</span><span class="p">,</span> <span class="n">error</span><span class="p">)</span>
         <span class="p">}</span>
     <span class="p">}</span>
 <span class="p">}</span>
