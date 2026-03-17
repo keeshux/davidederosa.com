@@ -26,7 +26,7 @@
 <meta property="og:site_name" content="Cross-platform Swift: Integration (pt. 2)" />
 <meta property="og:title" content="Cross-platform Swift: Integration (pt. 2)" />
 <meta property="og:description" content="I make software. I look around me." />
-<meta property="og:image" content="https://davidederosa.com/s/f/swift/swift.png?1773731225" />
+<meta property="og:image" content="https://davidederosa.com/s/f/swift/swift.png?1773731481" />
 <meta property="og:url" content="https://davidederosa.com/cross-platform-swift/integration-part-two/" />
 
 <!-- Twitter -->
@@ -35,7 +35,7 @@
 <meta name="twitter:site" content="@keeshux" />
 <meta name="twitter:title" content="Cross-platform Swift: Integration (pt. 2)" />
 <meta name="twitter:description" content="I make software. I look around me." />
-<meta name="twitter:image" content="https://davidederosa.com/s/f/swift/swift.png?1773731225" />
+<meta name="twitter:image" content="https://davidederosa.com/s/f/swift/swift.png?1773731481" />
 <meta name="twitter:url" content="https://davidederosa.com/cross-platform-swift/integration-part-two/" />
 
 <link rel="canonical" href="https://davidederosa.com/cross-platform-swift/integration-part-two/" />
@@ -44,14 +44,14 @@
 <link rel="next" href="/cross-platform-swift/integration-part-one/" title="Cross-platform Swift: Integration (pt. 1)" />
 
 
-<link rel="stylesheet" href="/s/main.css?1773731225" />
-<link rel="stylesheet" href="/s/main-mobile.css?1773731225" media="only screen and (max-width: 600px)" />
-<link rel="stylesheet" href="/s/syntax.css?1773731225" />
+<link rel="stylesheet" href="/s/main.css?1773731481" />
+<link rel="stylesheet" href="/s/main-mobile.css?1773731481" media="only screen and (max-width: 600px)" />
+<link rel="stylesheet" href="/s/syntax.css?1773731481" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway:600,400" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha384-t1nt8BQoYMLFN5p42tRAtuAAFQaCQODekUVeKKZrEnEyp4H2R0RHFz0KWpmj7i8g" crossorigin="anonymous">
 
-<link rel="shortcut icon" href="/s/favicon.ico?1773731225" />
-<link rel="apple-touch-icon" href="/s/iphone-icon-precomposed.png?1773731225" />
+<link rel="shortcut icon" href="/s/favicon.ico?1773731481" />
+<link rel="apple-touch-icon" href="/s/iphone-icon-precomposed.png?1773731481" />
 
 
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-DWPG2HZ9FS"></script>
@@ -464,7 +464,7 @@ gtag('config', 'G-DWPG2HZ9FS');
 
 <p>Another crux of a modern application is delivering and handling asynchronous events at scale. In the recent years, Combine was the most used tool for this purpose, and the SwiftUI <code class="language-plaintext highlighter-rouge">onReceive()</code> function certainly favored Combine publishers for emitting events. But… remember? <a href="/cross-platform-swift/combine/">Combine is not available</a> outside Apple.</p>
 
-<p>Regardless of how we emit events, though, that is a concern of the Swift library. When we build a non-Swift app on top of a Swift library, we only need a way to <em>observe</em> the events that the library emits. No magic involved, C is a simple language: we can register to events with a callback. The inherent difference with completion handlers, for example, is that an event callback will be a pointer to function that follows the application lifecycle.</p>
+<p>Regardless of how we emit events, though, that is a concern of the Swift library. When we build the non-Swift side of the app, we only need a way to <em>observe</em> the events that the library emits. No magic involved, C is a simple language: we can register to events with a callback. The inherent difference with completion handlers, for example, is that an event callback will be a pointer to function that follows the application lifecycle.</p>
 
 <h3 id="emit-the-events-from-swift">Emit the events from Swift</h3>
 
