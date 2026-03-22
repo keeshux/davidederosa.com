@@ -26,7 +26,7 @@
 <meta property="og:site_name" content="Cross-platform Swift: Integration (pt. 2)" />
 <meta property="og:title" content="Cross-platform Swift: Integration (pt. 2)" />
 <meta property="og:description" content="I make software. I look around me." />
-<meta property="og:image" content="https://davidederosa.com/s/f/swift/swift.png?1773731481" />
+<meta property="og:image" content="https://davidederosa.com/s/f/swift/swift.png?1774197885" />
 <meta property="og:url" content="https://davidederosa.com/cross-platform-swift/integration-part-two/" />
 
 <!-- Twitter -->
@@ -35,7 +35,7 @@
 <meta name="twitter:site" content="@keeshux" />
 <meta name="twitter:title" content="Cross-platform Swift: Integration (pt. 2)" />
 <meta name="twitter:description" content="I make software. I look around me." />
-<meta name="twitter:image" content="https://davidederosa.com/s/f/swift/swift.png?1773731481" />
+<meta name="twitter:image" content="https://davidederosa.com/s/f/swift/swift.png?1774197885" />
 <meta name="twitter:url" content="https://davidederosa.com/cross-platform-swift/integration-part-two/" />
 
 <link rel="canonical" href="https://davidederosa.com/cross-platform-swift/integration-part-two/" />
@@ -44,14 +44,14 @@
 <link rel="next" href="/cross-platform-swift/integration-part-one/" title="Cross-platform Swift: Integration (pt. 1)" />
 
 
-<link rel="stylesheet" href="/s/main.css?1773731481" />
-<link rel="stylesheet" href="/s/main-mobile.css?1773731481" media="only screen and (max-width: 600px)" />
-<link rel="stylesheet" href="/s/syntax.css?1773731481" />
+<link rel="stylesheet" href="/s/main.css?1774197885" />
+<link rel="stylesheet" href="/s/main-mobile.css?1774197885" media="only screen and (max-width: 600px)" />
+<link rel="stylesheet" href="/s/syntax.css?1774197885" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway:600,400" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha384-t1nt8BQoYMLFN5p42tRAtuAAFQaCQODekUVeKKZrEnEyp4H2R0RHFz0KWpmj7i8g" crossorigin="anonymous">
 
-<link rel="shortcut icon" href="/s/favicon.ico?1773731481" />
-<link rel="apple-touch-icon" href="/s/iphone-icon-precomposed.png?1773731481" />
+<link rel="shortcut icon" href="/s/favicon.ico?1774197885" />
+<link rel="apple-touch-icon" href="/s/iphone-icon-precomposed.png?1774197885" />
 
 
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-DWPG2HZ9FS"></script>
@@ -586,7 +586,18 @@ gtag('config', 'G-DWPG2HZ9FS');
 
 <p>Because there are often no 1:1 counterparts in other languages. Especially if the entities are involved in a persistence layer, you must be extremely careful with any refactoring of the data model to avoid data loss or crashes.</p>
 
-<p>In my case, I tried to rewrite my domain with JSON Schema or <a href="https://github.com/apple/swift-protobuf">swift-protobuf</a>, but eventually chose to <a href="https://github.com/partout-io/partout/tree/master/Sources/PartoutCodegen">write my own codegen</a> with <a href="https://github.com/swiftlang/swift-syntax">SwiftSyntax</a> to keep Swift as the source of truth. The codegen parses an IR from Swift and proceeds to transpile it to Kotlin for Android and C++ for Linux and Windows (later). It was tiring but safer because I didn’t need to change much of the application code, whereas a strict JSON domain would have been a potentially disruptive change. Better be safe than sorry.</p>
+<p><del>In my case, I tried to rewrite my domain with JSON Schema or <a href="https://github.com/apple/swift-protobuf">swift-protobuf</a>, but eventually chose to write my own codegen with <a href="https://github.com/swiftlang/swift-syntax">SwiftSyntax</a> to keep Swift as the source of truth. The codegen parses an IR from Swift and proceeds to transpile it to Kotlin for Android and C++ for Linux and Windows (later). It was tiring but safer because I didn’t need to change much of the application code, whereas a strict JSON domain would have been a potentially disruptive change. Better be safe than sorry.</del></p>
+
+<p>UPDATE 03/22/2026: Rather than generating the code myself, my strategy for Partout today is hybrid and consists of the steps below:</p>
+
+<ul>
+  <li>Use Swift as the source of truth, and stay clear of any fancy way to customize serialization</li>
+  <li>Make <a href="https://github.com/partout-io/codegen">partout-codegen</a> to parse a decent subset of Swift AST with <a href="https://github.com/swiftlang/swift-syntax">SwiftSyntax</a> into a restricted IR model</li>
+  <li>Let the codegen convert the IR to an <a href="https://github.com/partout-io/partout/blob/4e013d27f196715aa4ba47ebcb83f630acc7e05d/scripts/openapi.yaml">OpenAPI YAML</a> schema</li>
+  <li>Use the YAML with <a href="https://openapi-generator.tech/">openapi-generator</a> to generate the data model for any other programming language</li>
+</ul>
+
+<p>Unfortunately, I had to provide custom <code class="language-plaintext highlighter-rouge">Codable</code> implementations for any enum with associated values that was involved in serialized data. Kotlin sealed classes map way better to OpenAPI. All in all, the approach works very well to maintain data integrity across polyglot consumers of the library.</p>
 
 <h2 id="bottom-line">Bottom line</h2>
 
