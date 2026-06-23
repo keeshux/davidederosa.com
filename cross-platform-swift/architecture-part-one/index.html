@@ -28,7 +28,7 @@
 <meta property="og:site_name" content="Davide De Rosa" />
 <meta property="og:title" content="Cross-platform Swift: Architecture (pt. 1)" />
 <meta property="og:description" content="It’s been a while since the announcement of the last post, but I finally found the time to kickstart the last part of this series. Today, we start gathering all the previous research to make Swift and non-Swift apps that..." />
-<meta property="og:image" content="https://davidederosa.com/s/f/swift/swift.png?1782213305" />
+<meta property="og:image" content="https://davidederosa.com/s/f/swift/swift.png?1782252567" />
 <meta property="og:url" content="https://davidederosa.com/cross-platform-swift/architecture-part-one/" />
 
 <!-- Twitter -->
@@ -37,7 +37,7 @@
 <meta name="twitter:site" content="@keeshux" />
 <meta name="twitter:title" content="Cross-platform Swift: Architecture (pt. 1)" />
 <meta name="twitter:description" content="It’s been a while since the announcement of the last post, but I finally found the time to kickstart the last part of this series. Today, we start gathering all the previous research to make Swift and non-Swift apps that..." />
-<meta name="twitter:image" content="https://davidederosa.com/s/f/swift/swift.png?1782213305" />
+<meta name="twitter:image" content="https://davidederosa.com/s/f/swift/swift.png?1782252567" />
 <meta name="twitter:url" content="https://davidederosa.com/cross-platform-swift/architecture-part-one/" />
 
 <link rel="canonical" href="https://davidederosa.com/cross-platform-swift/architecture-part-one/" />
@@ -46,14 +46,14 @@
 
 
 
-<link rel="stylesheet" href="/s/main.css?1782213305" />
-<link rel="stylesheet" href="/s/main-mobile.css?1782213305" media="only screen and (max-width: 600px)" />
-<link rel="stylesheet" href="/s/syntax.css?1782213305" />
+<link rel="stylesheet" href="/s/main.css?1782252567" />
+<link rel="stylesheet" href="/s/main-mobile.css?1782252567" media="only screen and (max-width: 600px)" />
+<link rel="stylesheet" href="/s/syntax.css?1782252567" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway:600,400" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha384-t1nt8BQoYMLFN5p42tRAtuAAFQaCQODekUVeKKZrEnEyp4H2R0RHFz0KWpmj7i8g" crossorigin="anonymous">
 
-<link rel="shortcut icon" href="/s/favicon.ico?1782213305" />
-<link rel="apple-touch-icon" href="/s/iphone-icon-precomposed.png?1782213305" />
+<link rel="shortcut icon" href="/s/favicon.ico?1782252567" />
+<link rel="apple-touch-icon" href="/s/iphone-icon-precomposed.png?1782252567" />
 
 
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-DWPG2HZ9FS"></script>
@@ -362,8 +362,8 @@ gtag('config', 'G-DWPG2HZ9FS');
 
 <p>First, we build the Swift library as an <code class="language-plaintext highlighter-rouge">ExternalProject</code> and feed it a specific environment for the Android NDK and the Swift for Android SDK. By using the mentioned tools, this becomes a one-liner:</p>
 
-<div class="language-cmake highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">include</span><span class="p">(</span><span class="s2">"</span><span class="si">${</span><span class="nv">CMAKE_CURRENT_SOURCE_DIR</span><span class="si">}</span><span class="s2">/swift-cmake-toolchains/swift-android-env.cmake"</span><span class="p">)</span>  
-<span class="nf">add_swift_target</span><span class="p">(</span>SimpleLibrary <span class="si">${</span><span class="nv">CMAKE_CURRENT_SOURCE_DIR</span><span class="si">}</span>/simple-library<span class="p">)</span>
+<div class="language-cmake highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">include</span><span class="p">(</span><span class="s2">"</span><span class="si">${</span><span class="nv">CMAKE_CURRENT_SOURCE_DIR</span><span class="si">}</span><span class="s2">/swift-cmake-toolchains/swift-macros.cmake"</span><span class="p">)</span>  
+<span class="nf">add_swift_library</span><span class="p">(</span>SimpleLibrary <span class="si">${</span><span class="nv">CMAKE_CURRENT_SOURCE_DIR</span><span class="si">}</span>/simple-library<span class="p">)</span>
 </code></pre></div></div>
 
 <p>Then, we merge the Swift library into the wrapper, together with a <a href="https://github.com/keeshux/cross-platform-swift/blob/master/simple-android-app/app/src/main/cpp/wrapper.c"><code class="language-plaintext highlighter-rouge">wrapper.c</code></a> shim that translates the library ABI to JNI bindings for use in the Kotlin code:</p>
