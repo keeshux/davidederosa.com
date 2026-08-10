@@ -28,7 +28,7 @@
 <meta property="og:site_name" content="Davide De Rosa" />
 <meta property="og:title" content="The path to an obscure crash" />
 <meta property="og:description" content="One month after its first, painful release, Passepartout v3 is close to being stable.However, a couple of regressions were still haunting me.Here I want to describe the absurd journey into one of them, that started with a report from GitHub,..." />
-<meta property="og:image" content="https://davidederosa.com/s/keeshux.png?1786295340" />
+<meta property="og:image" content="https://davidederosa.com/s/keeshux.png?1786378517" />
 <meta property="og:url" content="https://davidederosa.com/2025/03/the-path-to-an-obscure-crash/" />
 
 <!-- Twitter -->
@@ -37,7 +37,7 @@
 <meta name="twitter:site" content="@keeshux" />
 <meta name="twitter:title" content="The path to an obscure crash" />
 <meta name="twitter:description" content="One month after its first, painful release, Passepartout v3 is close to being stable.However, a couple of regressions were still haunting me.Here I want to describe the absurd journey into one of them, that started with a report from GitHub,..." />
-<meta name="twitter:image" content="https://davidederosa.com/s/keeshux.png?1786295340" />
+<meta name="twitter:image" content="https://davidederosa.com/s/keeshux.png?1786378517" />
 <meta name="twitter:url" content="https://davidederosa.com/2025/03/the-path-to-an-obscure-crash/" />
 
 <link rel="canonical" href="https://davidederosa.com/2025/03/the-path-to-an-obscure-crash/" />
@@ -48,14 +48,14 @@
 <link rel="next" href="/2025/03/deploying-to-the-app-store-the-cost-you-didn-t-expect/" title="Deploying to the App Store: The cost you didn&#39;t expect" />
 
 
-<link rel="stylesheet" href="/s/main.css?1786295340" />
-<link rel="stylesheet" href="/s/main-mobile.css?1786295340" media="only screen and (max-width: 600px)" />
-<link rel="stylesheet" href="/s/syntax.css?1786295340" />
+<link rel="stylesheet" href="/s/main.css?1786378517" />
+<link rel="stylesheet" href="/s/main-mobile.css?1786378517" media="only screen and (max-width: 600px)" />
+<link rel="stylesheet" href="/s/syntax.css?1786378517" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway:600,400" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha384-t1nt8BQoYMLFN5p42tRAtuAAFQaCQODekUVeKKZrEnEyp4H2R0RHFz0KWpmj7i8g" crossorigin="anonymous">
 
-<link rel="shortcut icon" href="/s/favicon.ico?1786295340" />
-<link rel="apple-touch-icon" href="/s/iphone-icon-precomposed.png?1786295340" />
+<link rel="shortcut icon" href="/s/favicon.ico?1786378517" />
+<link rel="apple-touch-icon" href="/s/iphone-icon-precomposed.png?1786378517" />
 
 
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-DWPG2HZ9FS"></script>
@@ -106,11 +106,11 @@ gtag('config', 'G-DWPG2HZ9FS');
 
         
 
-        <p>One month after its first, painful release, <a href="https://passepartoutvpn.app">Passepartout</a> v3 is close to being stable.</p>
+        <p>One month after its first, painful release, <a href="https://partout.io/passepartout/">Passepartout</a> v3 is close to being stable.</p>
 
 <p>However, a couple of regressions were still haunting me.</p>
 
-<p>Here I want to describe the absurd journey into one of them, that started with a report <a href="https://github.com/passepartoutvpn/passepartout/issues/1204">from GitHub</a>, and <a href="https://www.reddit.com/r/passepartout/comments/1j0lbqa/not_open_in_sonoma_any_idea/">one from Reddit</a>. Both users were reporting that the Mac app was crashing on launch.</p>
+<p>Here I want to describe the absurd journey into one of them, that started with a report <a href="https://github.com/partout-io/passepartout/issues/1204">from GitHub</a>, and <a href="https://www.reddit.com/r/passepartout/comments/1j0lbqa/not_open_in_sonoma_any_idea/">one from Reddit</a>. Both users were reporting that the Mac app was crashing on launch.</p>
 
 <p>The reports led me to think that the regression was caused by the macOS version, or the CPU architecture, as both users were using an Intel-based machine.</p>
 
@@ -175,7 +175,7 @@ gtag('config', 'G-DWPG2HZ9FS');
 
 <h3 id="git-to-the-rescue">Git to the rescue</h3>
 
-<p>Time to locate where the regression was introduced. I rebuilt the app for each commit that sounded relevant, and after 10-20 builds, I found out that the crash was introduced in <a href="https://github.com/passepartoutvpn/passepartout/pull/1200">this pull request</a> about the light/dark mode picker in the app preferences. WTF?!</p>
+<p>Time to locate where the regression was introduced. I rebuilt the app for each commit that sounded relevant, and after 10-20 builds, I found out that the crash was introduced in <a href="https://github.com/partout-io/passepartout/pull/1200">this pull request</a> about the light/dark mode picker in the app preferences. WTF?!</p>
 
 <p>It turns out, the widely used <a href="https://developer.apple.com/documentation/appkit/nsapp"><code class="language-plaintext highlighter-rouge">NSApp</code> singleton</a> is an <strong>implicitly unwrapped optional</strong>:</p>
 
@@ -185,7 +185,7 @@ var NSApp: NSApplication!
 
 <p>and it was therefore used unsafely in this bit of the PR:</p>
 
-<script src="https://emgithub.com/embed-v2.js?target=https%3A%2F%2Fgithub.com%2Fpassepartoutvpn%2Fpassepartout%2Fblob%2Fv3.1.1%2FPackages%2FApp%2FSources%2FUILibrary%2FBusiness%2FAppearanceManager.swift%23L66-73&amp;style=default&amp;type=code&amp;showBorder=on&amp;showLineNumbers=on&amp;showFileMeta=on&amp;showFullPath=on&amp;showCopy=on"></script>
+<script src="https://emgithub.com/embed-v2.js?target=https%3A%2F%2Fgithub.com%2Fpartout-io%2Fpassepartout%2Fblob%2Fv3.1.1%2FPackages%2FApp%2FSources%2FUILibrary%2FBusiness%2FAppearanceManager.swift%23L66-73&amp;style=default&amp;type=code&amp;showBorder=on&amp;showLineNumbers=on&amp;showFileMeta=on&amp;showFullPath=on&amp;showCopy=on"></script>
 
 <h3 id="a-race-condition-about-nsapp">A race condition about NSApp</h3>
 
@@ -210,7 +210,7 @@ var NSApp: NSApplication!
 
 <p>The takeaway? Even well-documented singletons aren’t always safe to assume as non-nil. And when debugging obscure crashes, patience and a systematic approach (plus a good VM setup) can make all the difference.</p>
 
-<p>Passepartout v3.1.5 <a href="https://github.com/passepartoutvpn/passepartout/pull/1224">will handle this case properly</a>, ensuring that <code class="language-plaintext highlighter-rouge">NSApp</code> is accessed only when it’s actually available. Hopefully, that’s one less obscure crash lurking in the shadows.</p>
+<p>Passepartout v3.1.5 <a href="https://github.com/partout-io/passepartout/pull/1224">will handle this case properly</a>, ensuring that <code class="language-plaintext highlighter-rouge">NSApp</code> is accessed only when it’s actually available. Hopefully, that’s one less obscure crash lurking in the shadows.</p>
 
 <p>To Apple and Swift: isn’t it about time to discourage/deprecate the use of implicitly unwrapped optionals?</p>
 

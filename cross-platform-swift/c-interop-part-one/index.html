@@ -28,7 +28,7 @@
 <meta property="og:site_name" content="Davide De Rosa" />
 <meta property="og:title" content="Cross-platform Swift: C interop (pt. 1)" />
 <meta property="og:description" content="This is where the fun begins. Partout, the library I talk about in this series, is a networking library. As such, there are places where code control and performance are paramount. The integration of Swift with the C language for..." />
-<meta property="og:image" content="https://davidederosa.com/s/f/swift/swift.png?1786295340" />
+<meta property="og:image" content="https://davidederosa.com/s/f/swift/swift.png?1786378517" />
 <meta property="og:url" content="https://davidederosa.com/cross-platform-swift/c-interop-part-one/" />
 
 <!-- Twitter -->
@@ -37,7 +37,7 @@
 <meta name="twitter:site" content="@keeshux" />
 <meta name="twitter:title" content="Cross-platform Swift: C interop (pt. 1)" />
 <meta name="twitter:description" content="This is where the fun begins. Partout, the library I talk about in this series, is a networking library. As such, there are places where code control and performance are paramount. The integration of Swift with the C language for..." />
-<meta name="twitter:image" content="https://davidederosa.com/s/f/swift/swift.png?1786295340" />
+<meta name="twitter:image" content="https://davidederosa.com/s/f/swift/swift.png?1786378517" />
 <meta name="twitter:url" content="https://davidederosa.com/cross-platform-swift/c-interop-part-one/" />
 
 <link rel="canonical" href="https://davidederosa.com/cross-platform-swift/c-interop-part-one/" />
@@ -48,14 +48,14 @@
 <link rel="next" href="/cross-platform-swift/c-interop-part-two/" title="Cross-platform Swift: C interop (pt. 2)" />
 
 
-<link rel="stylesheet" href="/s/main.css?1786295340" />
-<link rel="stylesheet" href="/s/main-mobile.css?1786295340" media="only screen and (max-width: 600px)" />
-<link rel="stylesheet" href="/s/syntax.css?1786295340" />
+<link rel="stylesheet" href="/s/main.css?1786378517" />
+<link rel="stylesheet" href="/s/main-mobile.css?1786378517" media="only screen and (max-width: 600px)" />
+<link rel="stylesheet" href="/s/syntax.css?1786378517" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway:600,400" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha384-t1nt8BQoYMLFN5p42tRAtuAAFQaCQODekUVeKKZrEnEyp4H2R0RHFz0KWpmj7i8g" crossorigin="anonymous">
 
-<link rel="shortcut icon" href="/s/favicon.ico?1786295340" />
-<link rel="apple-touch-icon" href="/s/iphone-icon-precomposed.png?1786295340" />
+<link rel="shortcut icon" href="/s/favicon.ico?1786378517" />
+<link rel="apple-touch-icon" href="/s/iphone-icon-precomposed.png?1786378517" />
 
 
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-DWPG2HZ9FS"></script>
@@ -337,7 +337,7 @@ gtag('config', 'G-DWPG2HZ9FS');
 
 <p>The mix-and-match transition to Swift may lead your codebase to a place where it’s very difficult to gauge the extent of the Objective-C legacy. Why is this important? Because if your intent is going cross-platform, you’d better port all your Objective-C code to good old C. The alternative is manually linking against <a href="https://www.gnustep.org/">GNUstep</a>, but it’s niche GPL software, and adds unnecessary complexity to keep around a language that is already obsolete.</p>
 
-<p>In my case, the low-level part of my OpenVPN implementation in Partout was written in Objective-C plus OpenSSL, so I decided it was time to <a href="https://github.com/passepartoutvpn/partout/milestone/4?closed=1">patiently write a new C version</a>.</p>
+<p>In my case, the low-level part of my OpenVPN implementation in Partout was written in Objective-C plus OpenSSL, so I decided it was time to <a href="https://github.com/partout-io/partout/milestone/4?closed=1">patiently write a new C version</a>.</p>
 
 <p>You have no idea how thrilled I am that <strong>this new Swift/C implementation now works on Apple, Windows, Linux, and Android</strong>!</p>
 
@@ -345,9 +345,9 @@ gtag('config', 'G-DWPG2HZ9FS');
 
 <p>Can I finally mention the joy of using C again after years of high-level programming?</p>
 
-<script src="https://emgithub.com/embed-v2.js?target=https%3A%2F%2Fgithub.com%2Fpassepartoutvpn%2Fpartout%2Fblob%2F66f3ed5c01c8d357a7b625a1067f19f368698124%2FSources%2FCrypto%2FOpenSSL_ObjC%2FCryptoAEAD.m%23L37-L58&amp;style=default&amp;type=code&amp;showBorder=on&amp;showLineNumbers=on&amp;showFileMeta=on&amp;showFullPath=on&amp;showCopy=on"></script>
+<script src="https://emgithub.com/embed-v2.js?target=https%3A%2F%2Fgithub.com%2Fpartout-io%2Fpartout%2Fblob%2F66f3ed5c01c8d357a7b625a1067f19f368698124%2FSources%2FCrypto%2FOpenSSL_ObjC%2FCryptoAEAD.m%23L37-L58&amp;style=default&amp;type=code&amp;showBorder=on&amp;showLineNumbers=on&amp;showFileMeta=on&amp;showFullPath=on&amp;showCopy=on"></script>
 
-<script src="https://emgithub.com/embed-v2.js?target=https%3A%2F%2Fgithub.com%2Fpassepartoutvpn%2Fpartout%2Fblob%2F66f3ed5c01c8d357a7b625a1067f19f368698124%2FSources%2FCrypto%2FOpenSSL_C%2Fcrypto_aead.c%23L26-L42&amp;style=default&amp;type=code&amp;showBorder=on&amp;showLineNumbers=on&amp;showFileMeta=on&amp;showFullPath=on&amp;showCopy=on"></script>
+<script src="https://emgithub.com/embed-v2.js?target=https%3A%2F%2Fgithub.com%2Fpartout-io%2Fpartout%2Fblob%2F66f3ed5c01c8d357a7b625a1067f19f368698124%2FSources%2FCrypto%2FOpenSSL_C%2Fcrypto_aead.c%23L26-L42&amp;style=default&amp;type=code&amp;showBorder=on&amp;showLineNumbers=on&amp;showFileMeta=on&amp;showFullPath=on&amp;showCopy=on"></script>
 
 <p><img src="/s/f/cross-platform-swift/c-interop-speed-test.png" alt="OpenVPN over C versus ObjC" /></p>
 
@@ -363,7 +363,7 @@ gtag('config', 'G-DWPG2HZ9FS');
   <li>If the footprint is important, the OpenSSL dependency may be replaced with OS APIs, or used in SwiftPM as a shared library. This is common on Linux.</li>
 </ul>
 
-<script src="https://emgithub.com/embed-v2.js?target=https%3A%2F%2Fgithub.com%2Fpassepartoutvpn%2Fpartout%2Fblob%2F66f3ed5c01c8d357a7b625a1067f19f368698124%2FPackage.swift%23L334-L346&amp;style=default&amp;type=code&amp;showBorder=on&amp;showLineNumbers=on&amp;showFileMeta=on&amp;showFullPath=on&amp;showCopy=on"></script>
+<script src="https://emgithub.com/embed-v2.js?target=https%3A%2F%2Fgithub.com%2Fpartout-io%2Fpartout%2Fblob%2F66f3ed5c01c8d357a7b625a1067f19f368698124%2FPackage.swift%23L334-L346&amp;style=default&amp;type=code&amp;showBorder=on&amp;showLineNumbers=on&amp;showFileMeta=on&amp;showFullPath=on&amp;showCopy=on"></script>
 
 <h2 id="bottom-line">Bottom line</h2>
 

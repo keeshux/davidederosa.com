@@ -28,7 +28,7 @@
 <meta property="og:site_name" content="Davide De Rosa" />
 <meta property="og:title" content="A true case for Dependency Injection" />
 <meta property="og:description" content="When studying the foundations of a programming language, for example, during a career in Computer Science, very rarely are design patterns and the concept of software architecture presented in a way that can be transferred to real-world scenarios. Add to..." />
-<meta property="og:image" content="https://davidederosa.com/s/keeshux.png?1786295340" />
+<meta property="og:image" content="https://davidederosa.com/s/keeshux.png?1786378517" />
 <meta property="og:url" content="https://davidederosa.com/2025/05/a-true-case-for-dependency-injection/" />
 
 <!-- Twitter -->
@@ -37,7 +37,7 @@
 <meta name="twitter:site" content="@keeshux" />
 <meta name="twitter:title" content="A true case for Dependency Injection" />
 <meta name="twitter:description" content="When studying the foundations of a programming language, for example, during a career in Computer Science, very rarely are design patterns and the concept of software architecture presented in a way that can be transferred to real-world scenarios. Add to..." />
-<meta name="twitter:image" content="https://davidederosa.com/s/keeshux.png?1786295340" />
+<meta name="twitter:image" content="https://davidederosa.com/s/keeshux.png?1786378517" />
 <meta name="twitter:url" content="https://davidederosa.com/2025/05/a-true-case-for-dependency-injection/" />
 
 <link rel="canonical" href="https://davidederosa.com/2025/05/a-true-case-for-dependency-injection/" />
@@ -48,14 +48,14 @@
 <link rel="next" href="/cross-platform-swift/platform-specifics/" title="Cross-platform Swift: Platform specifics" />
 
 
-<link rel="stylesheet" href="/s/main.css?1786295340" />
-<link rel="stylesheet" href="/s/main-mobile.css?1786295340" media="only screen and (max-width: 600px)" />
-<link rel="stylesheet" href="/s/syntax.css?1786295340" />
+<link rel="stylesheet" href="/s/main.css?1786378517" />
+<link rel="stylesheet" href="/s/main-mobile.css?1786378517" media="only screen and (max-width: 600px)" />
+<link rel="stylesheet" href="/s/syntax.css?1786378517" />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway:600,400" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha384-t1nt8BQoYMLFN5p42tRAtuAAFQaCQODekUVeKKZrEnEyp4H2R0RHFz0KWpmj7i8g" crossorigin="anonymous">
 
-<link rel="shortcut icon" href="/s/favicon.ico?1786295340" />
-<link rel="apple-touch-icon" href="/s/iphone-icon-precomposed.png?1786295340" />
+<link rel="shortcut icon" href="/s/favicon.ico?1786378517" />
+<link rel="apple-touch-icon" href="/s/iphone-icon-precomposed.png?1786378517" />
 
 
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-DWPG2HZ9FS"></script>
@@ -108,7 +108,7 @@ gtag('config', 'G-DWPG2HZ9FS');
 
         <p>When studying the foundations of a programming language, for example, during a career in Computer Science, very rarely are <em>design patterns</em> and the concept of <em>software architecture</em> presented in a way that can be transferred to real-world scenarios. Add to that, you may never use most of the well-known patterns, and it’s okay because you don’t want to be a hammer looking for a nail. You shouldn’t force a design pattern for the sake of using it.</p>
 
-<p><a href="#how-di-helps-me-scale-passepartout">Below</a>, I’ll show you how a popular design pattern helped me rework Passepartout for Mac to distribute it <a href="https://github.com/passepartoutvpn/passepartout/issues/231">outside of the App Store</a>, without messing too much with the existing and stable codebase.</p>
+<p><a href="#how-di-helps-me-scale-passepartout">Below</a>, I’ll show you how a popular design pattern helped me rework Passepartout for Mac to distribute it <a href="https://github.com/partout-io/passepartout/issues/231">outside of the App Store</a>, without messing too much with the existing and stable codebase.</p>
 
 <h3 id="experience-produces-patterns">Experience produces patterns</h3>
 
@@ -137,7 +137,7 @@ gtag('config', 'G-DWPG2HZ9FS');
 
 <h3 id="how-di-helps-me-scale-passepartout">How DI helps me scale Passepartout</h3>
 
-<p>Weeks ago, I decided to make Passepartout for Mac available <a href="https://github.com/passepartoutvpn/passepartout/issues/231">outside of the App Store</a>. Making such a VPN app standalone is no trivial task because the way it operates is radically different: the UI is still a frontend to the VPN backend, but the app and the VPN processes execute as different users, and they do not easily communicate. Specifically, the VPN is deployed as <a href="apple-sysex">System Extension</a>, and therefore runs as <code class="language-plaintext highlighter-rouge">root</code>.</p>
+<p>Weeks ago, I decided to make Passepartout for Mac available <a href="https://github.com/partout-io/passepartout/issues/231">outside of the App Store</a>. Making such a VPN app standalone is no trivial task because the way it operates is radically different: the UI is still a frontend to the VPN backend, but the app and the VPN processes execute as different users, and they do not easily communicate. Specifically, the VPN is deployed as <a href="apple-sysex">System Extension</a>, and therefore runs as <code class="language-plaintext highlighter-rouge">root</code>.</p>
 
 <p>By leaving the App Store, I was about to lose a big chunk of features:</p>
 
@@ -170,7 +170,7 @@ gtag('config', 'G-DWPG2HZ9FS');
 <p>The new Mac app eventually works around the missing functionalities by dynamically replacing (<code class="language-plaintext highlighter-rouge">supportsAppGroups</code> is false in this case):</p>
 
 <ul>
-  <li><a href="https://github.com/passepartoutvpn/partout/blob/master/Sources/Platforms/Apple/UserDefaultsEnvironment.swift"><code class="language-plaintext highlighter-rouge">UserDefaultsEnvironment</code></a> with <a href="https://github.com/passepartoutvpn/partout/blob/master/Sources/Platforms/AppleNE/App/NETunnelEnvironment.swift"><code class="language-plaintext highlighter-rouge">NETunnelEnvironment</code></a>, which does IPC by sending messages to the System Extension, rather than sharing data through the App Group <code class="language-plaintext highlighter-rouge">UserDefaults</code>. They both implement the <code class="language-plaintext highlighter-rouge">TunnelEnvironmentReader</code> protocol, meant for reading VPN data from the app.</li>
+  <li><a href="https://github.com/partout-io/partout/blob/master/Sources/Platforms/Apple/UserDefaultsEnvironment.swift"><code class="language-plaintext highlighter-rouge">UserDefaultsEnvironment</code></a> with <a href="https://github.com/partout-io/partout/blob/master/Sources/Platforms/AppleNE/App/NETunnelEnvironment.swift"><code class="language-plaintext highlighter-rouge">NETunnelEnvironment</code></a>, which does IPC by sending messages to the System Extension, rather than sharing data through the App Group <code class="language-plaintext highlighter-rouge">UserDefaults</code>. They both implement the <code class="language-plaintext highlighter-rouge">TunnelEnvironmentReader</code> protocol, meant for reading VPN data from the app.</li>
 </ul>
 
 <div class="language-swift highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">protocol</span> <span class="kt">TunnelEnvironmentReader</span><span class="p">:</span> <span class="kt">Sendable</span> <span class="p">{</span>
@@ -178,10 +178,10 @@ gtag('config', 'G-DWPG2HZ9FS');
 <span class="p">}</span>
 </code></pre></div></div>
 
-<script src="https://emgithub.com/embed-v2.js?target=https%3A%2F%2Fgithub.com%2Fpassepartoutvpn%2Fpassepartout%2Fblob%2F7ffe37ea0d9e280b7cafbeff1332d431173be2d4%2FPassepartout%2FShared%2FDependencies%252BPartout.swift%23L59-L76&amp;style=default&amp;type=code&amp;showBorder=on&amp;showLineNumbers=on&amp;showFileMeta=on&amp;showFullPath=on&amp;showCopy=on"></script>
+<script src="https://emgithub.com/embed-v2.js?target=https%3A%2F%2Fgithub.com%2Fpartout-io%2Fpassepartout%2Fblob%2F7ffe37ea0d9e280b7cafbeff1332d431173be2d4%2FPassepartout%2FShared%2FDependencies%252BPartout.swift%23L59-L76&amp;style=default&amp;type=code&amp;showBorder=on&amp;showLineNumbers=on&amp;showFileMeta=on&amp;showFullPath=on&amp;showCopy=on"></script>
 
 <ul>
-  <li><a href="https://github.com/passepartoutvpn/partout/blob/master/Sources/Platforms/AppleNE/Serialization/KeychainNEProtocolCoder.swift"><code class="language-plaintext highlighter-rouge">KeychainNEProtocolCoder</code></a> with <a href="https://github.com/passepartoutvpn/partout/blob/master/Sources/Platforms/AppleNE/Serialization/ProviderNEProtocolCoder.swift"><code class="language-plaintext highlighter-rouge">ProviderNEProtocolCoder</code></a>, which installs the VPN profiles without the keychain, using the Network Extension map in <code class="language-plaintext highlighter-rouge">providerConfiguration</code>. They both implement the <code class="language-plaintext highlighter-rouge">NEProtocolCoder</code> protocol, meant for VPN profiles serialization.</li>
+  <li><a href="https://github.com/partout-io/partout/blob/master/Sources/Platforms/AppleNE/Serialization/KeychainNEProtocolCoder.swift"><code class="language-plaintext highlighter-rouge">KeychainNEProtocolCoder</code></a> with <a href="https://github.com/partout-io/partout/blob/master/Sources/Platforms/AppleNE/Serialization/ProviderNEProtocolCoder.swift"><code class="language-plaintext highlighter-rouge">ProviderNEProtocolCoder</code></a>, which installs the VPN profiles without the keychain, using the Network Extension map in <code class="language-plaintext highlighter-rouge">providerConfiguration</code>. They both implement the <code class="language-plaintext highlighter-rouge">NEProtocolCoder</code> protocol, meant for VPN profiles serialization.</li>
 </ul>
 
 <div class="language-swift highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">protocol</span> <span class="kt">NEProtocolCoder</span><span class="p">:</span> <span class="kt">Sendable</span> <span class="p">{</span>
@@ -191,7 +191,7 @@ gtag('config', 'G-DWPG2HZ9FS');
 <span class="p">}</span>
 </code></pre></div></div>
 
-<script src="https://emgithub.com/embed-v2.js?target=https%3A%2F%2Fgithub.com%2Fpassepartoutvpn%2Fpassepartout%2Fblob%2F7ffe37ea0d9e280b7cafbeff1332d431173be2d4%2FPassepartout%2FShared%2FDependencies%252BPartout.swift%23L40-L57&amp;style=default&amp;type=code&amp;showBorder=on&amp;showLineNumbers=on&amp;showFileMeta=on&amp;showFullPath=on&amp;showCopy=on"></script>
+<script src="https://emgithub.com/embed-v2.js?target=https%3A%2F%2Fgithub.com%2Fpartout-io%2Fpassepartout%2Fblob%2F7ffe37ea0d9e280b7cafbeff1332d431173be2d4%2FPassepartout%2FShared%2FDependencies%252BPartout.swift%23L40-L57&amp;style=default&amp;type=code&amp;showBorder=on&amp;showLineNumbers=on&amp;showFileMeta=on&amp;showFullPath=on&amp;showCopy=on"></script>
 
 <h3 id="do-you-really-need-di">Do you really need DI?</h3>
 
