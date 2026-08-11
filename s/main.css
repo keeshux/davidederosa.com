@@ -246,11 +246,6 @@ code {
     font-weight: bold;
 }
 
-.post-tags {
-    margin-top: 2em;
-    margin-bottom: 1em;
-}
-
 .paginator {
     margin: 1em 0em;
 }
@@ -343,7 +338,6 @@ h2 a,
 h3 a,
 h4 a,
 .post header,
-.post-tags,
 .post-related li,
 .paginator {
     font-family: 'Raleway', sans-serif;
