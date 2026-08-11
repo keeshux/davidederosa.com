@@ -1,0 +1,327 @@
+
+
+
+<!DOCTYPE html>
+<html lang="en" itemscope itemtype="http://schema.org/Blog">
+    <head>
+        
+
+
+
+
+
+
+
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+<title>I joined the rewrite bandwagon</title>
+
+<meta name="author" content="Davide De Rosa" />
+<meta name="description" content="I make software. I look around me.">
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="apple-mobile-web-app-title" content="keeshux">
+
+<!-- OpenGraph -->
+
+<meta property="og:type" content="article" />
+<meta property="og:site_name" content="Davide De Rosa" />
+<meta property="og:title" content="I joined the rewrite bandwagon" />
+<meta property="og:description" content="TL;DR Yes, I rewrote Partout from Swift to Zig with AI. No, it wasn’t one prompt.In late 2024, I started venting the idea of making Passepartout available beyond the Apple platforms, and this blog testifies how much I dedicated myself..." />
+<meta property="og:image" content="https://davidederosa.com/s/keeshux.png?1786460604" />
+<meta property="og:url" content="https://davidederosa.com/2026/08/i-joined-the-rewrite-bandwagon/" />
+
+<!-- Twitter -->
+
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:site" content="@keeshux" />
+<meta name="twitter:title" content="I joined the rewrite bandwagon" />
+<meta name="twitter:description" content="TL;DR Yes, I rewrote Partout from Swift to Zig with AI. No, it wasn’t one prompt.In late 2024, I started venting the idea of making Passepartout available beyond the Apple platforms, and this blog testifies how much I dedicated myself..." />
+<meta name="twitter:image" content="https://davidederosa.com/s/keeshux.png?1786460604" />
+<meta name="twitter:url" content="https://davidederosa.com/2026/08/i-joined-the-rewrite-bandwagon/" />
+
+<link rel="canonical" href="https://davidederosa.com/2026/08/i-joined-the-rewrite-bandwagon/" />
+
+<link rel="prev" href="/cross-platform-swift/closing/" title="Cross-platform Swift: Closing" />
+
+
+
+<link rel="stylesheet" href="/s/main.css?1786460604" />
+<link rel="stylesheet" href="/s/main-mobile.css?1786460604" media="only screen and (max-width: 600px)" />
+<link rel="stylesheet" href="/s/syntax.css?1786460604" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway:600,400" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha384-t1nt8BQoYMLFN5p42tRAtuAAFQaCQODekUVeKKZrEnEyp4H2R0RHFz0KWpmj7i8g" crossorigin="anonymous">
+
+<link rel="shortcut icon" href="/s/favicon.ico?1786460604" />
+<link rel="apple-touch-icon" href="/s/iphone-icon-precomposed.png?1786460604" />
+
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-DWPG2HZ9FS"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag() {
+    dataLayer.push(arguments);
+}
+gtag('js', new Date());
+gtag('config', 'G-DWPG2HZ9FS');
+</script>
+
+
+
+    </head>
+    <body>
+        <div id="container">
+            <header>
+                <nav id="menu">
+    <ul>
+        
+    </ul>
+</nav>
+
+            </header>
+            <div>
+                <header>
+                    <h1><a href="/">Davide De Rosa</a></h1>
+                </header>
+                <main>
+                    <article class="post post-full" itemscope itemtype="https://schema.org/Article">
+    <header>
+        
+
+        <div>
+            <span class="post-date" itemprop="datepublished">Aug 11, 2026</span>
+            <h2 itemprop="name">
+                
+                I joined the rewrite bandwagon
+                
+            </h2>
+            
+
+        </div>
+    </header>
+    <div class="post-body">
+        
+
+        
+
+        <p>TL;DR Yes, I rewrote <a href="https://github.com/partout-io/partout">Partout</a> from Swift to Zig with AI. No, it wasn’t <em>one</em> prompt.</p>
+
+<p>In late 2024, I started venting the idea of making <a href="https://partout.io/passepartout/">Passepartout</a> available beyond the Apple platforms, and this blog testifies how much I dedicated myself to making the original Swift/ObjC codebase cross-platform for more than a year.</p>
+
+<h3 id="cross-platform-swift">Cross-platform Swift</h3>
+
+<p>Around March 2025, I evaluated a few options that made sense at the time, and I ended up sticking with Swift because:</p>
+
+<ul>
+  <li>I was extremely proficient in Swift.</li>
+  <li>Partout was already agnostic of platforms and crypto.</li>
+  <li>The VPN code was stable and battle-tested.</li>
+  <li>Ports <em>always</em> regress to a degree, and I didn’t want to waste more time refactoring.</li>
+</ul>
+
+<p>Last but not least, there were no comparable examples of Swift used in low-level, cross-platform libraries at that scale (only later did I realize why). This was the main non-technical drive: trying <em>something new</em>.</p>
+
+<p>Months later, I started thinking that Swift wasn’t a great bet for portable software, and that I was only keeping it because I was too committed. Had I had to start from scratch, Swift wouldn’t have been my first choice, a feeling that has overwhelmed me over time.</p>
+
+<p>Regardless, I made my VPN library work in Swift on Android, Windows, and Linux.</p>
+
+<h3 id="not-exactly-a-one-shot-prompt">Not exactly a one-shot prompt</h3>
+
+<p>Fast-forward to 2026, software development has changed like it never has before, and everyone knows what I’m talking about. What was an insanely tedious endeavor last year, suddenly become feasible. The last few months I delegated things to frontier LLMs that made me reasonably confident about their coding capabilities. Ironically, I didn’t trust them a bit only one year ago.</p>
+
+<p>Two months ago, while <a href="https://coz.is/">a friend was talking to me about Zig</a>, I joked about how long it’d take to rewrite my library from Swift to Zig, given I had absolutely zero knowledge of Zig at that time. This happened before the hyped post about <a href="https://bun.com/blog/bun-in-rust">the infamous Bun rewrite</a>. I decided to give it a shot, and over a few hours of avid prompting, I managed to produce a smoke test of Partout connecting to my WireGuard server. If that wasn’t enough proof, the ridiculous drop in the library size (20MB -&gt; 300kB) convinced me to dive into it. The footprint was definitely my biggest struggle with Swift.</p>
+
+<p>Remarkably, but not proudly, I couldn’t write a single “Hello world” in Zig yet.</p>
+
+<p>However, I’ve never bought the story of “I single-prompted a video game”, so I was fully prepared to this outcome: the Zig MVP “worked”, but code-wise, it was a messy pile of crap. I could tell even without knowing the programming language.</p>
+
+<p>It took me almost a month to shape the new library into a production-ready artifact, with my intended design and taste, and while I’m not 5% proficient in Zig like I’m in Swift, I learned a lot about the language through this challenging process. It also reminded me of low-level patterns that after years of Swift programming I took for granted. Just think of the complexity behind coroutines, e.g. Swift Concurrency, and how such model is hard to translate to systems programming.</p>
+
+<h3 id="retaining-ownership">Retaining ownership</h3>
+
+<p>Last year, I wrote a post about the risk of <a href="/2025/08/the-role-of-ai-in-losing-care-for-our-products/">losing care for AI-coded products</a>. I stand by that post today more than ever. Rewriting Partout to a programming language I didn’t know posed a concrete risk not only of losing care for its quality, but something way more fundamental: <em>ownership</em>.</p>
+
+<p>What I call ownership of a software product is not knowing each line of code, as we programmers all know that feeling of not understanding even our own code after a while. Ownership is the ability to treat the software as a whole, whose code remains an important part, no matter what people say.</p>
+
+<p>If we accept that code may age bad, we also accept that what sticks through the years is the design of the software. That’s why I poured my original design into the rewrite, even if coding was mostly driven by AI. From a design perspective, I made sure that Partout was as close as possible to the old Swift architecture, as this allowed me to retain the ownership of the project.</p>
+
+<h3 id="my-advice">My advice</h3>
+
+<p>Delegating too much to AI is risky, especially if you’re learning to program. After 20 years in the field, I feel much more confident when it comes to making choices, and I’m happy with the new tools at disposal. However, AI or not, I would summarize the questions that you should <em>never</em> overlook about your software:</p>
+
+<ul>
+  <li>Why it exists</li>
+  <li>Who it serves</li>
+  <li>What it does</li>
+  <li>How it does it, to some extent (more crucial for highly technical products)</li>
+  <li>Where it’s going to</li>
+  <li>Could I draft a change offline (somewhat implied)</li>
+</ul>
+
+<p>If you can answer all of them, you are making good use of AI without outsourcing ownership and understanding.</p>
+
+<p>Never stop asking yourself the same questions, at different times, through different struggles. This is the compass you’ll need through these strange times.</p>
+
+
+        
+    </div>
+    
+    
+        
+            
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+            
+        
+    
+        
+    
+        
+    
+        
+    
+        
+            
+        
+    
+        
+    
+        
+            
+        
+    
+        
+    
+        
+    
+        
+            
+        
+    
+        
+            
+        
+    
+        
+            
+        
+    
+        
+            
+        
+    
+        
+            
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+    
+
+
+
+
+
+
+
+<aside class="sharing" id="sharing-me">
+    <ul>
+        <li><a href="/feed.xml" title="Follow the blog" target="_blank"><i class="fa-solid fa-rss"></i>Subscribe</a></li>
+        <li>Follow me <a href="https://x.com/keeshux" title="Follow me on X" target="_blank">on X</a> and <a href="https://github.com/keeshux" title="Follow me on GitHub" target="_blank">GitHub</a></li>
+    </ul>
+</aside>
+
+    <aside class="post-related">
+        <p>See also:</p>
+        <ul>
+            
+            <li><a href="/cross-platform-swift/architecture-part-one/">Cross-platform Swift: Architecture (pt. 1)</a></li>
+            
+            <li><a href="/cross-platform-swift/integration-part-two/">Cross-platform Swift: Integration (pt. 2)</a></li>
+            
+            <li><a href="/cross-platform-swift/integration-part-one/">Cross-platform Swift: Integration (pt. 1)</a></li>
+            
+        </ul>
+    </aside>
+    <div id="disqus_thread"></div>
+    <nav class="paginator">
+    <ul>
+        <li class="paginator-browser older">
+            
+            <a href="/cross-platform-swift/closing/" title="Cross-platform Swift: Closing"><i class="fa fa-chevron-left"></i> Older</a>
+            
+        </li><li class="paginator-browser home">
+            <a href="/" class="fa fa-home"></a>
+        </li><li class="paginator-browser newer">
+            
+        </li>
+    </ul>
+</nav>
+
+</article>
+<script src="//keeshux.disqus.com/embed.js" async="async"></script>
+
+                </main>
+                <footer id="page-footer">
+                    <p id="social">
+    &copy; 2026 Davide De Rosa
+    <a href="https://github.com/keeshux" title="Browse my GitHub repository" class="fab fa-github"></a>
+    <a href="https://linkedin.com/in/davidederosa" title="Connect on LinkedIn" class="fab fa-linkedin"></a>
+    <a href="https://x.com/keeshux" title="Follow me on X" class="fab fa-x-twitter"></a>
+    <a href="/s/keeshux-gpg.txt" title="My GnuPG public key" class="fa fa-lock"></a>
+    <a href="/feed.xml" title="Follow the blog" class="fa-solid fa-rss"></a>
+</ul>
+
+                </footer>
+            </div>
+        </div>
+        <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    </body>
+</html>
